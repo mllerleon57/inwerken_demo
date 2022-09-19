@@ -1,0 +1,48 @@
+<mvc:View
+    controllerName="sap.ui.demo.basicTemplate.controller.Master"
+	xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc">
+    <page>
+        <customHeader>
+            <Toolbar>
+                <SearchField width="100%" search="onSearch"/>
+            </Toolbar>        
+        </customHeader>
+        <content>
+                <List
+                    items="{/lists}"
+                    id="masterMenu"
+                >
+                <items>
+                    <ObjectListItem
+                            title="{name}"
+                            type="Active"
+                            press="onPress"
+                            class="list-item">
+                            <customData>
+                                <core:customData key="solved" value="true"
+                                writeToDom="{=${solved}===true}"/>
+                            </customData>
+                        <ObjectAttribute title="Game Mode" 
+                        text="{
+                        path:'gameMode',
+                        formatter:'.formatter.gameMode'
+                        }"/>
+                         <ObjectAttribute title="Schwierigkeit" 
+                        text="{difficulty}"/>
+                    </ObjectListItem>
+                </items>
+                </List>
+                <ToolBar class="prizeToolbar"
+                         visible="{=${/allSolved}===true}">
+                    <core:Icon
+                        src="sap-icon://competitor"
+                        visible="{=${/allSolved}===true}"
+                        size="4rem"
+                        class="sapUiMediumMargin" 
+                        press="onGameEndPress"/>
+                </ToolBar>
+        </content>
+    </page>
+</mvc:View>

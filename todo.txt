@@ -1,0 +1,8 @@
+1.Handlery:
+    a) jak sygnal - sprawdzic czy liczba boxow < 3, potwierdic czy rozwiazane, i pokazac informacje zeby wlozyc kiste z powrotem
+    b) jak sygnal - sprawdzic czy dialog is on, sprawdzic czy liczba boxow >=3 i wyjsc z modala jesli warunki zostaly spelnione.
+
+2.Zmienic var na solved i dodac modalOn
+3.Modal sposoby:
+    a) oddzielny fragment - barziej elastyczne
+    b) zmienic wartosci za pomoca JS.

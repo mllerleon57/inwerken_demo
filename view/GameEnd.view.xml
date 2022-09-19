@@ -1,0 +1,19 @@
+<mvc:View
+	controllerName="sap.ui.demo.basicTemplate.controller.GameEnd"
+	xmlns:mvc="sap.ui.core.mvc"
+    xmlns:l="sap.ui.layout"
+	displayBlock="true"
+	xmlns="sap.m">
+    <page id="gameEnd"
+            title="Congratulations"
+            class="detailPage"
+            visible="{=${/allSolved}===true}">
+        <content>
+            <Image src="images/win.jpg"
+                width="100%"/>
+                <Button type="Accept"
+                        text="Restart"
+                        press="onRestart"/>
+        </content>
+    </page>
+</mvc:View>

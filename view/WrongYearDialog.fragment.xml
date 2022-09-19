@@ -1,0 +1,28 @@
+<core:FragmentDefinition
+   xmlns="sap.m"
+   xmlns:core="sap.ui.core" >
+   <Dialog
+        id="WrongYearDialog"
+        title="Info"
+        class="almostsolved-list">
+        <Text textAlign="Center" 
+            width="100%"
+            text="Fast richtig ...😉 Du brauchst noch der Schaltjahr zu angeben. 📅"
+            class="sapUiSmallMarginTop padding10"
+            />
+        <Text textAlign="Center" 
+            width="100%"
+            text="Bitte füll die Kiste 📦 nach."
+            class="sapUiSmallMarginTop sapUiSmallMarginBottom"
+            visible="{=${viewModel>/kanbanMode}===true}"
+            />
+        <FlexBox justifyContent="Center">
+            <Button type="Accept"
+                    text="OK"
+                    press="onDialogPress"  
+                    class="sapUiTinyMarginEnd sapUiSmallMarginTop"   
+                    visible="{=${viewModel>/kanbanMode}===false}"       
+                />
+        </FlexBox>
+   </Dialog>
+</core:FragmentDefinition>

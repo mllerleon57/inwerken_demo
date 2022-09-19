@@ -1,0 +1,25 @@
+<core:FragmentDefinition
+   xmlns="sap.m"
+   xmlns:core="sap.ui.core" >
+   <Dialog
+        id="resultDialog"
+        title="Info">
+        <Text textAlign="Center" 
+            width="100%"
+            text="{=${viewModel>/solved}===1 ? '😁 Glückwunsch ! Das ist die richtige Antwort.' : '😭 Falsch. Versuch noch mal !'}"
+            class="sapUiSmallMarginTop"
+            />
+        <FlexBox justifyContent="Center">
+            <Button type="Accept"
+                    text="OK"
+                    press="onDialogPress"  
+                    class="sapUiTinyMarginEnd sapUiSmallMarginTop"          
+                />
+            <Button type="Decline"
+                    text="Reset"
+                    press="onDialogReset"   
+                    class="sapUiTinyMarginBegin sapUiSmallMarginTop"         
+                />
+        </FlexBox>
+   </Dialog>
+</core:FragmentDefinition>

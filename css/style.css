@@ -1,0 +1,121 @@
+/* Enter your custom styles here */
+.h-100{
+    height:100%;
+    color:red;
+    min-height:70vh;
+}
+
+.h-100 > ul{
+    height:100%;
+    min-height: 70vh;
+}
+
+.o-hidden{
+    overflow: hidden;
+}
+.p-medium{
+    padding-left:2rem;
+    padding-right:2rem;
+}
+.toolbarCustom{
+    justify-content: space-between;
+    background-color: #fafafa !important;
+    border-color:#dadada !important;
+}
+.buttonCheck>span{
+    color:white !important;
+}
+.sapMShellBrandingBar{
+    background-color: unset;
+}
+  
+.sapMIBar.sapMHeader-CTX{
+    background-color: #dc5034;
+}
+
+.sapMIBar-CTX .sapMTitle{
+    color:white;
+    font-size: 1.4rem;
+}
+
+.titleAttribute > span{
+    font-weight: bold !important;
+}
+.titleAttribute{
+    margin-bottom:1rem;
+}
+
+.instructionAttribute{
+    margin-bottom:1rem;
+}
+
+.list-item{
+    cursor: pointer
+}
+
+.list-item span{
+    cursor: pointer;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; 
+}
+
+.unsolved-list.sapMDialog.sapMPopup-CTX>header .sapMHeader-CTX, .sapMDialog.sapMPopup-CTX>header .sapMSubHeader-CTX{
+    background-color: #dc5034;
+}
+
+.solved-list.sapMDialog.sapMPopup-CTX>header .sapMHeader-CTX, .sapMDialog.sapMPopup-CTX>header .sapMSubHeader-CTX{
+    background-color: green;
+}
+
+.almostsolved-list.sapMDialog.sapMPopup-CTX>header .sapMHeader-CTX, .sapMDialog.sapMPopup-CTX>header .sapMSubHeader-CTX{
+    background-color: #fabd64;
+}
+
+
+.sapMDialog>header.sapMDialogTitle .sapMTitle{
+    color:White;
+}
+
+.list-item[data-solved] {
+    background-color: #439221;
+}
+
+.list-item[data-solved] span {
+    color:white;
+}
+
+.prizeToolbar{
+    height:7rem;
+    text-align: center;
+    background-color:#dc5034 
+}
+
+.prizeToolbar>span{
+    color:gold;
+    margin: 0 auto !important;
+
+}
+
+.list-item[data-intend="intend_1"]{
+    padding-left:2.5rem !important;
+}
+
+.list-item[data-intend="intend_2"]{
+    padding-left:4rem !important;
+}
+.list-item[data-intend="intend_3"]{
+    padding-left:5.5rem !important;
+}
+
+.leapyearInput {
+    min-width: 20rem;
+}
+
+.padding10{
+    padding-left: 10px;
+    padding-right: 10px;
+}

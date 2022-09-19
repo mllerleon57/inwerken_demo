@@ -1,0 +1,17 @@
+<mvc:View
+	controllerName="sap.ui.demo.basicTemplate.controller.Main"
+	xmlns:mvc="sap.ui.core.mvc"
+    xmlns:l="sap.ui.layout"
+	displayBlock="true"
+	xmlns="sap.m">
+    <page id="mainPage"
+            title="Wilkommen"
+            class="detailPage">
+        <content>
+            <Image src="images/inwerken_logo_white.jpg"
+                width="100%"/>
+             <Image src="images/01.jpg"
+                width="100%"/>
+        </content>
+    </page>
+</mvc:View>

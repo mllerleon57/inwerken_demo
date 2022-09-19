@@ -1,0 +1,92 @@
+<mvc:View
+	controllerName="sap.ui.demo.basicTemplate.controller.Game"
+	xmlns:mvc="sap.ui.core.mvc"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core" 
+	displayBlock="true"
+	xmlns="sap.m">
+    <page id="mainGameTitle" 
+        title="{name}">
+        <content>
+            <HBox alignItems="Center" justifyContent="End">
+                <Text text="Kanban Mode" class="sapUiSmallMarginEnd "/>
+                <Switch state="false" customTextOn="Yes" customTextOff="No" change="onSwitchChange"/>
+            </HBox>
+            <ObjectHeader binding="{/lists}" id="objectHeader1">
+                <attributes>
+                    <ObjectAttribute text="Titel: {title}" class="titleAttribute"/>
+                    <ObjectAttribute text="{instruction}" class="instructionAttribute"/>
+                </attributes>
+            </ObjectHeader>
+            <FlexBox
+            width="100%"
+            justifyContent="SpaceBetween"
+            class="o-hidden p-medium"
+            >
+                <items>
+                    <List
+                        items="{data}"
+                        id="lb1-listUl"
+                        class="h-100 list1"
+                        showNoData="false"
+                        headerText="Source"
+                        updateStarted="onUpdateStarted"
+                        updateFinished="onUpdateFinished"
+                        growingFinished="onChange"
+                        >
+                        <ObjectListItem
+                        title="{name}"
+                        class="list-item">
+                            <customData>
+                                    <core:customData key="intend" value="intend_{intend}"
+                                    writeToDom="{=${intend}>0}"/>
+                            </customData>
+                        </ObjectListItem>
+                        <layoutData>
+                            <FlexItemData growFactor="1"
+                                        maxWidth="48%"/>
+                        </layoutData>
+                    </List>
+                    <List id="lb2-listUl"
+                    showNoData="false"
+                    headerText="Lösung 📂👇"
+                    class="h-100 list2">
+
+                    <layoutData>
+                            <FlexItemData growFactor="1"
+                                        maxWidth="48%"/>
+                        </layoutData>
+                    </List>
+                </items>
+            </FlexBox>
+            <HBox alignItems="Center" justifyContent="Center" class="sapUiSmallMarginBottom sapUiSmallMarginTop" visible="{=${gameMode}==='schaltjahr'}">
+                <Label text="Enter Leap Year:" labelFor="schaltjahrInput" class="sapUiMediumMarginEnd"/>
+                <Input
+                    id="schaltjahrInput"
+                    class="leapyearInput"
+                    placeholder="Leapyear"
+                    enabled="true"
+                    editable="true"
+                    minWidth="500rem"
+                    showValueHelp="true"
+                    visible="{=${gameMode}==='schaltjahr'}"
+                />
+            </HBox>
+        </content>
+        <footer>
+            <ToolBar class="toolbarCustom">
+                <core:Icon
+                    src="sap-icon://home"
+                    size="2rem"
+                    press="goHome"
+                    class="sapUiMediumMargin" />
+                <Button type="Accept"
+                        text="Prüfen"
+                        press="onButtonPress"
+                        class="buttonCheck"
+                        enabled="{=${viewModel>/kanbanMode}===false}"
+                        />
+            </ToolBar>
+        </footer>
+    </page>
+</mvc:View>

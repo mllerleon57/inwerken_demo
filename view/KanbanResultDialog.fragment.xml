@@ -1,0 +1,17 @@
+<core:FragmentDefinition
+   xmlns="sap.m"
+   xmlns:core="sap.ui.core" >
+   <Dialog
+        id="kanbanResultDialog"
+        title="Info">
+        <Text textAlign="Center" 
+            width="100%"
+            text="{=${viewModel>/solved}===1 ? '😁 Glückwunsch ! Das ist die richtige Antwort.' : '😭 Falsch. Versuch noch mal !'}"
+            class="sapUiSmallMarginTop"
+            />
+        <Text textAlign="Center" 
+            width="100%"
+            text="Bitte füll die Kiste 📦 nach."
+            class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+   </Dialog>
+</core:FragmentDefinition>
