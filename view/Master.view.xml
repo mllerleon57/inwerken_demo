@@ -3,12 +3,12 @@
         <semantic:titleHeading>
             <Title text="📝 Aufgaben" />
         </semantic:titleHeading>
-        <semantic:headerContent>
+        <!-- <semantic:headerContent>
             <FlexBox alignItems="Center" visible="{=${/allSolved}===true}" justifyContent="Center" direction="Column">
                 <core:Icon src="sap-icon://competitor" size="4rem" class="sapUiMediumMargin" press="onGameEndPress" color="green"/>
                 <Title text="Du hast alle Spiele gewonnen, hol dir deinen Preis ab!" wrapping="true"/>
             </FlexBox>
-        </semantic:headerContent>
+        </semantic:headerContent> -->
         <semantic:titleCustomTextActions>
             <Button
             icon="sap-icon://home"
