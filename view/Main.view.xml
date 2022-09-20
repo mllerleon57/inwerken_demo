@@ -41,10 +41,10 @@
                             wrappingType="Hyphenated"
                             text="Du kannst uns einfach ansprechen und wir werden Dir alles erzählen, was du dafür benötigst. Keine Sorge, es ist ganz einfach!" />
                             <FlexBox class="sapUiContentPadding" direction="Column">
-                            <Link text="🔗 Auszubildende*r Fachrichtung Fachinformatik" href="https://www.inwerken.de/job/auszubildende-fachinformatik-mit-fachrichtung-systemintegration-mwd/" target="_blank" />
-                            <Link text="🔗 Auszubildende*r Fachrichtung Systemintegration" href="https://www.inwerken.de/job/auszubildende-fachinformatik-mit-fachrichtung-systemintegration-mwd/" target="_blank" />
-                            <Link text="🔗 Dual Studierende*r" href="https://www.inwerken.de/job/duales-studium-wirtschaftsinformatik-b-sc/" target="_blank" />
-                            <Link text="🔗 Werkstudierende*r" href="https://www.inwerken.de/job/werkstudent-m-w-d-im-personal-isernhagen-hannover/" target="_blank" />
+                            <Link text="🔗 Auszubildende*r Fachrichtung Fachinformatik" href="assets/Auszubildende%20Fachinformatik%20mit%20Fachrichtung%20Systemintegration%20(m_w_d)%202022.html" target="_blank" />
+                            <Link text="🔗 Auszubildende*r Fachrichtung Systemintegration" href="assets/Auszubildende%20Fachinformatik%20mit%20Fachrichtung%20Systemintegration%20(m_w_d)%202022.html" target="_blank" />
+                            <Link text="🔗 Dual Studierende*r" href="assets/Duales%20Studium_%20Wirtschaftsinformatik%20B.Sc.%20–%20Isernhagen%20bei%20Hannover.html" target="_blank" />
+                            <Link text="🔗 Werkstudierende*r" href="assets/Werkstudent%20(m_w_d)%20im%20Personal%20-%20Isernhagen,%20Hannover%20–%20Inwerken.html" target="_blank" />
                         </FlexBox>
                     </l:BlockLayoutCell>
                 </l:BlockLayoutRow>
