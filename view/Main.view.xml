@@ -28,21 +28,34 @@
                             wrappingType="Hyphenated"
                             text="Inwerken ist ein sehr attraktiver Arbeitgeber und bietet ganz besondere Vorteile, sprich uns einfach an." />
                     </l:BlockLayoutCell>
-                    <l:BlockLayoutCell title="📜 Wie kann ich mich bewerben?">
-                        <Text
-                            id="text4"
-                            wrappingType="Hyphenated"
-                            text="Du kannst uns einfach ansprechen und wir werden Dir alles erzählen, was du dafür benötigst. Keine Sorge, es ist ganz einfach!" />
-                    </l:BlockLayoutCell>
-                </l:BlockLayoutRow>
-                <l:BlockLayoutRow>
                     <l:BlockLayoutCell title="😊 Was kannst Du bei Inwerken machen?">
                         <Text
                             id="text2"
                             wrappingType="Hyphenated"
-                            text="Du kannst bei uns als Auszubildende*r, dual Studierender oder Werkstudierender einen ganz besonderen Arbeitsplatz kennenlernen. Mit deinen Fähigkeiten kannst Du dich in den Bereichen IT und SAP oder in der Verwaltung etablieren, um deine Karriere zu starten und interessante Einblicke zu erhalten." />
+                            text="Du kannst bei uns als Auszubildende*r, dual Studierende*r oder Werkstudierende*r einen ganz besonderen Arbeitsplatz kennenlernen. Mit deinen Fähigkeiten kannst Du dich in den Bereichen IT und SAP oder in der Verwaltung etablieren, um deine Karriere zu starten und interessante Einblicke zu erhalten." />
+                    </l:BlockLayoutCell>
+                    <l:BlockLayoutCell title="📜 Wie kann ich mich bewerben?" >
+                            <Text
+                            id="text4"
+                            class="sapUiTinyMarginBottom"
+                            wrappingType="Hyphenated"
+                            text="Du kannst uns einfach ansprechen und wir werden Dir alles erzählen, was du dafür benötigst. Keine Sorge, es ist ganz einfach!" />
+                            <FlexBox class="sapUiContentPadding" direction="Column">
+                            <Link text="🔗 Auszubildende*r Fachrichtung Fachinformatik" href="https://www.inwerken.de/job/auszubildende-fachinformatik-mit-fachrichtung-systemintegration-mwd/" target="_blank" />
+                            <Link text="🔗 Auszubildende*r Fachrichtung Systemintegration" href="https://www.inwerken.de/job/auszubildende-fachinformatik-mit-fachrichtung-systemintegration-mwd/" target="_blank" />
+                            <Link text="🔗 Dual Studierende*r" href="https://www.inwerken.de/job/duales-studium-wirtschaftsinformatik-b-sc/" target="_blank" />
+                            <Link text="🔗 Werkstudierende*r" href="https://www.inwerken.de/job/werkstudent-m-w-d-im-personal-isernhagen-hannover/" target="_blank" />
+                        </FlexBox>
                     </l:BlockLayoutCell>
                 </l:BlockLayoutRow>
+                    <!-- <l:BlockLayoutRow>
+                        <l:BlockLayoutCell title="📧 Infos an mich senden" >
+                        <FlexBox justifyContent="Start" direction="Row">
+                            <Input id="mailInput" width="500px" placeholder="Deine E-Mail Adresse..." class="sapUiTinyMarginEnd"/>
+                            <Button text="Infos senden" press="sendMail"/>
+                        </FlexBox>
+                        </l:BlockLayoutCell>
+                    </l:BlockLayoutRow> -->
             </l:BlockLayout>
          </FlexBox>
         </semantic:content>
