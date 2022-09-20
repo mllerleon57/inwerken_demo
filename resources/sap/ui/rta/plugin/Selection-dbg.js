@@ -1,22 +1,25 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides class sap.ui.rta.plugin.Selection.
 sap.ui.define([
-	'sap/ui/rta/plugin/Plugin',
-	'sap/ui/rta/Utils',
-	'sap/ui/fl/Utils',
-	'sap/ui/dt/OverlayRegistry'
+	"sap/ui/rta/plugin/Plugin",
+	"sap/ui/rta/Utils",
+	"sap/ui/dt/OverlayRegistry",
+	"sap/ui/events/KeyCodes",
+	"sap/base/util/restricted/_intersection",
+	"sap/m/InstanceManager"
 ],
-function(
+function (
 	Plugin,
 	Utils,
-	FlexUtils,
-	OverlayRegistry
-){
+	OverlayRegistry,
+	KeyCodes,
+	_intersection,
+	InstanceManager
+) {
 	"use strict";
 
 	/**
@@ -27,23 +30,23 @@ function(
 	 * @class The Selection plugin allows you to select or focus overlays with mouse or keyboard and navigate to others.
 	 * @extends sap.ui.rta.plugin.Plugin
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 * @constructor
 	 * @private
 	 * @since 1.34
 	 * @alias sap.ui.rta.plugin.Selection
 	 * @experimental Since 1.34. This class is experimental and provides only limited functionality. Also the API might be changed in future.
 	 */
-	var Selection = Plugin.extend("sap.ui.rta.plugin.Selection", /** @lends sap.ui.dt.Plugin.prototype */
-	{
+	var Selection = Plugin.extend("sap.ui.rta.plugin.Selection", {
 		metadata: {
-			// ---- object ----
-
-			// ---- control specific ----
 			library: "sap.ui.rta",
 			properties: {
-				multiSelectionRequiredPlugins : {
-					type : "string[]"
+				multiSelectionRequiredPlugins: {
+					type: "string[]"
+				},
+				isActive: {
+					type: "boolean",
+					defaultValue: true
 				}
 			},
 			associations: {},
@@ -59,13 +62,52 @@ function(
 		}
 	});
 
+	function preventEventDefaultAndPropagation(oEvent) {
+		oEvent.preventDefault();
+		oEvent.stopPropagation();
+	}
+
+	function hasSharedMultiSelectionPlugins(aElementOverlays, aMultiSelectionRequiredPlugins) {
+		var aSharedMultiSelectionPlugins = aMultiSelectionRequiredPlugins.slice();
+
+		aElementOverlays.forEach(function (oElementOverlay) {
+			aSharedMultiSelectionPlugins = _intersection(aSharedMultiSelectionPlugins, oElementOverlay.getEditableByPlugins());
+		});
+
+		return aSharedMultiSelectionPlugins.length > 0;
+	}
+
+	function hasSharedRelevantContainer(aElementOverlays) {
+		return aElementOverlays.every(function (oElementOverlay) {
+			return oElementOverlay.getRelevantContainer() === aElementOverlays[0].getRelevantContainer();
+		});
+	}
+
+	function hasSameParent(aElementOverlays) {
+		return aElementOverlays.every(function(oElementOverlay) {
+			return oElementOverlay.getParentElementOverlay() === aElementOverlays[0].getParentElementOverlay();
+		});
+	}
+
+	function isOfSameType(aElementOverlays) {
+		return aElementOverlays.every(function (oElementOverlay) {
+			return oElementOverlay.getElement().getMetadata().getName() === aElementOverlays[0].getElement().getMetadata().getName();
+		});
+	}
+
+	Selection.prototype.init = function () {
+		this._multiSelectionValidator = this._multiSelectionValidator.bind(this);
+		Plugin.prototype.init.apply(this, arguments);
+	};
+
 	/**
-	 * @param {sap.ui.dt.ElementOverlay} oOverlay overlay to be checked for developer mode
+	 * @param {sap.ui.dt.ElementOverlay} oOverlay - Overlay to be checked for developer mode
+	 * @param {sap.ui.dt.DesignTimeMetadata} oDesignTimeMetadata - Design Time Metadata of the element
 	 * @returns {boolean} true if it's in developer mode
 	 * @private
 	 */
-	Selection.prototype._checkDeveloperMode = function(oOverlay) {
-		if (oOverlay.getDesignTimeMetadata()) {
+	Selection.prototype._checkDeveloperMode = function (oOverlay, oDesignTimeMetadata) {
+		if (oDesignTimeMetadata) {
 			var bDeveloperMode = this.getCommandFactory().getFlexSettings().developerMode;
 			if (bDeveloperMode && this.hasStableId(oOverlay)) {
 				oOverlay.setEditable(true);
@@ -80,18 +122,46 @@ function(
 	};
 
 	/**
+	 * Sets the value of the isActive property.
+	 * When set to false, de-select all overlays.
+	 * @param {boolean} bValue - Value to be set
+	 */
+	Selection.prototype.setIsActive = function(bValue) {
+		this.setProperty("isActive", bValue);
+		if (bValue === false) {
+			this._deselectOverlays();
+		}
+	};
+
+	/**
+	 * Gets the value of the isActive property.
+	 * When set to <code>true</code>, then additional check for busy plugnis is triggered.
+	 * @return {boolean} bValue - <code>false</code> if inactive or some busy plugins available.
+	 */
+	Selection.prototype.getIsActive = function() {
+		return this.getProperty("isActive")
+			&& this.getDesignTime()
+			&& !this.getDesignTime().getBusyPlugins().length;
+	};
+
+	/**
 	 * Register an overlay
 	 *
-	 * @param {sap.ui.dt.Overlay} oOverlay overlay object
+	 * @param {sap.ui.dt.Overlay} oOverlay - Overlay object
 	 * @override
 	 */
-	Selection.prototype.registerElementOverlay = function(oOverlay) {
-		if (!this._checkDeveloperMode(oOverlay)) {
+	Selection.prototype.registerElementOverlay = function (oOverlay) {
+		var oDesignTimeMetadata = oOverlay.getDesignTimeMetadata();
+		if (
+			!oDesignTimeMetadata.markedAsNotAdaptable() &&
+			!this._checkDeveloperMode(oOverlay, oDesignTimeMetadata)
+		) {
 			oOverlay.attachEditableChange(this._onEditableChange, this);
 			this._adaptSelectable(oOverlay);
 		}
 
 		oOverlay.attachBrowserEvent("click", this._selectOverlay, this);
+		oOverlay.attachBrowserEvent("contextmenu", this._selectOverlay, this);
 		oOverlay.attachBrowserEvent("keydown", this._onKeyDown, this);
 		oOverlay.attachBrowserEvent("mousedown", this._onMouseDown, this);
 		oOverlay.attachBrowserEvent("mouseover", this._onMouseover, this);
@@ -107,7 +177,7 @@ function(
 		var bSelectable = oOverlay.getEditable();
 		if (oOverlay.getSelectable() !== bSelectable) {
 			oOverlay.setSelectable(bSelectable);
-			if (!bSelectable){
+			if (!bSelectable) {
 				this._removePreviousHover();
 			}
 			this.fireElementEditableChange({
@@ -119,11 +189,12 @@ function(
 	/**
 	 * Additionally to super->deregisterOverlay this method detatches the browser events
 	 *
-	 * @param {sap.ui.dt.Overlay} oOverlay overlay object
+	 * @param {sap.ui.dt.Overlay} oOverlay - Overlay object
 	 * @override
 	 */
 	Selection.prototype.deregisterElementOverlay = function(oOverlay) {
 		oOverlay.detachBrowserEvent("click", this._selectOverlay, this);
+		oOverlay.detachBrowserEvent("contextmenu", this._selectOverlay, this);
 		oOverlay.detachBrowserEvent("keydown", this._onKeyDown, this);
 		oOverlay.detachBrowserEvent("mousedown", this._onMouseDown, this);
 		oOverlay.detachBrowserEvent("mouseover", this._onMouseover, this);
@@ -141,115 +212,152 @@ function(
 	/**
 	 * Handle keydown event
 	 *
-	 * @param {sap.ui.base.Event} oEvent event object
+	 * @param {sap.ui.base.Event} oEvent - Event object
 	 * @private
 	 */
 	Selection.prototype._onKeyDown = function(oEvent) {
+		if (!this.getIsActive()) {
+			return;
+		}
 		var oOverlay = Utils.getFocusedOverlay();
-		if (oEvent.keyCode === jQuery.sap.KeyCodes.ENTER) {
+		if (oEvent.keyCode === KeyCodes.ENTER) {
 			this._selectOverlay(oEvent);
-		} else if (oEvent.keyCode === jQuery.sap.KeyCodes.ARROW_UP && oEvent.shiftKey === false && oEvent.altKey === false) {
+		} else if (oEvent.keyCode === KeyCodes.ARROW_UP && oEvent.shiftKey === false && oEvent.altKey === false) {
 			if (oOverlay) {
 				var oParentOverlay = Utils.getFocusableParentOverlay(oOverlay);
 				this._setFocusOnOverlay(oParentOverlay, oEvent);
 				oEvent.preventDefault();
 			}
-		} else if (oEvent.keyCode === jQuery.sap.KeyCodes.ARROW_DOWN && oEvent.shiftKey === false && oEvent.altKey === false) {
+		} else if (oEvent.keyCode === KeyCodes.ARROW_DOWN && oEvent.shiftKey === false && oEvent.altKey === false) {
 			if (oOverlay) {
 				var oFirstChildOverlay = Utils.getFirstFocusableDescendantOverlay(oOverlay);
 				this._setFocusOnOverlay(oFirstChildOverlay, oEvent);
 				oEvent.preventDefault();
 			}
-		} else if (oEvent.keyCode === jQuery.sap.KeyCodes.ARROW_LEFT && oEvent.shiftKey === false && oEvent.altKey === false) {
+		} else if (oEvent.keyCode === KeyCodes.ARROW_LEFT && oEvent.shiftKey === false && oEvent.altKey === false) {
 			if (oOverlay) {
 				var oPrevSiblingOverlay = Utils.getPreviousFocusableSiblingOverlay(oOverlay);
 				this._setFocusOnOverlay(oPrevSiblingOverlay, oEvent);
 				oEvent.preventDefault();
 			}
-		} else if (oEvent.keyCode === jQuery.sap.KeyCodes.ARROW_RIGHT && oEvent.shiftKey === false && oEvent.altKey === false) {
+		} else if (oEvent.keyCode === KeyCodes.ARROW_RIGHT && oEvent.shiftKey === false && oEvent.altKey === false) {
 			if (oOverlay) {
 				var oNextSiblingOverlay = Utils.getNextFocusableSiblingOverlay(oOverlay);
 				this._setFocusOnOverlay(oNextSiblingOverlay, oEvent);
 				oEvent.preventDefault();
 			}
+		} else if (oEvent.keyCode === KeyCodes.ESCAPE) {
+			if (oOverlay) {
+				this._deselectOverlays();
+			}
 		}
+	};
+
+	/**
+	 * Deselect all selected Overlays
+	 *
+	 * @private
+	 */
+	Selection.prototype._deselectOverlays = function () {
+		this.getDesignTime().getSelectionManager().reset();
 	};
 
 	Selection.prototype._selectOverlay = function (oEvent) {
 		var oOverlay = OverlayRegistry.getOverlay(oEvent.currentTarget.id);
+		if (!this.getIsActive()) {
+			// Propagation should be stopped at the root overlay to prevent the selection of the underlying elements
+			if (oOverlay.isRoot()) {
+				preventEventDefaultAndPropagation(oEvent);
+			}
+			return;
+		}
 		var bMultiSelection = oEvent.metaKey || oEvent.ctrlKey;
-		var oTargetClasses = oEvent.target.className;
+		var bContextMenu = oEvent.type === "contextmenu";
 
-		if (oOverlay.getSelectable() && oTargetClasses.indexOf("sapUiDtOverlay") > -1) {
-			if (bMultiSelection) {
-				this.getDesignTime().setSelectionMode(sap.ui.dt.SelectionMode.Multi);
+		if (oOverlay && oOverlay.getSelectable()) {
+			if (oOverlay.isSelected()) {
+				// don't deselect on right click!
+				if (!bContextMenu) {
+					this.getDesignTime().getSelectionManager().remove(oOverlay);
+				}
+			} else if (bMultiSelection) {
+				this.getDesignTime().getSelectionManager().add(oOverlay);
+			} else {
+				this.getDesignTime().getSelectionManager().set(oOverlay);
 			}
 
-			oOverlay.setSelected(!oOverlay.getSelected());
-
-			if (bMultiSelection) {
-				this.getDesignTime().setSelectionMode(sap.ui.dt.SelectionMode.Single);
-			}
-
-			oEvent.preventDefault();
-			oEvent.stopPropagation();
+			preventEventDefaultAndPropagation(oEvent);
+		} else if (oOverlay && oOverlay.isRoot()) {
+			preventEventDefaultAndPropagation(oEvent);
 		}
 	};
 
 	/**
 	 * Handle MouseDown event
 	 *
-	 * @param {sap.ui.base.Event} oEvent event object
+	 * @param {sap.ui.base.Event} oEvent - Event object
 	 * @private
 	 */
 	Selection.prototype._onMouseDown = function(oEvent) {
-		// set focus after clicking, needed only for internet explorer
-		if (sap.ui.Device.browser.name == "ie"){
-			// when the EasyAdd Button is clicked, we don't want to focus/stopPropagation.
-			// but when the OverlayScrollContainer is the target, we want it to behave like a click on an overlay
-			var oTarget = OverlayRegistry.getOverlay(oEvent.target.id);
-			var bTargetIsScrollContainer = oEvent.target.className === "sapUiDtOverlayScrollContainer";
+		if (!this.getIsActive()) {
+			// In Visualization Mode we must prevent MouseDown-Event for Overlays
+			// We have to close open PopOvers from the ChangeVisualization because they
+			// should close on MouseDown
 			var oOverlay = OverlayRegistry.getOverlay(oEvent.currentTarget.id);
-			if ((bTargetIsScrollContainer || oTarget instanceof sap.ui.dt.Overlay) && oOverlay instanceof sap.ui.dt.Overlay) {
-				if (oOverlay.getSelectable()){
-					oOverlay.focus();
-					oEvent.stopPropagation();
-				} else {
-					oOverlay.getDomRef().blur();
-				}
+			// Propagation should be stopped at the root overlay to prevent the selection of the underlying elements
+			if (oOverlay.isRoot()) {
+				preventEventDefaultAndPropagation(oEvent);
 			}
+			InstanceManager.getOpenPopovers().forEach(function(oPopOver) {
+				if (oPopOver._bOpenedByChangeIndicator) {
+					oPopOver.close();
+				}
+			});
+			return;
 		}
 	};
 
 	/**
 	 * Handle mouseover event
-	 * @param  {sap.ui.base.Event} oEvent event object
+	 * @param  {sap.ui.base.Event} oEvent - Event object
 	 * @private
 	 */
 	Selection.prototype._onMouseover = function(oEvent) {
 		var oOverlay = OverlayRegistry.getOverlay(oEvent.currentTarget.id);
-		if (oOverlay.isSelectable()){
+		if (!this.getIsActive()) {
+			// Propagation should be stopped at the root overlay to prevent the selection of the underlying elements
+			if (oOverlay.isRoot()) {
+				preventEventDefaultAndPropagation(oEvent);
+			}
+			return;
+		}
+		if (oOverlay.isSelectable()) {
 			if (oOverlay !== this._oHoverTarget) {
 				this._removePreviousHover();
 				this._oHoverTarget = oOverlay;
 				oOverlay.addStyleClass("sapUiRtaOverlayHover");
 			}
-			oEvent.preventDefault();
-			oEvent.stopPropagation();
+			preventEventDefaultAndPropagation(oEvent);
 		}
 	};
 
 	/**
 	 * Handle mouseleave event
-	 * @param  {sap.ui.base.Event} oEvent event object
+	 * @param  {sap.ui.base.Event} oEvent - Event object
 	 * @private
 	 */
 	Selection.prototype._onMouseleave = function(oEvent) {
 		var oOverlay = OverlayRegistry.getOverlay(oEvent.currentTarget.id);
-		if (oOverlay.isSelectable()){
+		if (!this.getIsActive()) {
+			// Propagation should be stopped at the root overlay to prevent the selection of the underlying elements
+			if (oOverlay.isRoot()) {
+				preventEventDefaultAndPropagation(oEvent);
+			}
+			return;
+		}
+		if (oOverlay.isSelectable()) {
 			this._removePreviousHover();
-			oEvent.preventDefault();
-			oEvent.stopPropagation();
+			preventEventDefaultAndPropagation(oEvent);
 		}
 	};
 
@@ -267,10 +375,10 @@ function(
 	/**
 	 * @override
 	 */
-	Selection.prototype.setDesignTime = function(oDesignTime) {
+	Selection.prototype.setDesignTime = function() {
 		//detach from listener from old DesignTime instance
 		if (this.getDesignTime()) {
-			this.getDesignTime().detachSelectionChange(this._onDesignTimeSelectionChange, this);
+			this.getDesignTime().getSelectionManager().removeValidator(this._multiSelectionValidator);
 		}
 
 		//set new DesignTime instance in parent class
@@ -278,70 +386,23 @@ function(
 
 		//attach listener back to the new DesignTime instance
 		if (this.getDesignTime()) {
-			this.getDesignTime().attachSelectionChange(this._onDesignTimeSelectionChange, this);
+			this.getDesignTime().getSelectionManager().addValidator(this._multiSelectionValidator);
 		}
 	};
 
-	Selection.prototype._onDesignTimeSelectionChange = function(oEvent) {
-		if (this.getDesignTime().getSelectionMode() === sap.ui.dt.SelectionMode.Single) {
-			return;
-		}
-
-		var oCurrentSelectedOverlay = oEvent.getParameter("selection")[oEvent.getParameter("selection").length - 1];
-		var aSelections = this.getSelectedOverlays();
-		if (aSelections && aSelections.length === 1) {
-			oCurrentSelectedOverlay.setSelected(true);
-			return;
-		}
-		if (!oCurrentSelectedOverlay || this.getDesignTime().getSelectionMode() === sap.ui.dt.SelectionMode.Single) {
-			return;
-		}
-
-		var bMultiSelectisValid = _hasSharedMultiSelectionPlugins(aSelections, this.getMultiSelectionRequiredPlugins())
-			&& _hasSharedRelevantContainer(aSelections)
-			&& (_hasSameParent(aSelections, oCurrentSelectedOverlay)
-				|| _isOfSameType(aSelections, oCurrentSelectedOverlay));
-
-		oCurrentSelectedOverlay.setSelected(bMultiSelectisValid);
+	Selection.prototype._multiSelectionValidator = function (aElementOverlays) {
+		return (
+			aElementOverlays.length === 1
+			|| (
+				hasSharedMultiSelectionPlugins(aElementOverlays, this.getMultiSelectionRequiredPlugins())
+				&& hasSharedRelevantContainer(aElementOverlays)
+				&& (
+					hasSameParent(aElementOverlays)
+					|| isOfSameType(aElementOverlays)
+				)
+			)
+		);
 	};
-
-	function _hasSharedMultiSelectionPlugins(aSelections, aMultiSelectionRequiredPlugins){
-		var aSharedMultiSelectionPlugins = aMultiSelectionRequiredPlugins;
-		aSelections.forEach(function(oSelectedOverlay) {
-			var aEditableByPlugins = oSelectedOverlay.getEditableByPlugins();
-			aSharedMultiSelectionPlugins = aSharedMultiSelectionPlugins.reduce(function(aSharedPlugins, sPluginName){
-				if (aEditableByPlugins.indexOf(sPluginName) !== -1){
-					aSharedPlugins.push(sPluginName);
-				}
-				return aSharedPlugins;
-			}, []);
-		});
-		return aSharedMultiSelectionPlugins.length > 0;
-	}
-
-	function _hasSharedRelevantContainer(aSelections){
-		var oCurrentSelectedOverlay = aSelections[aSelections.length - 1];
-		var oPreviousSelectedOverlay = aSelections[aSelections.length - 2];
-
-		var oCurrentRelevantContainer = oCurrentSelectedOverlay.getRelevantContainer();
-		var oPreviousRelevantContainer = oPreviousSelectedOverlay.getRelevantContainer();
-
-		return oCurrentRelevantContainer === oPreviousRelevantContainer;
-	}
-
-	function _hasSameParent(aSelections, oSelectedOverlay){
-		return !aSelections.some(function(oSelection){
-			return oSelection.getParentElementOverlay() !== oSelectedOverlay.getParentElementOverlay();
-		});
-	}
-
-	function _isOfSameType(aSelections, oSelectedOverlay){
-		var sSelectedOverlayElementName = oSelectedOverlay.getElement().getMetadata().getName();
-		return !aSelections.some(function(oSelection){
-			var sCurrentSelectionElementName = oSelection.getElement().getMetadata().getName();
-			return (sCurrentSelectionElementName !== sSelectedOverlayElementName);
-		});
-	}
 
 	return Selection;
-}, /* bExport= */true);
+});

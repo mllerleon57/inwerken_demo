@@ -1,6 +1,6 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -13,40 +13,42 @@ sap.ui.define([],
 		 * @namespace
 		 */
 		var TabContainerRenderer = {
+			apiVersion: 2
 		};
 
 		/**
 		 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 		 *
 		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer
-		 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered
+		 * @param {sap.m.TabContainer} oControl An object representation of the control that should be rendered
 		 */
 		TabContainerRenderer.render = function(oRm, oControl) {
 			var oTabStrip = oControl._getTabStrip(),
 				oSelectedItemContent = oControl._getSelectedItemContent();
 
 			// start control wrapper
-			oRm.write("<div ");
-			oRm.writeControlData(oControl);
-			oRm.addClass("sapMTabContainer");
-			oRm.writeClasses();
-			oRm.write(">");
+			oRm.openStart("div", oControl);
+			oRm.class("sapMTabContainer");
+			oRm.openEnd();
 
 			if (oTabStrip) {
 				oRm.renderControl(oTabStrip);
 			}
 
 			// render outer content
-			oRm.write("<div id='" + oControl.getId() + "-containerContent' ");
-			oRm.addClass("sapMTabContainerContent");
+			oRm.openStart("div", oControl.getId() + "-containerContent");
+			oRm.class("sapMTabContainerContent");
+			if (oControl.getBackgroundDesign()) {
+				oRm.class("sapMTabContainerContent" + oControl.getBackgroundDesign());
+			}
 
-			oRm.writeClasses();
-			oRm.write(">");
+			oRm.openEnd();
 
 			// render inner content
-			oRm.write("<div id='" + this.getContentDomId(oControl) + "' class='sapMTabContainerInnerContent'");
-			oRm.writeAccessibilityState(oControl, this.getTabContentAccAttributes(oControl));
-			oRm.write(">");
+			oRm.openStart("div", this.getContentDomId(oControl));
+			oRm.class("sapMTabContainerInnerContent");
+			oRm.accessibilityState(oControl, this.getTabContentAccAttributes(oControl));
+			oRm.openEnd();
 
 			// render the content
 			if (oSelectedItemContent) {
@@ -55,13 +57,13 @@ sap.ui.define([],
 				});
 			}
 
-			oRm.write("</div>");
+			oRm.close("div");
 
 			// end outer content
-			oRm.write("</div>");
+			oRm.close("div");
 
 			// end control wrapper
-			oRm.write("</div>");
+			oRm.close("div");
 		};
 
 		/**
@@ -88,7 +90,7 @@ sap.ui.define([],
 		/**
 		 * Returns the DOM ID of the content element.
 		 *
-		 * @param {sap.ui.core.Control} oControl The <code>TabContainer</code> for which the DOM ID is looking for
+		 * @param {sap.m.TabContainer} oControl The <code>TabContainer</code> for which the DOM ID is looking for
 		 * @returns {string} The ID of the DOM element, corresponding to the tab content
 		 */
 		TabContainerRenderer.getContentDomId = function(oControl) {

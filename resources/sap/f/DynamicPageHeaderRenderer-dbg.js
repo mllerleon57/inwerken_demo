@@ -1,6 +1,6 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -12,33 +12,40 @@ sap.ui.define([], function () {
 	 * oDynamicPage Header renderer.
 	 * @namespace
 	 */
-	var DynamicPageHeaderRenderer = {};
+	var DynamicPageHeaderRenderer = {
+		apiVersion: 2
+	};
 
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
 	 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.ui.core.Control} oDynamicPageHeader An object representation of the control that should be rendered
+	 * @param {sap.f.DynamicPageHeader} oDynamicPageHeader An object representation of the control that should be rendered
 	 */
 	DynamicPageHeaderRenderer.render = function (oRm, oDynamicPageHeader) {
-		var oDynamicPageHeaderState = oDynamicPageHeader._getState();
+		var oDynamicPageHeaderState = oDynamicPageHeader._getState(),
+			sSapFDynamicPageHeader = "sapFDynamicPageHeader",
+			sBackgroundDesign = oDynamicPageHeader.getBackgroundDesign();
 
 		// Dynamic Page Layout Header Root DOM Element.
-		oRm.write("<header");
-		oRm.writeControlData(oDynamicPageHeader);
-		oRm.writeAccessibilityState({
+		oRm.openStart("section", oDynamicPageHeader);
+		oRm.accessibilityState({
 			role: "region"
 		});
-		oRm.addClass("sapContrastPlus");
-		oRm.addClass("sapFDynamicPageHeader");
+		oRm.class("sapContrastPlus");
+		oRm.class(sSapFDynamicPageHeader);
 		if (oDynamicPageHeaderState.headerHasContent) {
-			oRm.addClass("sapFDynamicPageHeaderWithContent");
+			oRm.class("sapFDynamicPageHeaderWithContent");
 		}
 		if (oDynamicPageHeaderState.headerPinnable) {
-			oRm.addClass("sapFDynamicPageHeaderPinnable");
+			oRm.class("sapFDynamicPageHeaderPinnable");
 		}
-		oRm.writeClasses();
-		oRm.write(">");
+
+		if (sBackgroundDesign) {
+			oRm.class(sSapFDynamicPageHeader + sBackgroundDesign);
+		}
+
+		oRm.openEnd();
 
 		// Header Content
 		this._renderHeaderContent(oRm, oDynamicPageHeaderState);
@@ -51,17 +58,16 @@ sap.ui.define([], function () {
 			oRm.renderControl(oDynamicPageHeaderState.pinButton);
 		}
 
-		oRm.write("</header>");
+		oRm.close("section");
 	};
 
 	DynamicPageHeaderRenderer._renderHeaderContent = function (oRm, oDynamicPageHeaderState) {
 		if (oDynamicPageHeaderState.headerHasContent) {
-			oRm.write("<div");
-			oRm.addClass("sapFDynamicPageHeaderContent");
-			oRm.writeClasses();
-			oRm.write(">");
-			oDynamicPageHeaderState.content.forEach(oRm.renderControl);
-			oRm.write("</div>");
+			oRm.openStart("div");
+			oRm.class("sapFDynamicPageHeaderContent");
+			oRm.openEnd();
+			oDynamicPageHeaderState.content.forEach(oRm.renderControl, oRm);
+			oRm.close("div");
 		}
 	};
 

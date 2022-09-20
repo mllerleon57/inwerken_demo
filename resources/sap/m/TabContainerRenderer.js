@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([],function(){"use strict";var T={};T.render=function(r,c){var t=c._getTabStrip(),s=c._getSelectedItemContent();r.write("<div ");r.writeControlData(c);r.addClass("sapMTabContainer");r.writeClasses();r.write(">");if(t){r.renderControl(t);}r.write("<div id='"+c.getId()+"-containerContent' ");r.addClass("sapMTabContainerContent");r.writeClasses();r.write(">");r.write("<div id='"+this.getContentDomId(c)+"' class='sapMTabContainerInnerContent'");r.writeAccessibilityState(c,this.getTabContentAccAttributes(c));r.write(">");if(s){s.forEach(function(C){r.renderControl(C);});}r.write("</div>");r.write("</div>");r.write("</div>");};T.getTabContentAccAttributes=function(c){var s=c.getSelectedItem(),t,a={role:"tabpanel"};if(s){t=c._toTabStripItem(s);if(t){a["aria-labelledby"]=t.getId();}}return a;};T.getContentDomId=function(c){return c.getId()+"-content";};return T;},true);
+sap.ui.define([],function(){"use strict";var t={apiVersion:2};t.render=function(t,e){var n=e._getTabStrip(),o=e._getSelectedItemContent();t.openStart("div",e);t.class("sapMTabContainer");t.openEnd();if(n){t.renderControl(n)}t.openStart("div",e.getId()+"-containerContent");t.class("sapMTabContainerContent");if(e.getBackgroundDesign()){t.class("sapMTabContainerContent"+e.getBackgroundDesign())}t.openEnd();t.openStart("div",this.getContentDomId(e));t.class("sapMTabContainerInnerContent");t.accessibilityState(e,this.getTabContentAccAttributes(e));t.openEnd();if(o){o.forEach(function(e){t.renderControl(e)})}t.close("div");t.close("div");t.close("div")};t.getTabContentAccAttributes=function(t){var e=t.getSelectedItem(),n,o={role:"tabpanel"};if(e){n=t._toTabStripItem(e);if(n){o["aria-labelledby"]=n.getId()}}return o};t.getContentDomId=function(t){return t.getId()+"-content"};return t},true);
+//# sourceMappingURL=TabContainerRenderer.js.map

@@ -1,12 +1,19 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.core.search.OpenSearchProvider.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './SearchProvider', 'jquery.sap.encoder'],
-	function(jQuery, library, SearchProvider/* , jQuerySap */) {
+sap.ui.define([
+	'./SearchProvider',
+	"sap/base/Log",
+	"sap/base/security/encodeURL",
+	"sap/base/util/fetch",
+	"sap/ui/thirdparty/jquery",
+	'sap/ui/core/library' // ensure that required DataTypes are available
+],
+	function(SearchProvider, Log, encodeURL, fetch, jQuery) {
 	"use strict";
 
 
@@ -20,7 +27,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './SearchProvider', '
 	 * @class
 	 * A SearchProvider which uses the OpenSearch protocol (either JSON or XML).
 	 * @extends sap.ui.core.search.SearchProvider
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 *
 	 * @public
 	 * @alias sap.ui.core.search.OpenSearchProvider
@@ -50,7 +57,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './SearchProvider', '
 	 * and an array of the suggestions (type '[string]', 2nd parameter).
 	 *
 	 * @param {string} sValue The value for which suggestions are requested.
-	 * @param {function} fCallback The callback function which is called when the suggestions are available.
+	 * @param {function(string, string[])} fCallback The callback function which is called when the suggestions are available.
 	 * @type void
 	 * @public
 	 */
@@ -59,7 +66,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './SearchProvider', '
 		if (!sUrl) {
 			return;
 		}
-		sUrl = sUrl.replace("{searchTerms}", jQuery.sap.encodeURL(sValue));
+		sUrl = sUrl.replace("{searchTerms}", encodeURL(sValue));
 
 		var sType = this.getSuggestType();
 		var fSuccess;
@@ -82,18 +89,30 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './SearchProvider', '
 				fCallback(sValue, data[1]);
 			};
 		}
-
-		jQuery.ajax({
-			url: sUrl,
-			dataType: sType,
-			success: fSuccess,
-			error: function(XMLHttpRequest, textStatus, errorThrown) {
-				jQuery.sap.log.fatal("The following problem occurred: " + textStatus, XMLHttpRequest.responseText + ","
-						+ XMLHttpRequest.status);
+		fetch(sUrl, {
+			headers: {
+				Accept: fetch.ContentTypes[sType.toUpperCase()]
 			}
+		}).then(function(response) {
+			if (response.ok) {
+				return response.text().then(function (responseText) {
+					var data;
+					if (sType === "json") {
+						data = JSON.parse(responseText);
+					} else {
+						// sType == "xml"
+						var parser = new DOMParser();
+						data = parser.parseFromString(responseText, "text/xml");
+					}
+					fSuccess(data);
+				});
+			} else {
+				throw new Error(response.statusText || response.status);
+			}
+		}).catch(function(error) {
+			Log.fatal("The following problem occurred: " + error.message);
 		});
 	};
-
 
 	return OpenSearchProvider;
 

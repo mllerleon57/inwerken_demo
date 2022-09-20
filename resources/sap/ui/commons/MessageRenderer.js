@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],function(q){"use strict";var M={};M.render=function(r,c){var a=r;a.write('<div class="sapUiMsg" tabindex="0"');a.writeControlData(c);a.write('>');a.write('<div class="sapUiMsgIcon sapUiMsgIcon'+c.getType()+'"></div>');if(typeof c.fnCallBack==="function"){a.write('<span class="sapUiMsgLnk">');if(!c.oLink){c.oLink=new sap.ui.commons.Link();var b=sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");c.oLink.setText(b.getText("MSGLIST_DETAILS"));c.oLink.attachPress(function(){c.openDetails();});}a.renderControl(c.oLink);a.write(' - </span>');}a.write('<span class="sapUiMsgTxt">');a.writeEscaped(c.getText());a.write('</span>');a.write('</div>');};return M;},true);
+sap.ui.define(["./Link"],function(e){"use strict";var i={};i.render=function(i,t){i.write('<div class="sapUiMsg" tabindex="0"');i.writeControlData(t);i.write(">");i.write('<div class="sapUiMsgIcon sapUiMsgIcon'+t.getType()+'"></div>');if(typeof t.fnCallBack==="function"){i.write('<span class="sapUiMsgLnk">');if(!t.oLink){t.oLink=new e;var s=sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");t.oLink.setText(s.getText("MSGLIST_DETAILS"));t.oLink.attachPress(function(){t.openDetails()})}i.renderControl(t.oLink);i.write(" - </span>")}i.write('<span class="sapUiMsgTxt">');i.writeEscaped(t.getText());i.write("</span>");i.write("</div>")};return i},true);
+//# sourceMappingURL=MessageRenderer.js.map

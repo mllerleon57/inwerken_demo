@@ -1,32 +1,31 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
 	"sap/ui/base/ManagedObject",
 	"sap/ui/dt/ElementUtil",
-	"sap/ui/dt/Util"
+	"sap/ui/dt/Util",
+	"sap/base/util/isEmptyObject"
 ],
 function(
 	ManagedObject,
 	ElementUtil,
-	Util
+	Util,
+	isEmptyObject
 ) {
 	"use strict";
 
 	/**
-	 * Class for OverlayRegistry.
+	 * Static registry for Overlays.
 	 *
-	 * @class
-	 * Static registry for Overlays
-	 *
+	 * @namespace
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 *
 	 * @private
-	 * @static
 	 * @since 1.30
 	 * @alias sap.ui.dt.OverlayRegistry
 	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
@@ -42,15 +41,15 @@ function(
 
 	/**
 	 * Returns a registered Overlay by element instance or id
-	 * @param {string|sap.ui.core.Element} vElementOrId element instance or id
+	 * @param {string|sap.ui.core.Element|sap.ui.core.Component} vElementOrId - Element instance or id
 	 * @return {sap.ui.dt.Overlay|undefined} found overlay or undefined
 	 * @public
 	 */
 	OverlayRegistry.getOverlay = function(vElementOrId) {
 		var sId = (
 			typeof vElementOrId === "string"
-			? vElementOrId
-			: ElementUtil.getElementInstance(vElementOrId) && ElementUtil.getElementInstance(vElementOrId).getId()
+				? vElementOrId
+				: ElementUtil.getElementInstance(vElementOrId) && ElementUtil.getElementInstance(vElementOrId).getId()
 		);
 
 		return mOverlays[sId] || mAliases[sId];
@@ -62,8 +61,7 @@ function(
 
 	/**
 	 * Registers an overlay for the element or element's id
-	 * @param {string|sap.ui.core.Element} vElementOrId element instance or id
-	 * @param {sap.ui.dt.Overlay} oOverlay overlay to register
+	 * @param {sap.ui.dt.Overlay} oOverlay - Overlay to register
 	 * @public
 	 */
 	OverlayRegistry.register = function(oOverlay) {
@@ -108,7 +106,7 @@ function(
 	 * @public
 	 */
 	OverlayRegistry.hasOverlays = function() {
-		return !jQuery.isEmptyObject(mOverlays);
+		return !isEmptyObject(mOverlays);
 	};
 
 	function isOverlay(oOverlay) {

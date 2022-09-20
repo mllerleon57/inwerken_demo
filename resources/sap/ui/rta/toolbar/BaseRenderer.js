@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['sap/ui/core/Renderer','sap/m/ToolbarRenderer'],function(R,T){"use strict";var B=R.extend('sap.ui.rta.toolbar.BaseRenderer',T);B.decorateRootElement=function(r,c){r.addClass('sapUiRtaToolbar');r.addClass('sapContrastPlus');r.addClass("color_"+c.getColor());c.type&&r.addClass("type_"+c.type);var z=c.getZIndex();z&&r.addStyle("z-index",z);T.decorateRootElement(r,c);};return B;});
+sap.ui.define(["sap/ui/core/Renderer","sap/m/HBoxRenderer"],function(e,r){"use strict";var a=e.extend.call(r,"sap.ui.rta.toolbar.BaseRenderer");a.render=function(e,a){e.addClass("sapUiRtaToolbar");e.addClass("color_"+a.getColor());a.type&&e.addClass("type_"+a.type);var d=a.getZIndex();d&&e.addStyle("z-index",d);r.render(e,a)};return a});
+//# sourceMappingURL=BaseRenderer.js.map

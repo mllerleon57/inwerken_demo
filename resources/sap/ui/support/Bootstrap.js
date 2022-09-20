@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(["jquery.sap.global"],function(q){"use strict";var B={initSupportRules:function(s,d){sap.ui.require(["sap/ui/support/supportRules/Main"],function(M){if(s[0].toLowerCase()==="true"||s[0].toLowerCase()==="silent"){if(d&&d.onReady&&typeof d.onReady==="function"){M.attachEvent("ready",d.onReady);}M.startPlugin(s);if('logSupportInfo'in q.sap.log){q.sap.log.logSupportInfo(true);}}});}};return B;});
+sap.ui.define(["sap/base/Log"],function(t){"use strict";t.setLogEntriesLimit(Infinity);var e={initSupportRules:function(e,i){sap.ui.require(["sap/ui/support/supportRules/Main","sap/ui/support/jQuery.sap.support"],function(n){if(e[0].toLowerCase()==="true"||e[0].toLowerCase()==="silent"){var u=i&&i.onReady&&typeof i.onReady==="function";if(!n._pluginStarted){if(u){n.attachEvent("ready",i.onReady)}n.startPlugin(e)}else{if(u){i.onReady()}}t.logSupportInfo(true)}})}};return e});
+//# sourceMappingURL=Bootstrap.js.map

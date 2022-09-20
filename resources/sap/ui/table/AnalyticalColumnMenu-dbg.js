@@ -1,16 +1,13 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.table.AnalyticalColumnMenu.
-sap.ui.define(['jquery.sap.global', './ColumnMenu', './library'],
-	function(jQuery, ColumnMenu, library) {
+sap.ui.define(['./ColumnMenu', "sap/ui/unified/MenuRenderer", './utils/TableUtils', './library', "sap/ui/thirdparty/jquery"],
+	function(ColumnMenu, MenuRenderer, TableUtils, library, jQuery) {
 	"use strict";
-
-	// shortcut
-	var GroupEventType = library.GroupEventType;
 
 	/**
 	 * Constructor for a new AnalyticalColumnMenu.
@@ -23,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './ColumnMenu', './library'],
 	 * @extends sap.ui.table.ColumnMenu
 	 *
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 *
 	 * @constructor
 	 * @public
@@ -36,7 +33,7 @@ sap.ui.define(['jquery.sap.global', './ColumnMenu', './library'],
 		metadata : {
 			library : "sap.ui.table"
 		},
-		renderer: "sap.ui.table.ColumnMenuRenderer"
+		renderer: MenuRenderer
 	});
 
 	/**
@@ -59,7 +56,7 @@ sap.ui.define(['jquery.sap.global', './ColumnMenu', './library'],
 		var oColumn = this._oColumn,
 			oTable = this._oTable;
 
-		if (oColumn.isGroupable()) {
+		if (oColumn.isGroupableByMenu()) {
 			this._oGroupIcon = this._createMenuItem(
 				"group",
 				"TBL_GROUP",
@@ -67,10 +64,21 @@ sap.ui.define(['jquery.sap.global', './ColumnMenu', './library'],
 				function(oEvent) {
 					var oMenuItem = oEvent.getSource();
 					var bGrouped = oColumn.getGrouped();
-					var sGroupEventType = bGrouped ? GroupEventType.group : GroupEventType.ungroup;
 
-					oColumn.setGrouped(!bGrouped);
-					oTable.fireGroup({column: oColumn, groupedColumns: oTable._aGroupedColumns, type: sGroupEventType});
+					oColumn._setGrouped(!bGrouped);
+					if (!bGrouped && !oColumn.getShowIfGrouped()) {
+						var oDomRef;
+
+						if (TableUtils.isNoDataVisible(oTable)) {
+							oDomRef = oTable.getDomRef("noDataCnt");
+						} else {
+							oDomRef = oTable.getDomRef("rowsel0");
+						}
+
+						if (oDomRef) {
+							oDomRef.focus();
+						}
+					}
 					oMenuItem.setIcon(!bGrouped ? "sap-icon://accept" : null);
 				}
 			);
@@ -83,12 +91,9 @@ sap.ui.define(['jquery.sap.global', './ColumnMenu', './library'],
 	 * @private
 	 */
 	AnalyticalColumnMenu.prototype._addSumMenuItem = function() {
-		var oColumn = this._oColumn,
-			oTable = this._oTable,
-			oBinding = oTable.getBinding("rows"),
-			oResultSet = oBinding && oBinding.getAnalyticalQueryResult();
+		var oColumn = this._oColumn;
 
-		if (oTable && oResultSet && oResultSet.findMeasureByPropertyName(oColumn.getLeadingProperty())) {
+		if (oColumn._isAggregatableByMenu()) {
 			this._oSumItem = this._createMenuItem(
 				"total",
 				"TBL_TOTAL",

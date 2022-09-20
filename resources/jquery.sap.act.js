@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['sap/ui/ActivityDetection','jquery.sap.global'],function(A,q){"use strict";q.sap.act=A;return q;});
+sap.ui.define(["sap/ui/util/ActivityDetection","jquery.sap.global"],function(t,jQuery){"use strict";jQuery.sap.act=t;return jQuery});
+//# sourceMappingURL=jquery.sap.act.js.map

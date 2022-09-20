@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','./library','sap/ui/core/Control',"./HorizontalDividerRenderer"],function(q,l,C,H){"use strict";var a=C.extend("sap.ui.commons.HorizontalDivider",{metadata:{library:"sap.ui.commons",properties:{width:{type:"sap.ui.core.CSSSize",group:"Appearance",defaultValue:'100%'},type:{type:"sap.ui.commons.HorizontalDividerType",group:"Appearance",defaultValue:sap.ui.commons.HorizontalDividerType.Area},height:{type:"sap.ui.commons.HorizontalDividerHeight",group:"Appearance",defaultValue:sap.ui.commons.HorizontalDividerHeight.Medium}}}});return a;},true);
+sap.ui.define(["./library","sap/ui/core/Control","./HorizontalDividerRenderer"],function(e,r,i){"use strict";var a=e.HorizontalDividerHeight;var o=e.HorizontalDividerType;var t=r.extend("sap.ui.commons.HorizontalDivider",{metadata:{library:"sap.ui.commons",deprecated:true,properties:{width:{type:"sap.ui.core.CSSSize",group:"Appearance",defaultValue:"100%"},type:{type:"sap.ui.commons.HorizontalDividerType",group:"Appearance",defaultValue:o.Area},height:{type:"sap.ui.commons.HorizontalDividerHeight",group:"Appearance",defaultValue:a.Medium}}}});return t});
+//# sourceMappingURL=HorizontalDivider.js.map

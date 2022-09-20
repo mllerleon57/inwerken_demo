@@ -1,1 +1,2 @@
-ace.define("ace/snippets/luapage",["require","exports","module"],function(r,e,m){"use strict";e.snippetText=undefined;e.scope="luapage";});
+(function(){ace.require(["ace/snippets/luapage"],function(e){if(typeof module=="object"&&typeof exports=="object"&&module){module.exports=e}})})();
+//# sourceMappingURL=luapage.js.map

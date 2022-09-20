@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','./ButtonRenderer','sap/ui/core/Renderer'],function(q,B,R){"use strict";var M=R.extend(B);M.renderButtonAttributes=function(r,c){if(sap.ui.getCore().getConfiguration().getAccessibility()){r.writeAttribute("aria-haspopup","true");}};M.renderButtonContentAfter=function(r,c){r.write("<span class=\"sapUiMenuButtonIco\"></span>");};return M;},true);
+sap.ui.define(["./ButtonRenderer","sap/ui/core/Renderer"],function(t,e){"use strict";var n=e.extend(t);n.renderButtonAttributes=function(t,e){if(sap.ui.getCore().getConfiguration().getAccessibility()){t.writeAttribute("aria-haspopup","true")}};n.renderButtonContentAfter=function(t,e){t.write('<span class="sapUiMenuButtonIco"></span>')};return n},true);
+//# sourceMappingURL=MenuButtonRenderer.js.map

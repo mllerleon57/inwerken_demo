@@ -1,1 +1,2 @@
-ace.define("ace/snippets/applescript",["require","exports","module"],function(r,e,m){"use strict";e.snippetText=undefined;e.scope="applescript";});
+(function(){ace.require(["ace/snippets/applescript"],function(e){if(typeof module=="object"&&typeof exports=="object"&&module){module.exports=e}})})();
+//# sourceMappingURL=applescript.js.map

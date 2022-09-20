@@ -1,6 +1,6 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define(["sap/ui/Device"],
@@ -13,6 +13,7 @@ sap.ui.define(["sap/ui/Device"],
 	 * @namespace
 	 */
 	var ActionSheetRenderer = {
+		apiVersion: 2
 	};
 
 
@@ -20,7 +21,7 @@ sap.ui.define(["sap/ui/Device"],
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
 	 * @param {sap.ui.core.RenderManager} oRm the RenderManager that can be used for writing to the render output buffer
-	 * @param {sap.ui.core.Control} oControl an object representation of the control that should be rendered
+	 * @param {sap.m.ActionSheet} oControl an object representation of the control that should be rendered
 	 */
 	ActionSheetRenderer.render = function(oRm, oControl){
 		var aActionButtons = oControl._getAllButtons(),
@@ -36,38 +37,33 @@ sap.ui.define(["sap/ui/Device"],
 				})[0];
 			};
 
-		for (i = 0 ; i < iButtonsCount ; i++) {
+		for (i = 0; i < iButtonsCount; i++) {
 			oButton = aActionButtons[i];
-			oButton.removeStyleClass("sapMActionSheetButtonNoIcon");
 			if (oButton.getIcon() && oButton.getVisible()) {
 				bMixedButtons = true;
-			} else {
-				oButton.addStyleClass("sapMActionSheetButtonNoIcon");
 			}
 		}
-
 		// write the HTML into the render manager
-		oRm.write("<div");
-		oRm.writeControlData(oControl);
-		oRm.addClass("sapMActionSheet");
+		oRm.openStart("div", oControl);
+		oRm.class("sapMActionSheet");
+
 		if (bMixedButtons) {
-			oRm.addClass("sapMActionSheetMixedButtons");
+			oRm.class("sapMActionSheetMixedButtons");
 		}
-		oRm.writeClasses();
 
 		var sTooltip = oControl.getTooltip_AsString();
 		if (sTooltip) {
-			oRm.writeAttributeEscaped("title", sTooltip);
+			oRm.attr("title", sTooltip);
 		}
 
 		// This is needed in order to prevent JAWS from announcing the ActionSheet content multiple times
-		bAccessibilityOn && oRm.writeAttributeEscaped("role", "presentation");
+		bAccessibilityOn && oRm.attr("role", "presentation");
 
-		oRm.write(">");
+		oRm.openEnd();
 
-		for (i = 0 ; i < iButtonsCount ; i++) {
+		for (i = 0; i < iButtonsCount; i++) {
 			oButton = aActionButtons[i];
-			oRm.renderControl(aActionButtons[i].addStyleClass("sapMActionSheetButton"));
+			oRm.renderControl(aActionButtons[i]);
 
 			if (bAccessibilityOn && oButton.getVisible()) {
 
@@ -86,8 +82,7 @@ sap.ui.define(["sap/ui/Device"],
 		if (Device.system.phone && oControl.getShowCancelButton()) {
 			oRm.renderControl(oControl._getCancelButton());
 		}
-
-		oRm.write("</div>");
+		oRm.close("div");
 	};
 
 

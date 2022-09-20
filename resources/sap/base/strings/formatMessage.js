@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(["sap/base/assert"],function(a){"use strict";var r=/('')|'([^']+(?:''[^']*)*)(?:'|$)|\{([0-9]+(?:\s*,[^{}]*)?)\}|[{}]/g;var f=function(p,v){a(typeof p==="string"||p instanceof String,"pattern must be string");if(arguments.length>2||(v!=null&&!Array.isArray(v))){v=Array.prototype.slice.call(arguments,1);}v=v||[];return p.replace(r,function($,b,c,d,o){if(b){return"'";}else if(c){return c.replace(/''/g,"'");}else if(d){return String(v[parseInt(d,10)]);}throw new Error("formatMessage: pattern syntax error at pos. "+o);});};return f;});
+sap.ui.define(["sap/base/assert"],function(r){"use strict";var e=/('')|'([^']+(?:''[^']*)*)(?:'|$)|\{([0-9]+(?:\s*,[^{}]*)?)\}|[{}]/g;var t=function(t,n){r(typeof t==="string"||t instanceof String,"pattern must be string");if(arguments.length>2||n!=null&&!Array.isArray(n)){n=Array.prototype.slice.call(arguments,1)}n=n||[];return t.replace(e,function(r,e,t,s,a){if(e){return"'"}else if(t){return t.replace(/''/g,"'")}else if(s){return String(n[parseInt(s)])}throw new Error("formatMessage: pattern syntax error at pos. "+a)})};return t});
+//# sourceMappingURL=formatMessage.js.map

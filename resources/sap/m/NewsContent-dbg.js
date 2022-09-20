@@ -1,19 +1,18 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	'jquery.sap.global',
 	'./library',
 	'sap/ui/core/Control',
-	'sap/m/Text',
+	'sap/m/FormattedText',
 	'sap/ui/Device',
 	'./NewsContentRenderer',
-	'jquery.sap.keycodes'
+	"sap/ui/events/KeyCodes"
 ],
-	function(jQuery, library, Control, Text, Device, NewsContentRenderer) {
+	function(library, Control, FormattedText, Device, NewsContentRenderer, KeyCodes) {
 	"use strict";
 
 	/**
@@ -26,7 +25,7 @@ sap.ui.define([
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 * @since 1.34
 	 *
 	 * @public
@@ -42,7 +41,7 @@ sap.ui.define([
 				 * Updates the size of the chart. If not set then the default size is applied based on the device tile.
 				 * @deprecated Since version 1.38.0. The NewsContent control has now a fixed size, depending on the used media (desktop, tablet or phone).
 				 */
-				"size" : {type : "sap.m.Size", group : "Misc", defaultValue : "Auto"},
+				"size" : {type : "sap.m.Size", group : "Misc", defaultValue : "Auto", deprecated: true},
 				/**
 				 * The content text.
 				 */
@@ -57,7 +56,11 @@ sap.ui.define([
 				/**
 				 * The hidden aggregation for the content text.
 				 */
-				"_contentText" : {type : "sap.m.Text", multiple : false, visibility : "hidden"}
+				"_contentText" : {type : "sap.m.FormattedText", multiple : false, visibility : "hidden"},
+				/**
+				 * The hidden aggregation for the subHeader text.
+				 */
+				 "_subHeaderText" : {type : "sap.m.FormattedText", multiple : false, visibility : "hidden"}
 			},
 			events : {
 				/**
@@ -74,23 +77,22 @@ sap.ui.define([
 	* Init function for the control
 	*/
 	NewsContent.prototype.init = function() {
-		this._oContentText = new Text(this.getId() + "-content-text", {
-			maxLines : 2
-		});
-		this._oContentText.cacheLineHeight = false;
+		this._oContentText = new FormattedText(this.getId() + "-content-text");
+		this._oSubHeaderText = new FormattedText(this.getId() + "-subheader-text");
 		this.setAggregation("_contentText", this._oContentText, true);
+		this.setAggregation("_subHeaderText", this._oSubHeaderText, true);
 		this.setTooltip("{AltText}");
 	};
 
 	NewsContent.prototype.onBeforeRendering = function() {
 		this._setPointerOnContentText();
-		this.$().unbind("mouseenter", this._addTooltip);
-		this.$().unbind("mouseleave", this._removeTooltip);
+		this.$().off("mouseenter");
+		this.$().off("mouseleave");
 	};
 
 	NewsContent.prototype.onAfterRendering = function() {
-		this.$().bind("mouseenter", this._addTooltip.bind(this));
-		this.$().bind("mouseleave", this._removeTooltip.bind(this));
+		this.$().on("mouseenter", this._addTooltip.bind(this));
+		this.$().on("mouseleave", this._removeTooltip.bind(this));
 	};
 
 	/**
@@ -127,13 +129,13 @@ sap.ui.define([
 	/**
 	 * Returns the AltText
 	 *
-	 * @returns {String} The AltText text
+	 * @returns {string} The AltText text
 	 */
 	NewsContent.prototype.getAltText = function() {
 		var sAltText = "";
 		var bIsFirst = true;
-		if (this.getAggregation("_contentText").getText()) {
-			sAltText += this.getAggregation("_contentText").getText();
+		if (this.getContentText()) {
+			sAltText += this.getContentText();
 			bIsFirst = false;
 		}
 		if (this.getSubheader()) {
@@ -161,8 +163,13 @@ sap.ui.define([
 	};
 
 	NewsContent.prototype.setContentText = function(text) {
-		this._oContentText.setText(text);
+		this._oContentText.setHtmlText(text);
 		return this.setProperty("contentText", text, true);
+	};
+
+	NewsContent.prototype.setSubheader = function(text) {
+		this._oSubHeaderText.setHtmlText(text);
+		return this.setProperty("subheader", text, true);
 	};
 
 	/* --- Event Handling --- */
@@ -174,7 +181,7 @@ sap.ui.define([
 	 */
 	NewsContent.prototype.ontap = function(oEvent) {
 		if (Device.browser.msie) {
-			this.$().focus();
+			this.$().trigger("focus");
 		}
 		this.firePress();
 	};
@@ -185,7 +192,7 @@ sap.ui.define([
 	 * @param {sap.ui.base.Event} oEvent which was triggered
 	 */
 	NewsContent.prototype.onkeydown = function(oEvent) {
-		if (oEvent.which === jQuery.sap.KeyCodes.ENTER || oEvent.which === jQuery.sap.KeyCodes.SPACE) {
+		if (oEvent.which === KeyCodes.ENTER || oEvent.which === KeyCodes.SPACE) {
 			this.firePress();
 			oEvent.preventDefault();
 		}

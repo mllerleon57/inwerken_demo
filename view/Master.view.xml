@@ -1,40 +1,34 @@
-<mvc:View
-    controllerName="sap.ui.demo.basicTemplate.controller.Master"
-	xmlns="sap.m"
-    xmlns:core="sap.ui.core"
-	xmlns:mvc="sap.ui.core.mvc">
-    <page>
-        <customHeader>
-            <Toolbar>
-                <SearchField width="100%" search="onSearch"/>
-            </Toolbar>        
-        </customHeader>
-        <content>
-                <List
-                    items="{/lists}"
-                    id="masterMenu"
-                >
+<mvc:View controllerName="sap.ui.demo.basicTemplate.controller.Master" xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:layout="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:semantic="sap.f.semantic">
+    <semantic:SemanticPage>
+        <semantic:titleHeading>
+            <Title text="📝 Aufgaben" />
+        </semantic:titleHeading>
+        <semantic:headerContent>
+            <FlexBox alignItems="Center" visible="{=${/allSolved}===true}" justifyContent="Center" direction="Column">
+                <core:Icon src="sap-icon://competitor" size="4rem" class="sapUiMediumMargin" press="onGameEndPress" color="green"/>
+                <Title text="Du hast alle Spiele gewonnen, hol dir deinen Preis ab!" wrapping="true"/>
+            </FlexBox>
+        </semantic:headerContent>
+        <semantic:titleCustomTextActions>
+            <Button
+            icon="sap-icon://home"
+            press="goHome"/>
+            <Button 
+            icon="sap-icon://reset" press="reset" />
+        </semantic:titleCustomTextActions>
+        <semantic:content>
+            <List items="{/lists}" id="masterMenu">
                 <items>
-                    <ObjectListItem
-                            title="{name}"
-                            type="Active"
-                            press="onPress"
-                            class="list-item">
-                            <customData>
-                                <core:customData key="solved" value="true"
-                                writeToDom="{=${solved}===true}"/>
-                            </customData>
-                        <ObjectAttribute title="Game Mode" 
-                        text="{
-                        path:'gameMode',
-                        formatter:'.formatter.gameMode'
-                        }"/>
-                         <ObjectAttribute title="Schwierigkeit" 
-                        text="{difficulty}"/>
+                    <ObjectListItem title="{name}" type="Active" press="onPress" class="list-item">
+                        <customData>
+                            <core:CustomData key="solved" value="true" writeToDom="{=${solved}===true}" />
+                        </customData>
+                        <ObjectAttribute title="Schwierigkeit" text="{difficulty}" />
+                        <ObjectAttribute title="Gelöst" text="{= ${solved} === true ? 'Ja' : 'Nein'}" />
                     </ObjectListItem>
                 </items>
-                </List>
-                <ToolBar class="prizeToolbar"
+            </List>
+            <!-- <Toolbar class="prizeToolbar"
                          visible="{=${/allSolved}===true}">
                     <core:Icon
                         src="sap-icon://competitor"
@@ -42,7 +36,10 @@
                         size="4rem"
                         class="sapUiMediumMargin" 
                         press="onGameEndPress"/>
-                </ToolBar>
-        </content>
-    </page>
+                </Toolbar> -->
+
+
+        </semantic:content>
+
+    </semantic:SemanticPage>
 </mvc:View>

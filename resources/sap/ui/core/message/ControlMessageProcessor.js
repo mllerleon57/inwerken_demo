@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','sap/ui/core/message/MessageProcessor'],function(q,M){"use strict";var C=M.extend("sap.ui.core.message.ControlMessageProcessor",{constructor:function(){if(!C._instance){M.apply(this,arguments);C._instance=this;}return C._instance;},metadata:{}});C._instance=null;C.prototype.setMessages=function(m){this.mOldMessages=this.mMessages===null?{}:this.mMessages;this.mMessages=m||{};this.checkMessages();delete this.mOldMessages;};C.prototype.checkMessages=function(){var m,t=this,a=q.extend(this.mMessages,{});q.each(this.mOldMessages,function(T){if(!(T in a)){a[T]=[];}});q.each(a,function(T){var b,c,p=T.split('/');if(!p[0]){p.shift();}c=sap.ui.getCore().byId(p[0]);if(!c){return;}b=c.getBinding(p[1]);m=t.mMessages[T]?t.mMessages[T]:[];if(b){var d=b.getDataState();d.setControlMessages(m);b.checkDataState();}else{c.propagateMessages(p[1],m);}});};return C;});
+sap.ui.define(["sap/ui/core/message/MessageProcessor"],function(s){"use strict";var e=s.extend("sap.ui.core.message.ControlMessageProcessor",{constructor:function(){if(!e._instance){s.apply(this,arguments);e._instance=this}return e._instance},metadata:{}});e._instance=null;e.prototype.setMessages=function(s){this.mOldMessages=this.mMessages===null?{}:this.mMessages;this.mMessages=s||{};this.checkMessages();delete this.mOldMessages};e.prototype.checkMessages=function(){var s,e,t=Object.assign({},this.mMessages);for(e in this.mOldMessages){if(!(e in t)){t[e]=[]}}for(e in t){var a,i,n=e.split("/");if(!n[0]){n.shift()}i=sap.ui.getCore().byId(n[0]);if(!i||i._bIsBeingDestroyed){return}a=i.getBinding(n[1]);s=t[e]?t[e]:[];if(a){var r=a.getDataState();r.setControlMessages(s);a.checkDataState()}else{i.propagateMessages(n[1],s)}}};return e});
+//# sourceMappingURL=ControlMessageProcessor.js.map

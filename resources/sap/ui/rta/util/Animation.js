@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],function(q){"use strict";var m={};m.waitTransition=function($,c){if(!($ instanceof q)){throw new Error('$element should be wrapped into jQuery object');}if(!q.isFunction(c)){throw new Error('fnCallback should be a function');}return new Promise(function(r){$.one('transitionend',r);var t;var a=function(T){if(!t){t=T;}if(T!==t){c();}else{window.requestAnimationFrame(a);}};window.requestAnimationFrame(a);});};return m;},true);
+sap.ui.define(["sap/ui/thirdparty/jquery"],function(jQuery){"use strict";var n={};n.waitTransition=function(n,e){if(!(n instanceof jQuery)){throw new Error("$element should be wrapped into jQuery object")}if(typeof e!=="function"){throw new Error("fnCallback should be a function")}return new Promise(function(i){n.one("transitionend",i);var r;var t=function(n){if(!r){r=n}if(n!==r){e()}else{window.requestAnimationFrame(t)}};window.requestAnimationFrame(t)})};return n},true);
+//# sourceMappingURL=Animation.js.map

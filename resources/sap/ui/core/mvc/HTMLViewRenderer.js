@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['./ViewRenderer'],function(V){"use strict";var H={};H.render=function(r,c){var a=r;a.write("<div");a.writeControlData(c);a.addClass("sapUiView");a.addClass("sapUiHTMLView");V.addDisplayClass(a,c);if(c.getWidth()){a.addStyle("width",c.getWidth());}if(c.getHeight()){a.addStyle("height",c.getHeight());}a.writeStyles();a.writeClasses();a.write(">");if(c._oTemplate){var h=c._oTemplate.innerHTML;var b=c.getContent();var d=[];var e=function(c){var t=H._getHTML(a,c,h);if(t){h=t;}else{d.push(c);}};if(b){if(Array.isArray(b)){for(var i=0;i<b.length;i++){e(b[i]);}}else if(b){e(b);}}a.write(h);for(var i=0;i<d.length;i++){a.renderControl(d[i]);}}a.write("</div>");};H._getHTML=function(r,c,h){var i=c.getId();h=h.replace(/(<div)/gi,"\n$1");var a=new RegExp('<div.*?data-sap-ui-id="'+i+'".*?></div>',"gi");var m=a.exec(h);if(m){h=h.replace(m[0],r.getHTML(c));return h;}else{return"";}};return H;},true);
+sap.ui.define(["./ViewRenderer"],function(e){"use strict";var r={apiVersion:1};r.render=function(i,t){i.openStart("div",t);i.class("sapUiView");i.class("sapUiHTMLView");e.addDisplayClass(i,t);i.style("width",t.getWidth());i.style("height",t.getHeight());i.openEnd();if(t._oTemplate){var a=t._oTemplate.innerHTML;var n=t.getContent();var s=[];var l=function(e){var t=r._getHTML(i,e,a);if(t){a=t}else{s.push(e)}};if(n){if(Array.isArray(n)){for(var d=0;d<n.length;d++){l(n[d])}}else if(n){l(n)}}i.unsafeHtml(a);for(var v=0;v<s.length;v++){i.renderControl(s[v])}}i.close("div")};r._getHTML=function(e,r,i){var t=r.getId();i=i.replace(/(<div)/gi,"\n$1");var a=new RegExp('<div.*?data-sap-ui-id="'+t+'".*?></div>',"gi");var n=a.exec(i);if(n){i=i.replace(n[0],e.getHTML(r));return i}else{return""}};return r},true);
+//# sourceMappingURL=HTMLViewRenderer.js.map

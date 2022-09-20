@@ -1,16 +1,17 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 /**
  * Initialization Code and shared classes of library sap.ui.commons.
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
+sap.ui.define(['sap/ui/base/DataType', 'sap/base/util/ObjectPath',
 	'sap/ui/core/library', // library dependency
-	'sap/ui/layout/library'], // library dependency
-	function(jQuery, DataType) {
+	'sap/ui/layout/library', // library dependency
+	'sap/ui/unified/library'], // library dependency
+	function(DataType, ObjectPath) {
 
 	"use strict";
 
@@ -18,16 +19,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * Common basic controls, mainly intended for desktop scenarios
 	 *
 	 * @namespace
-	 * @name sap.ui.commons
+	 * @alias sap.ui.commons
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
+	 * @since 0.8
 	 * @public
+	 * @deprecated as of version 1.38
 	 */
-
-	// delegate further initialization of this library to the Core
-	sap.ui.getCore().initLibrary({
+	var thisLib = sap.ui.getCore().initLibrary({
 		name : "sap.ui.commons",
-		version: "1.56.5",
+		version: "1.106.0",
 		dependencies : ["sap.ui.core","sap.ui.layout","sap.ui.unified"],
 		types: [
 			"sap.ui.commons.ButtonStyle",
@@ -166,8 +167,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.ButtonStyle = {
+	thisLib.ButtonStyle = {
 
 		/**
 		 * Button is emphasized.
@@ -197,14 +199,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 
 
 	/**
-	 * different styles for a ColorPicker.
+	 * Different styles for a ColorPicker.
 	 *
-	 * @enum {string}
+	 * This enum is an alias for {@link sap.ui.unified.ColorPickerMode} and was only kept
+	 * for compatibility reasons. Please switch to the {@link sap.ui.unified.ColorPicker} API.
+	 *
+	 * @typedef {sap.ui.unified.ColorPickerMode}
 	 * @public
-	 * @deprecated Since version 1.48.0. Moved to sap.ui.unified library. Please use this one.
+	 * @deprecated Since version 1.48.0. Use {@link sap.ui.unified.ColorPickerMode} instead.
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	sap.ui.commons.ColorPickerMode = sap.ui.unified.ColorPickerMode;
+	thisLib.ColorPickerMode = sap.ui.unified.ColorPickerMode;
 
 	/**
 	 * Marker interface for common controls which are suitable for use within a FormattedTextView.
@@ -213,6 +218,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @interface
 	 * @public
 	 * @ui5-metamodel This interface also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
 
 
@@ -222,8 +228,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.HorizontalDividerHeight = {
+	thisLib.HorizontalDividerHeight = {
 
 		/**
 		 * Divider gets no top and bottom margin.
@@ -258,8 +265,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.HorizontalDividerType = {
+	thisLib.HorizontalDividerType = {
 
 		/**
 		 * Type Area
@@ -282,8 +290,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.LabelDesign = {
+	thisLib.LabelDesign = {
 
 		/**
 		 * Displays the label in bold.
@@ -306,8 +315,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.MenuBarDesign = {
+	thisLib.MenuBarDesign = {
 
 		/**
 		 * The MenuBar appears in standard design.
@@ -330,8 +340,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.MessageType = {
+	thisLib.MessageType = {
 
 		/**
 		 * Error message
@@ -360,8 +371,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.PaginatorEvent = {
+	thisLib.PaginatorEvent = {
 
 		/**
 		 * First page event
@@ -402,8 +414,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.RatingIndicatorVisualMode = {
+	thisLib.RatingIndicatorVisualMode = {
 
 		/**
 		 * Values are rounded to the nearest integer value (e.g. 1.7 -> 2).
@@ -432,8 +445,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.RowRepeaterDesign = {
+	thisLib.RowRepeaterDesign = {
 
 		/**
 		 * The RowRepeater header and footer elements, as well as the row container background, appear solid.
@@ -463,8 +477,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @namespace
 	 * @public
 	 * @ui5-metamodel This simple type also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.SplitterSize = DataType.createType('sap.ui.commons.SplitterSize', {
+	thisLib.SplitterSize = DataType.createType('sap.ui.commons.SplitterSize', {
 	    isValid : function(vValue) {
 	      return /^((0*|([0-9]+|[0-9]*\.[0-9]+)([pP][xX]|%)))$/.test(vValue);
 	    }
@@ -480,8 +495,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.TextViewColor = {
+	thisLib.TextViewColor = {
 
 		/**
 		 * Default color
@@ -516,8 +532,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.TextViewDesign = {
+	thisLib.TextViewDesign = {
 
 		/**
 		 * Displays the text in standard letters.
@@ -596,11 +613,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 
 	/**
 	 * Level of a title.
+	 *
+	 * This is an alias for {@link sap.ui.core.TitleLevel} and only kept for compatibility reasons.
+	 *
 	 * @since 1.9.1
-	 * @deprecated Since version 1.16.0. Moved to sap.ui.core library. Please use this one.
+	 * @deprecated Since version 1.16.0. Use {@link sap.ui.core.TitleLevel} instead.
 	 * @public
+	 * @typedef {sap.ui.core.TitleLevel}
 	 */
-	sap.ui.commons.TitleLevel = sap.ui.core.TitleLevel;
+	thisLib.TitleLevel = sap.ui.core.TitleLevel;
 
 
 	/**
@@ -609,8 +630,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.ToolbarDesign = {
+	thisLib.ToolbarDesign = {
 
 		/**
 		 * The toolbar elements such as buttons for example have their normal visual design, and the toolbar appears solid.
@@ -648,6 +670,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @interface
 	 * @public
 	 * @ui5-metamodel This interface also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
 
 
@@ -657,8 +680,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.ToolbarSeparatorDesign = {
+	thisLib.ToolbarSeparatorDesign = {
 
 		/**
 		 * Standard Separator between controls
@@ -681,8 +705,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.TreeSelectionMode = {
+	thisLib.TreeSelectionMode = {
 
 		/**
 		 * Select multiple rows at a time.
@@ -718,8 +743,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @public
 	 * @since 1.7.2
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.TriStateCheckBoxState = {
+	thisLib.TriStateCheckBoxState = {
 
 		/**
 		 * unchecked, default value for tri-state checkbox
@@ -741,8 +767,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 
 	};
 
-
-	sap.ui.commons.enums = sap.ui.commons.enums || {};
+	/**
+	 * @namespace
+	 * @public
+	 * @deprecated as of version 1.38
+	 */
+	thisLib.enums = thisLib.enums || {};
 
 	/**
 	 * Value set for the background design of areas
@@ -750,8 +780,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.enums.AreaDesign = {
+	thisLib.enums.AreaDesign = {
 
 		/**
 		 * Shows the area in a plain look
@@ -780,8 +811,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.enums.BorderDesign = {
+	thisLib.enums.BorderDesign = {
 
 		/**
 		 * Draws the border as a box around the area
@@ -804,8 +836,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.enums.Orientation = {
+	thisLib.enums.Orientation = {
 
 		/**
 		 * Horizontal orientation
@@ -821,24 +854,41 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 
 	};
 
-
-	sap.ui.commons.form = sap.ui.commons.form || {};
+	/**
+	 * @namespace
+	 * @public
+	 * @deprecated as of version 1.38
+	 */
+	thisLib.form = thisLib.form || {};
 
 	/**
-	 * A string that defines the number of used cells in a GridLayout. This can be a number from 1 to 16, "auto" or "full".
-	 * @deprecated Since version 1.16.0. Moved to sap.ui.layout library. Please use this one.
+	 * A string that defines the number of used cells in a GridLayout.
+	 *
+	 * This is an alias for {@link sap.ui.layout.form.GridElementCells} and only kept for compatibility reasons.
+	 *
+	 * @deprecated Since version 1.16.0. Use {@link sap.ui.layout.form.GridElementCells} instead.
+	 * @typedef {sap.ui.layout.form.GridElementCells}
 	 */
-	sap.ui.commons.form.GridElementCells = sap.ui.layout.form.GridElementCells;
+	thisLib.form.GridElementCells = sap.ui.layout.form.GridElementCells;
 
 
 	/**
 	 * Available FormLayouts used for the SimpleForm.
-	 * @deprecated Since version 1.16.0. Moved to sap.ui.layout library. Please use this one.
+	 *
+	 * This is an alias for {@link sap.ui.layout.form.SimpleFormLayout} and only kept for compatibility reasons.
+	 *
+	 * @deprecated Since version 1.16.0. Use {@link sap.ui.layout.form.SimpleFormLayout} instead.
 	 * @public
+	 * @typedef {sap.ui.layout.form.SimpleFormLayout}
 	 */
-	sap.ui.commons.form.SimpleFormLayout = sap.ui.layout.form.SimpleFormLayout;
+	thisLib.form.SimpleFormLayout = sap.ui.layout.form.SimpleFormLayout;
 
-	sap.ui.commons.layout = sap.ui.commons.layout || {};
+	/**
+	 * @namespace
+	 * @public
+	 * @deprecated as of version 1.38
+	 */
+	thisLib.layout = thisLib.layout || {};
 
 	/**
 	 * Background design (i.e. color), e.g. of a layout cell.
@@ -846,8 +896,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.layout.BackgroundDesign = {
+	thisLib.layout.BackgroundDesign = {
 
 		/**
 		 *
@@ -914,8 +965,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.layout.BorderLayoutAreaTypes = {
+	thisLib.layout.BorderLayoutAreaTypes = {
 
 		/**
 		 * Value to identify the top area.
@@ -958,8 +1010,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.layout.HAlign = {
+	thisLib.layout.HAlign = {
 
 		/**
 		 *
@@ -1013,8 +1066,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.layout.Padding = {
+	thisLib.layout.Padding = {
 
 		/**
 		 *
@@ -1072,8 +1126,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.layout.Separation = {
+	thisLib.layout.Separation = {
 
 		/**
 		 *
@@ -1140,8 +1195,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated as of version 1.38
 	 */
-	sap.ui.commons.layout.VAlign = {
+	thisLib.layout.VAlign = {
 
 		/**
 		 *
@@ -1175,7 +1231,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	// lazy imports for MenuItemBase which no longer is a control on its own
 	sap.ui.lazyRequire("sap.ui.commons.MenuItemBase", "new extend getMetadata");
 
-	sap.ui.commons.Orientation = {
+	thisLib.Orientation = {
 		// Map the Orientation enum to new enums in core
 		"Vertical"   : sap.ui.core.Orientation.Vertical,
 		"Horizontal" : sap.ui.core.Orientation.Horizontal,
@@ -1222,8 +1278,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	// implement Form helper factory with common controls
 	if (!sap.ui.layout.form.FormHelper || !sap.ui.layout.form.FormHelper.bFinal) {
 		sap.ui.layout.form.FormHelper = {
-			createLabel: function(sText){
-				return new sap.ui.commons.Label({text: sText});
+			createLabel: function(sText, sId){
+				return new sap.ui.commons.Label(sId, {text: sText});
 			},
 			createButton: function(sId, fPressFunction, fnCallback){
 				var that = this;
@@ -1248,6 +1304,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			},
 			addFormClass: function(){ return null; },
 			setToolbar: function(oToolbar){ return oToolbar; },
+			getToolbarTitle: function(oToolbar) {
+				// as no Title control as ToolbarItem exust just use Toolbar ID. (Let application point to the wanted control.)
+				return oToolbar && oToolbar.getId();
+			},
 			bArrowKeySupport: true, /* enables the keyboard support for arrow keys */
 			bFinal: false /* to allow mobile to overwrite  */
 		};
@@ -1263,8 +1323,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			setTextFieldContent: function(oTextField, sWidth){
 				oTextField.setWidth(sWidth);
 			},
-			createButton: function(){
-				var oButton = new sap.ui.commons.Button();
+			createButton: function(sId){
+				var oButton = new sap.ui.commons.Button(sId);
 				return oButton;
 			},
 			addFormClass: function(){ return "sapUiCFUM"; },
@@ -1274,9 +1334,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 
 	//implement table helper factory with m controls
 	//possible is set before layout lib is loaded.
-	var oTableHelper = jQuery.sap.getObject("sap.ui.table.TableHelper", 4);
+	var oTableHelper = ObjectPath.get("sap.ui.table.TableHelper");
 	if (!oTableHelper || !oTableHelper.bFinal) {
-		jQuery.sap.setObject("sap.ui.table.TableHelper", {
+		ObjectPath.set("sap.ui.table.TableHelper", {
 			createLabel: function(mConfig){
 				return new sap.ui.commons.Label(mConfig);
 			},
@@ -1291,6 +1351,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		});
 	}
 
-	return sap.ui.commons;
+	if (!sap.ui.layout.GridHelper || !sap.ui.layout.GridHelper.bFinal) {
+		sap.ui.layout.GridHelper = {
+			getLibrarySpecificClass: function () {
+				return "sapUiRespGridOverflowHidden";
+			},
+			bFinal: false /* to allow mobile to overwrite  */
+		};
+	}
+
+	return thisLib;
 
 });

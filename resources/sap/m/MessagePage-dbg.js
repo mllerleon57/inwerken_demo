@@ -1,34 +1,38 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.MessagePage.
 sap.ui.define([
-	'jquery.sap.global',
 	'./library',
 	'sap/ui/core/library',
 	'sap/ui/core/Control',
 	'sap/ui/core/IconPool',
+	'sap/ui/base/ManagedObject',
 	'sap/m/Text',
 	'sap/m/Image',
 	'sap/m/Button',
 	'sap/m/Title',
+	'sap/m/Bar',
 	'sap/m/FormattedText',
-	'./MessagePageRenderer'
+	'./MessagePageRenderer',
+	"sap/ui/thirdparty/jquery"
 ], function(
-	jQuery,
 	library,
 	coreLibrary,
 	Control,
 	IconPool,
+	ManagedObject,
 	Text,
 	Image,
 	Button,
 	Title,
+	Bar,
 	FormattedText,
-	MessagePageRenderer
+	MessagePageRenderer,
+	jQuery
 ) {
 		"use strict";
 
@@ -40,6 +44,9 @@ sap.ui.define([
 
 		// shortcut for sap.m.BarDesign
 		var BarDesign = library.BarDesign;
+
+		// shortcut for sap.ui.core.TitleLevel
+		var TitleLevel = coreLibrary.TitleLevel;
 
 		/**
 		 * Constructor for a new MessagePage.
@@ -65,7 +72,7 @@ sap.ui.define([
 		 * @see {@link fiori:https://experience.sap.com/fiori-design-web/message-page/ Message Page}
 		 *
 		 * @extends sap.ui.core.Control
-		 * @version 1.56.5
+		 * @version 1.106.0
 		 *
 		 * @constructor
 		 * @public
@@ -89,6 +96,14 @@ sap.ui.define([
 				 * Determines the title in the header of MessagePage.
 				 */
 				title : { type : "string", group : "Misc", defaultValue : null },
+				/**
+				 * Defines the semantic level of the title. When using <code>Auto</code>, no explicit level information is written.
+				 *
+				 * <b>Note:</b> Used for accessibility purposes only.
+				 *
+				 * @since 1.97
+				 */
+				titleLevel : { type: "sap.ui.core.TitleLevel", group: "Appearance", defaultValue: TitleLevel.Auto },
 				/**
 				 * Determines the visibility of the MessagePage header.
 				 * Can be used to hide the header of the MessagePage when it's embedded in another page.
@@ -187,10 +202,18 @@ sap.ui.define([
 			designtime: "sap/m/designtime/MessagePage.designtime"
 		}});
 
-		MessagePage.prototype.init = function() {
-			var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m"),
-				oTitle = new Title(this.getId() + "-title");
+		/**
+		 * STATIC MEMBERS
+		 */
+		MessagePage.ARIA_ROLE_DESCRIPTION = "MESSAGE_PAGE_ROLE_DESCRIPTION";
 
+		/**
+		 * LIFECYCLE METHODS
+		 */
+		MessagePage.prototype.init = function() {
+			var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+
+			this._oTitle = null;
 			this._oNavButton = new Button(this.getId() + "-navButton", {
 				type: ButtonType.Back,
 				press: jQuery.proxy(function () {
@@ -198,13 +221,14 @@ sap.ui.define([
 				}, this)
 			});
 
-			this.setAggregation("_internalHeader", new sap.m.Bar(this.getId() + "-intHeader", {
-				design: BarDesign.Header,
-				contentMiddle: [ oTitle ]
+			this.setAggregation("_internalHeader", new Bar(this.getId() + "-intHeader", {
+				design: BarDesign.Header
 			}));
 
 			this.setProperty("text", oBundle.getText("MESSAGE_PAGE_TEXT"), true);
 			this.setProperty("description", oBundle.getText("MESSAGE_PAGE_DESCRIPTION"), true);
+
+			this._sAriaRoleDescription = oBundle.getText(MessagePage.ARIA_ROLE_DESCRIPTION);
 		};
 
 		MessagePage.prototype.exit = function() {
@@ -222,8 +246,15 @@ sap.ui.define([
 		MessagePage.prototype.setTitle = function(sTitle) {
 			this.setProperty("title", sTitle, true); // no re-rendering
 
-			var oTitle = this._getInternalHeader().getContentMiddle()[0];
-			oTitle.setText(sTitle);
+			this._getTitle().setText(sTitle);
+
+			return this;
+		};
+
+		MessagePage.prototype.setTitleLevel = function(sTitleLevel) {
+			this.setProperty("titleLevel", sTitleLevel, true); // no re-rendering
+
+			this._getTitle().setLevel(sTitleLevel);
 
 			return this;
 		};
@@ -257,22 +288,6 @@ sap.ui.define([
 				oHeader.addContentLeft(this._oNavButton);
 			} else {
 				oHeader.removeAllContentLeft();
-			}
-
-			return this;
-		};
-
-		MessagePage.prototype.setTextDirection = function(sTextDirection) {
-			this.setProperty("textDirection", sTextDirection, true); // no re-rendering
-
-			var oDomRef = this.getDomRef();
-
-			if (oDomRef) {
-				if (sTextDirection === TextDirection.Inherit) {
-					oDomRef.removeAttribute("dir");
-				} else {
-					oDomRef.dir = sTextDirection.toLowerCase();
-				}
 			}
 
 			return this;
@@ -336,7 +351,7 @@ sap.ui.define([
 			if (!this.getAggregation("_text")) {
 				var oText = new Text(this.getId() + "-text", {
 					id: this.getId() + "-customText",
-					text: this.getText(),
+					text: ManagedObject.escapeSettingsValue(this.getText()),
 					textAlign: TextAlign.Center,
 					textDirection: this.getTextDirection()
 				});
@@ -344,6 +359,21 @@ sap.ui.define([
 			}
 
 			return this.getAggregation("_text");
+		};
+
+		/**
+		 * @returns {sap.m.Title} the control which will display the MessagePage's title
+		 * @private
+		 */
+		MessagePage.prototype._getTitle = function() {
+			if (!this._oTitle) {
+				this._oTitle = new Title(this.getId() + "-title", {
+					level: this.getTitleLevel()
+				});
+				this._getInternalHeader().addContentMiddle(this._oTitle);
+			}
+
+			return this._oTitle;
 		};
 
 		/**
@@ -362,7 +392,7 @@ sap.ui.define([
 			if (!this.getAggregation("_description")) {
 				var oDescription = new Text(this.getId() + "-description", {
 					id: this.getId() + "-customDescription",
-					text: this.getDescription(),
+					text: ManagedObject.escapeSettingsValue(this.getDescription()),
 					textAlign: TextAlign.Center,
 					textDirection: this.getTextDirection()
 				});

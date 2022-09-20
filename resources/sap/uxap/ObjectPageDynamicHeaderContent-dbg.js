@@ -1,26 +1,17 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.uxap.ObjectPageDynamicHeaderContent.
 sap.ui.define([
-    'jquery.sap.global',
-    './library',
-    "./ObjectPageDynamicHeaderContentRenderer"
+	'./library',
+	"./ObjectPageDynamicHeaderContentRenderer",
+	"sap/f/DynamicPageHeader"
 ],
-	function(jQuery, library, ObjectPageDynamicHeaderContentRenderer) {
+	function(library, ObjectPageDynamicHeaderContentRenderer, DynamicPageHeader) {
 		"use strict";
-
-		try {
-			sap.ui.getCore().loadLibrary("sap.f");
-		} catch (e) {
-			jQuery.sap.log.error("The control 'sap.uxap.ObjectPageDynamicHeaderContent' needs library 'sap.f'.");
-			throw (e);
-		}
-
-		var DynamicPageHeader = sap.ui.requireSync("sap/f/DynamicPageHeader");
 
 		/**
 		 * Constructor for a new <code>ObjectPageDynamicHeaderContent</code>.
@@ -49,7 +40,7 @@ sap.ui.define([
 		 * @implements sap.uxap.IHeaderContent
 		 *
 		 * @author SAP SE
-		 * @version 1.56.5
+		 * @version 1.106.0
 		 *
 		 * @constructor
 		 * @public
@@ -69,12 +60,14 @@ sap.ui.define([
 		 * @param bVisible
 		 * @param sContentDesign
 		 * @param bPinnable
+		 * @param sStableId
 		 */
-		ObjectPageDynamicHeaderContent.createInstance = function (aContent, bVisible, sContentDesign, bPinnable) {
+		ObjectPageDynamicHeaderContent.createInstance = function (aContent, bVisible, sContentDesign, bPinnable, sStableId) {
 			return new ObjectPageDynamicHeaderContent({
 				content: aContent,
 				visible: bVisible,
-				pinnable: bPinnable
+				pinnable: bPinnable,
+				id: sStableId
 			});
 		};
 
@@ -108,6 +101,11 @@ sap.ui.define([
 		 */
 		ObjectPageDynamicHeaderContent.prototype.setContentDesign = function (sDesign) {
 			// implementation not supported
+		};
+
+		ObjectPageDynamicHeaderContent.prototype.setVisible = function (bVisible) {
+			this.getParent() && this.getParent().toggleStyleClass("sapUxAPObjectPageLayoutNoHeaderContent", !bVisible);
+			return this.setProperty("visible", bVisible);
 		};
 
 		return ObjectPageDynamicHeaderContent;

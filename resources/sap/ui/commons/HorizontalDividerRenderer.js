@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],function(q){"use strict";var H={};H.render=function(r,c){var a=r;a.write("<hr");a.writeControlData(c);a.writeAttribute("role","separator");if(c.getWidth()){a.writeAttribute("style","width:"+c.getWidth()+";");}a.addClass("sapUiCommonsHoriDiv");a.addClass(c.getType()=="Page"?"sapUiCommonsHoriDivTypePage":"sapUiCommonsHoriDivTypeArea");switch(c.getHeight()){case"Ruleheight":a.addClass("sapUiCommonsHoriDivHeightR");break;case"Small":a.addClass("sapUiCommonsHoriDivHeightS");break;case"Large":a.addClass("sapUiCommonsHoriDivHeightL");break;default:a.addClass("sapUiCommonsHoriDivHeightM");}a.writeClasses();a.write("/>");};return H;},true);
+sap.ui.define([],function(){"use strict";var i={};i.render=function(i,e){i.write("<hr");i.writeControlData(e);i.writeAttribute("role","separator");if(e.getWidth()){i.writeAttribute("style","width:"+e.getWidth()+";")}i.addClass("sapUiCommonsHoriDiv");i.addClass(e.getType()=="Page"?"sapUiCommonsHoriDivTypePage":"sapUiCommonsHoriDivTypeArea");switch(e.getHeight()){case"Ruleheight":i.addClass("sapUiCommonsHoriDivHeightR");break;case"Small":i.addClass("sapUiCommonsHoriDivHeightS");break;case"Large":i.addClass("sapUiCommonsHoriDivHeightL");break;default:i.addClass("sapUiCommonsHoriDivHeightM")}i.writeClasses();i.write(">")};return i},true);
+//# sourceMappingURL=HorizontalDividerRenderer.js.map

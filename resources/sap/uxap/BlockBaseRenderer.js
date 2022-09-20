@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(function(){"use strict";var B={};B.render=function(r,c){if(!c.getVisible()){return;}r.write("<div");r.writeControlData(c);if(c._getSelectedViewContent()){r.addClass('sapUxAPBlockBase');r.addClass("sapUxAPBlockBase"+c.getMode());}else{var C=c.getMetadata().getName().split(".").pop();r.addClass('sapUxAPBlockBaseDefaultSize');r.addClass('sapUxAPBlockBaseDefaultSize'+C+c.getMode());}r.writeClasses();r.write(">");if(c._getSelectedViewContent()){r.renderControl(c._getSelectedViewContent());}r.write("</div>");};return B;},true);
+sap.ui.define(function(){"use strict";var e={apiVersion:2};e.render=function(e,t){if(!t.getVisible()){return}e.openStart("div",t);if(t._getSelectedViewContent()){e.class("sapUxAPBlockBase").class("sapUxAPBlockBase"+t.getMode())}else{var n=t.getMetadata().getName().split(".").pop();e.class(n+t.getMode())}e.openEnd();if(t._getSelectedViewContent()){e.renderControl(t._getSelectedViewContent())}e.close("div")};return e},true);
+//# sourceMappingURL=BlockBaseRenderer.js.map

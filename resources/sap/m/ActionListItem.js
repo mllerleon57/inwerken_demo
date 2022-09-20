@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['./ListItemBase','./library','./ActionListItemRenderer'],function(L,l,A){"use strict";var a=l.ListMode;var b=l.ListType;var c=L.extend("sap.m.ActionListItem",{metadata:{library:"sap.m",properties:{text:{type:"string",group:"Misc",defaultValue:null}}}});c.prototype.init=function(){this.setType(b.Active);L.prototype.init.apply(this,arguments);};c.prototype.getMode=function(){return a.None;};c.prototype.onsapspace=c.prototype.onsapenter;c.prototype.getContentAnnouncement=function(){return this.getText();};return c;});
+sap.ui.define(["./ListItemBase","./library","./ActionListItemRenderer"],function(t,e,n){"use strict";var i=e.ListMode;var o=e.ListType;var r=t.extend("sap.m.ActionListItem",{metadata:{library:"sap.m",properties:{text:{type:"string",group:"Misc",defaultValue:null}}}});r.prototype.init=function(){this.setType(o.Active);t.prototype.init.apply(this,arguments)};r.prototype.getMode=function(){return i.None};r.prototype.onsapspace=r.prototype.onsapenter;r.prototype.getContentAnnouncement=function(){return this.getText()};return r});
+//# sourceMappingURL=ActionListItem.js.map

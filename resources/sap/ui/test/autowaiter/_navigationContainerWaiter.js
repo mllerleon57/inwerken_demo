@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(["jquery.sap.global","sap/ui/test/_OpaLogger","sap/ui/test/_opaCorePlugin"],function($,_,a){"use strict";var h=_.getLogger("sap.ui.test.autowaiter._navigationContainerWaiter#hasPending");function b(){var c="sap.m.NavContainer";var n=$.sap.getObject(c);if(sap.ui.lazyRequire._isStub(c)||!n){return false;}return a.getAllControls(n).some(function(N){if(N._bNavigating){h.debug("The NavContainer "+N+" is currently navigating");}return N._bNavigating;});}return{hasPending:b};});
+sap.ui.define(["sap/ui/core/Element","./WaiterBase"],function(n,i){"use strict";var e=i.extend("sap.ui.test.autowaiter._navigationContainerWaiter",{hasPending:function(){var i=sap.ui.require("sap/m/NavContainer");if(!i){return false}function e(n){return n instanceof i}return n.registry.filter(e).some(function(n){if(n._bNavigating){this._oHasPendingLogger.debug("The NavContainer "+n+" is currently navigating")}return n._bNavigating}.bind(this))}});return new e});
+//# sourceMappingURL=_navigationContainerWaiter.js.map

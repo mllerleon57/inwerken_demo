@@ -1,28 +1,29 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	'sap/m/ToolbarSpacer',
-	'sap/m/Button',
-	'sap/m/SegmentedButton',
-	'sap/m/SegmentedButtonItem',
-	'sap/m/MenuButton',
-	'sap/m/MenuItem',
-	'sap/m/Menu',
-	'./Base'
-],
-function(
-	ToolbarSpacer,
-	Button,
-	SegmentedButton,
-	SegmentedButtonItem,
-	MenuButton,
-	MenuItem,
-	Menu,
-	Base
+	"sap/ui/core/Fragment",
+	"sap/ui/fl/write/api/Version",
+	"sap/ui/rta/toolbar/contextBased/SaveAsContextBasedAdaptation",
+	"sap/ui/rta/toolbar/translation/Translation",
+	"sap/ui/rta/toolbar/versioning/Versioning",
+	"sap/ui/rta/appVariant/Feature",
+	"sap/ui/rta/toolbar/Base",
+	"sap/ui/Device",
+	"./AdaptationRenderer"
+], function(
+	Fragment,
+	Version,
+	SaveAsContextBasedAdaptation,
+	Translation,
+	Versioning,
+	AppVariantFeature,
+	Base,
+	Device,
+	AdaptationRenderer
 ) {
 	"use strict";
 
@@ -34,7 +35,7 @@ function(
 	 * @extends sap.ui.rta.toolbar.Base
 	 *
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 *
 	 * @constructor
 	 * @private
@@ -43,179 +44,221 @@ function(
 	 * @experimental Since 1.48. This class is experimental. API might be changed in future.
 	 */
 	var Adaptation = Base.extend("sap.ui.rta.toolbar.Adaptation", {
-		renderer: 'sap.ui.rta.toolbar.BaseRenderer',
+		renderer: AdaptationRenderer,
 		animation: true,
 		metadata: {
+			library: "sap.ui.rta",
 			events: {
 				/**
 				 * Events are fired when the Toolbar Buttons are pressed
 				 */
-				"undo": {},
-				"redo": {},
-				"exit": {},
-				"restore": {},
-				"transport": {},
-				"modeChange": {},
-				"manageApps": {},
-				"appVariantOverview": {},
-				"saveAs": {}
-			},
-			properties: {
-				/** Determines whether publish button is visible */
-				"publishVisible": {
-					"type": "boolean",
-					"defaultValue": false
-				},
-
-				/** Defines value of the switcher SegmentedButton */
-				"modeSwitcher": {
-					type: "string",
-					defaultValue: "adaptation"
-				}
+				undo: {},
+				redo: {},
+				exit: {},
+				save: {},
+				restore: {},
+				transport: {},
+				publishVersion: {},
+				modeChange: {},
+				activate: {},
+				discardDraft: {},
+				switchVersion: {},
+				openChangeCategorySelectionPopover: {}
 			}
 		}
 	});
 
-	Adaptation.prototype.onAfterRendering = function () {
-		var iSign = -1;
-		var bIgnore = false;
-		var iWidth = this.getAggregation('content').reduce(function (iResult, oControl) {
-			switch (oControl.data('name')) {
-				case 'spacerLeft':
-					iSign = 1;
-					bIgnore = true;
-					break;
-				case 'spacerRight':
-					bIgnore = false;
-					break;
+	Adaptation.modes = {
+		MOBILE: "sapUiRtaToolbarMobile",
+		TABLET: "sapUiRtaToolbarTablet",
+		DESKTOP: "sapUiRtaToolbarDesktop"
+	};
+
+	var DEVICE_SET = "sapUiRtaToolbar";
+
+	Adaptation.prototype.init = function() {
+		this._pFragmentLoaded = Base.prototype.init.apply(this, arguments).then(function() {
+			if (!Device.media.hasRangeSet(DEVICE_SET)) {
+				Device.media.initRangeSet(DEVICE_SET, [900, 1200], "px", [Adaptation.modes.MOBILE, Adaptation.modes.TABLET, Adaptation.modes.DESKTOP]);
 			}
-			return !(oControl instanceof ToolbarSpacer) && !bIgnore
-				? iResult + iSign * oControl.$().outerWidth(true)
-				: iResult;
-		}, 0);
+			Device.media.attachHandler(this._onSizeChanged, this, DEVICE_SET);
+		}.bind(this));
+	};
 
-		if (iWidth > 0) {
-			this.getControl('spacerBalancer').setWidth(iWidth + 'px');
+	Adaptation.prototype.onFragmentLoaded = function() {
+		return this._pFragmentLoaded;
+	};
+
+	Adaptation.prototype.exit = function() {
+		Device.media.detachHandler(this._onSizeChanged, this, DEVICE_SET);
+		Base.prototype.exit.apply(this, arguments);
+	};
+
+	Adaptation.prototype.show = function() {
+		this._onSizeChanged(Device.media.getCurrentRange(DEVICE_SET), true);
+		return Base.prototype.show.apply(this, arguments);
+	};
+
+	function setButtonProperties(sButtonName, sIcon, sTextKey, sToolTipKey) {
+		var oButton = this.getControl(sButtonName);
+		var sText = sTextKey ? this.getTextResources().getText(sTextKey) : "";
+		var sToolTip = sToolTipKey ? this.getTextResources().getText(sToolTipKey) : "";
+		oButton.setText(sText || "");
+		oButton.setTooltip(sToolTip || "");
+		oButton.setIcon(sIcon || "");
+	}
+
+	Adaptation.prototype.formatPublishVersionVisibility = function (bPublishVisible, bVersioningEnabled, sDisplayedVersion, sModeSwitcher) {
+		return this.getExtension("versioning", Versioning).formatPublishVersionVisibility(bPublishVisible, bVersioningEnabled, sDisplayedVersion, sModeSwitcher);
+	};
+
+	Adaptation.prototype.formatDiscardDraftVisible = function (sDisplayedVersion, bVersioningEnabled, sModeSwitcher) {
+		return this.getExtension("versioning", Versioning).formatDiscardDraftVisible(sDisplayedVersion, bVersioningEnabled, sModeSwitcher);
+	};
+
+	Adaptation.prototype.formatVersionButtonText = function (aVersions, sDisplayedVersion) {
+		return this.getExtension("versioning", Versioning).formatVersionButtonText(aVersions, sDisplayedVersion);
+	};
+
+	Adaptation.prototype.showVersionHistory = function(oEvent) {
+		return this.getExtension("versioning", Versioning).showVersionHistory(oEvent);
+	};
+
+	Adaptation.prototype._openVersionTitleDialog = function (sDisplayedVersion) {
+		return this.getExtension("versioning", Versioning).openActivateVersionDialog(sDisplayedVersion);
+	};
+
+	Adaptation.prototype.showRestore = function (bVersioningEnabled) {
+		return !bVersioningEnabled;
+	};
+
+	Adaptation.prototype._showButtonIcon = function(sButtonName, sIcon, sToolTipKey) {
+		setButtonProperties.call(this, sButtonName, sIcon, "", sToolTipKey);
+	};
+
+	Adaptation.prototype._showButtonText = function(sButtonName, sTextKey) {
+		setButtonProperties.call(this, sButtonName, "", sTextKey, "");
+	};
+
+	Adaptation.prototype._switchToIcons = function() {
+		var oIconBox = this.getControl("iconBox");
+		var oIconSpacer = this.getControl("iconSpacer");
+
+		oIconBox.setVisible(false);
+		oIconSpacer.setVisible(false);
+		this._showButtonIcon("adaptationSwitcherButton", "sap-icon://wrench", "BTN_ADAPTATION");
+		this._showButtonIcon("navigationSwitcherButton", "sap-icon://explorer", "BTN_NAVIGATION");
+		this._showButtonIcon("visualizationSwitcherButton", "sap-icon://show", "BTN_VISUALIZATION");
+		this._showButtonIcon("exit", "sap-icon://decline", "BTN_EXIT");
+	};
+
+	Adaptation.prototype._switchToTexts = function () {
+		var oIconBox = this.getControl("iconBox");
+		var oIconSpacer = this.getControl("iconSpacer");
+
+		oIconBox.setVisible(true);
+		oIconSpacer.setVisible(true);
+		this._showButtonText("adaptationSwitcherButton", "BTN_ADAPTATION");
+		this._showButtonText("navigationSwitcherButton", "BTN_NAVIGATION");
+		this._showButtonText("visualizationSwitcherButton", "BTN_VISUALIZATION");
+		this._showButtonText("exit", "BTN_EXIT");
+	};
+
+	Adaptation.prototype._onSizeChanged = function(mParams, bInitial) {
+		if (mParams) {
+			var sMode = mParams.name;
+			this.sMode = sMode;
+
+			switch (sMode) {
+				case Adaptation.modes.MOBILE:
+					this._switchToIcons();
+					break;
+				case Adaptation.modes.TABLET:
+				case Adaptation.modes.DESKTOP:
+					// this is already defined in the view
+					if (!bInitial) {
+						this._switchToTexts();
+					}
+					break;
+				default:
+				// no default
+			}
 		}
-
-		Base.prototype.onAfterRendering.apply(this, arguments);
 	};
 
+	/**
+	 * Loads and creates the Fragment of the Toolbar
+	 *
+	 * @returns {Promise<sap.ui.core.Control[]>} Returns the controls in a structure described above.
+	 */
 	Adaptation.prototype.buildControls = function () {
-		return [
-			new ToolbarSpacer().data('name', 'spacerBalancer'),
-			new ToolbarSpacer().data('name', 'spacerLeft'),
-			new SegmentedButton({
-				width: "auto",
-				selectedKey: this.getModeSwitcher(),
-				items: [
-					new SegmentedButtonItem({
-						text: this.getTextResources().getText("BTN_ADAPTATION"),
-						tooltip: this.getTextResources().getText("BTN_ADAPTATION"),
-						width: "auto",
-						key: "adaptation"
-					}),
-					new SegmentedButtonItem({
-						text: this.getTextResources().getText("BTN_NAVIGATION"),
-						tooltip: this.getTextResources().getText("BTN_NAVIGATION"),
-						width: "auto",
-						key: "navigation"
-					})
-				],
-				select: this.eventHandler.bind(this, 'ModeChange')
-			}).data('name', 'modeSwitcher'),
-			new ToolbarSpacer().data('name', 'spacerRight'),
-			new Button({
-				type: "Transparent",
-				icon: "sap-icon://undo",
-				enabled: false,
-				tooltip: this.getTextResources().getText("BTN_UNDO"),
-				press: this.eventHandler.bind(this, 'Undo')
-			}).data('name', 'undo'),
-			new Button({
-				type:"Transparent",
-				icon: "sap-icon://redo",
-				iconFirst: false,
-				enabled: false,
-				tooltip: this.getTextResources().getText("BTN_REDO"),
-				press: this.eventHandler.bind(this, 'Redo')
-			}).data('name', 'redo'),
-			new Button({
-				type:"Transparent",
-				icon: "sap-icon://message-information",
-				enabled: false,
-				visible: false,
-				tooltip: this.getTextResources().getText("BTN_MANAGE_APPS"),
-				press: this.eventHandler.bind(this, 'ManageApps')
-			}).data('name', 'manageApps'),
-			new MenuButton({
-				type:"Transparent",
-				icon: "sap-icon://message-information",
-				enabled: false,
-				visible: false,
-				tooltip: this.getTextResources().getText("BTN_MANAGE_APPS"),
-				menu: new Menu({
-					itemSelected: this.eventHandler.bind(this, 'AppVariantOverview'),
-					items: [
-						new MenuItem('keyUser', {
-							text: this.getTextResources().getText("MENU_ITEM_KEY_USER")
-						}),
-						new MenuItem('developer', {
-							text: this.getTextResources().getText("MENU_ITEM_SAP_DEVELOPER")
-						})
-					]
-				})
-			}).data('name', 'appVariantOverview'),
-			new Button({
-				type: "Transparent",
-				text: this.getTextResources().getText("BTN_RESTORE"),
-				visible: true,
-				enabled: false,
-				tooltip: this.getTextResources().getText("BTN_RESTORE"),
-				press: this.eventHandler.bind(this, 'Restore')
-			}).data('name', 'restore'),
-			new Button({
-				type: "Transparent",
-				enabled: false,
-				visible: this.getPublishVisible(),
-				text: this.getTextResources().getText("BTN_PUBLISH"),
-				tooltip: this.getTextResources().getText("BTN_PUBLISH"),
-				press: this.eventHandler.bind(this, 'Transport') // Fixme: rename event
-			}).data('name', 'publish'),
-			new Button({
-				type: "Transparent",
-				text: this.getTextResources().getText("BTN_SAVE_AS"),
-				enabled: false,
-				visible: false,
-				tooltip: this.getTextResources().getText("TOOLTIP_SAVE_AS"),
-				press: this.eventHandler.bind(this, 'SaveAs')
-			}).data('name', 'saveAs'),
-			new Button({
-				type:"Transparent",
-				text: this.getTextResources().getText("BTN_EXIT"),
-				tooltip: this.getTextResources().getText("BTN_EXIT"),
-				press: this.eventHandler.bind(this, 'Exit')
-			}).data('name', 'exit')
-		];
+		return Fragment.load({
+			name: "sap.ui.rta.toolbar.Adaptation",
+			id: this.getId() + "_fragment",
+			controller: {
+				activate: this._openVersionTitleDialog.bind(this),
+				discardDraft: this.eventHandler.bind(this, "DiscardDraft"),
+				formatDiscardDraftVisible: this.formatDiscardDraftVisible.bind(this),
+				formatPublishVersionVisibility: this.formatPublishVersionVisibility.bind(this),
+				modeChange: this.eventHandler.bind(this, "ModeChange"),
+				openDownloadTranslationDialog: onOpenDownloadTranslationDialog.bind(this),
+				openUploadTranslationDialog: onOpenUploadTranslationDialog.bind(this),
+				undo: this.eventHandler.bind(this, "Undo"),
+				redo: this.eventHandler.bind(this, "Redo"),
+				openChangeCategorySelectionPopover: this.eventHandler.bind(this, "OpenChangeCategorySelectionPopover"),
+				manageApps: onManageAppsPressed.bind(this),
+				appVariantOverview: onOverviewPressed.bind(this),
+				saveAs: onSaveAsPressed.bind(this),
+				saveAsContextBasedAdaptation: onSaveAsContextBasedAdaptation.bind(this),
+				formatSaveAsEnabled: formatSaveAsEnabled,
+				restore: this.eventHandler.bind(this, "Restore"),
+				publish: this.eventHandler.bind(this, "Transport"),
+				publishVersion: this.eventHandler.bind(this, "PublishVersion"),
+				exit: this.eventHandler.bind(this, "Exit"),
+				formatVersionButtonText: this.formatVersionButtonText.bind(this),
+				showVersionHistory: this.showVersionHistory.bind(this),
+				showRestore: this.showRestore.bind(this)
+			}
+		});
 	};
 
-	Adaptation.prototype.setUndoRedoEnabled = function (bCanUndo, bCanRedo) {
-		this.getControl('undo').setEnabled(bCanUndo);
-		this.getControl('redo').setEnabled(bCanRedo);
-	};
+	function onOpenDownloadTranslationDialog() {
+		var mPropertyBag = {
+			layer: this.getRtaInformation().flexSettings.layer,
+			selector: this.getRtaInformation().rootControl
+		};
+		this.getExtension("translation", Translation).openDownloadTranslationDialog(mPropertyBag);
+	}
 
-	Adaptation.prototype.setPublishEnabled = function (bEnabled) {
-		this.getControl('publish').setEnabled(bEnabled);
-	};
+	function onOpenUploadTranslationDialog() {
+		this.getExtension("translation", Translation).openUploadTranslationDialog();
+	}
 
-	Adaptation.prototype.setRestoreEnabled = function (bEnabled) {
-		this.getControl('restore').setEnabled(bEnabled);
-	};
+	function formatSaveAsEnabled(bGeneralSaveAsEnabled, sDisplayedVersion) {
+		return bGeneralSaveAsEnabled && sDisplayedVersion !== Version.Number.Draft;
+	}
 
-	/* Methods propagation */
-	Adaptation.prototype.show = function () { return Base.prototype.show.apply(this, arguments); };
-	Adaptation.prototype.hide = function () { return Base.prototype.hide.apply(this, arguments); };
+	function onSaveAsPressed() {
+		AppVariantFeature.onSaveAs(true, true, this.getRtaInformation().flexSettings.layer, null);
+	}
+
+	function onSaveAsContextBasedAdaptation() {
+		this.getExtension("adaptation", SaveAsContextBasedAdaptation).openAddAdaptationDialog(this.getRtaInformation().flexSettings.layer);
+	}
+
+	function onOverviewPressed(oEvent) {
+		var oItem = oEvent.getParameter("item");
+		var bTriggeredForKeyUser = oItem.getId().endsWith("keyUser");
+		return AppVariantFeature.onGetOverview(bTriggeredForKeyUser, this.getRtaInformation().flexSettings.layer);
+	}
+
+	function onManageAppsPressed() {
+		AppVariantFeature.onGetOverview(true, this.getRtaInformation().flexSettings.layer);
+	}
+
+	Adaptation.prototype.getControl = function(sName) {
+		return sap.ui.getCore().byId(this.getId() + "_fragment--sapUiRta_" + sName);
+	};
 
 	return Adaptation;
-
-}, true);
+});

@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['./ListItemBaseRenderer','sap/ui/core/Renderer'],function(L,R){"use strict";var F=R.extend(L);F.renderLIContent=function(r,c){r.write("<div");if(c.getParent()&&c.getParent().getWordWrap()){r.addClass("sapMFFLITitleWrap");}else{r.addClass("sapMFFLITitle");}r.writeClasses();r.write(">");r.writeEscaped(c.getText());r.write("</div>");};return F;},true);
+sap.ui.define(["./ListItemBaseRenderer","sap/ui/core/Renderer"],function(e,t){"use strict";var r=t.extend(e);r.apiVersion=2;r.renderLIContent=function(e,t){e.openStart("div",t);if(t.getParent()&&t.getParent().getWordWrap()){e.class("sapMFFLITitleWrap")}else{e.class("sapMFFLITitle")}e.openEnd();e.text(t.getText());e.close("div")};return r},true);
+//# sourceMappingURL=FacetFilterItemRenderer.js.map

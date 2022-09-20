@@ -1,24 +1,24 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 //Provides the locale object sap.ui.core.LocaleData
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
-	function(jQuery, BaseObject, Locale) {
+sap.ui.define(['sap/base/util/extend', 'sap/ui/base/Object', './CalendarType', './Locale', 'sap/base/assert', 'sap/base/util/LoaderExtensions'],
+	function(extend, BaseObject, CalendarType, Locale, assert, LoaderExtensions) {
 	"use strict";
 
 	/**
 	 * Creates an instance of LocaleData for the given locale.
 	 *
-	 * @class Provides access to locale-specific data, like date formats, number formats, currencies, etc.
+	 * @class Provides access to locale-specific data, such as, date formats, number formats, and currencies.
 	 *
 	 * @param {sap.ui.core.Locale} oLocale the locale
 	 *
 	 * @extends sap.ui.base.Object
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 * @public
 	 * @alias sap.ui.core.LocaleData
 	 */
@@ -27,9 +27,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		constructor: function(oLocale) {
 			this.oLocale = oLocale;
 			BaseObject.apply(this);
-			this.mData = getData(oLocale);
+			var oDataLoaded = getData(oLocale);
+			this.mData = oDataLoaded.mData;
+			this.sCLDRLocaleId = oDataLoaded.sCLDRLocaleId;
 		},
 
+		/**
+		 * @private
+		 * @ui5-restricted UI5 Web Components
+		 */
 		_get: function() {
 			return this._getDeep(this.mData, arguments);
 		},
@@ -65,9 +71,52 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		},
 
 		/**
+		 * Get a display name for the language of the Locale of this LocaleData, using
+		 * the CLDR display names for languages.
+		 *
+		 * The lookup logic works as follows:
+		 * 1. language code and region is checked (e.g. "en-GB")
+		 * 2. If not found: language code and script is checked (e.g. "zh-Hant")
+		 * 3. If not found language code is checked (e.g. "en")
+		 * 4. If it is then still not found <code>undefined</code> is returned.
+		 *
+		 * @returns {string} language name, e.g. "English", "British English", "American English"
+		 *  or <code>undefined</code> if language cannot be found
+		 * @private
+		 * @ui5-restricted sap.ushell
+		 */
+		getCurrentLanguageName: function() {
+			var oLanguages = this.getLanguages();
+			var sCurrentLanguage;
+			var sLanguage = this.oLocale.getModernLanguage();
+			var sScript = this.oLocale.getScript();
+			// special case for "sr_Latn" language: "sh" should then be used
+			// the key used in the languages object for serbian latin is "sh"
+			if (sLanguage === "sr" && sScript === "Latn") {
+				sLanguage = "sh";
+				sScript = null;
+			}
+			if (this.oLocale.getRegion()) {
+				// fall back to language and region, e.g. "en_GB"
+				sCurrentLanguage = oLanguages[sLanguage + "_" + this.oLocale.getRegion()];
+			}
+
+			if (!sCurrentLanguage && sScript) {
+				// fall back to language and script, e.g. "zh_Hant"
+				sCurrentLanguage = oLanguages[sLanguage + "_" + sScript];
+			}
+
+			if (!sCurrentLanguage) {
+				// fall back to language only, e.g. "en"
+				sCurrentLanguage = oLanguages[sLanguage];
+			}
+			return sCurrentLanguage;
+		},
+
+		/**
 		 * Get locale specific language names.
 		 *
-		 * @returns {object} map of locale specific language names
+		 * @returns {Object<string, string>} map of locale specific language names
 		 * @public
 		 */
 		getLanguages: function() {
@@ -77,7 +126,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		/**
 		 * Get locale specific script names.
 		 *
-		 * @returns {object} map of locale specific script names
+		 * @returns {Object.<string, string>} map of locale specific script names
 		 * @public
 		 */
 		getScripts: function() {
@@ -87,7 +136,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		/**
 		 * Get locale specific territory names.
 		 *
-		 * @returns {object} map of locale specific territory names
+		 * @returns {Object.<string, string>} map of locale specific territory names
 		 * @public
 		 */
 		getTerritories: function() {
@@ -103,7 +152,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getMonths: function(sWidth, sCalendarType) {
-			jQuery.sap.assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
+			assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
 			return this._get(getCLDRCalendarName(sCalendarType), "months", "format", sWidth);
 		},
 
@@ -116,7 +165,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getMonthsStandAlone: function(sWidth, sCalendarType) {
-			jQuery.sap.assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
+			assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
 			return this._get(getCLDRCalendarName(sCalendarType), "months", "stand-alone", sWidth);
 		},
 
@@ -129,7 +178,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getDays: function(sWidth, sCalendarType) {
-			jQuery.sap.assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide" || sWidth == "short", "sWidth must be narrow, abbreviate, wide or short");
+			assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide" || sWidth == "short", "sWidth must be narrow, abbreviate, wide or short");
 			return this._get(getCLDRCalendarName(sCalendarType), "days", "format",  sWidth);
 		},
 
@@ -142,7 +191,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getDaysStandAlone: function(sWidth, sCalendarType) {
-			jQuery.sap.assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide" || sWidth == "short", "sWidth must be narrow, abbreviated, wide or short");
+			assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide" || sWidth == "short", "sWidth must be narrow, abbreviated, wide or short");
 			return this._get(getCLDRCalendarName(sCalendarType), "days", "stand-alone",  sWidth);
 		},
 
@@ -155,7 +204,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getQuarters: function(sWidth, sCalendarType) {
-			jQuery.sap.assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
+			assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
 			return this._get(getCLDRCalendarName(sCalendarType), "quarters", "format",  sWidth);
 		},
 
@@ -168,7 +217,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getQuartersStandAlone: function(sWidth, sCalendarType) {
-			jQuery.sap.assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
+			assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
 			return this._get(getCLDRCalendarName(sCalendarType), "quarters", "stand-alone",  sWidth);
 		},
 
@@ -181,7 +230,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getDayPeriods: function(sWidth, sCalendarType) {
-			jQuery.sap.assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
+			assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
 			return this._get(getCLDRCalendarName(sCalendarType), "dayPeriods", "format",  sWidth);
 		},
 
@@ -194,7 +243,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getDayPeriodsStandAlone: function(sWidth, sCalendarType) {
-			jQuery.sap.assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
+			assert(sWidth == "narrow" || sWidth == "abbreviated" || sWidth == "wide", "sWidth must be narrow, abbreviated or wide");
 			return this._get(getCLDRCalendarName(sCalendarType), "dayPeriods", "stand-alone",  sWidth);
 		},
 
@@ -207,7 +256,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getDatePattern: function(sStyle, sCalendarType) {
-			jQuery.sap.assert(sStyle == "short" || sStyle == "medium" || sStyle == "long" || sStyle == "full", "sStyle must be short, medium, long or full");
+			assert(sStyle == "short" || sStyle == "medium" || sStyle == "long" || sStyle == "full", "sStyle must be short, medium, long or full");
 			return this._get(getCLDRCalendarName(sCalendarType), "dateFormats", sStyle);
 		},
 
@@ -220,7 +269,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getTimePattern: function(sStyle, sCalendarType) {
-			jQuery.sap.assert(sStyle == "short" || sStyle == "medium" || sStyle == "long" || sStyle == "full", "sStyle must be short, medium, long or full");
+			assert(sStyle == "short" || sStyle == "medium" || sStyle == "long" || sStyle == "full", "sStyle must be short, medium, long or full");
 			return this._get(getCLDRCalendarName(sCalendarType), "timeFormats", sStyle);
 		},
 
@@ -233,12 +282,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getDateTimePattern: function(sStyle, sCalendarType) {
-			jQuery.sap.assert(sStyle == "short" || sStyle == "medium" || sStyle == "long" || sStyle == "full", "sStyle must be short, medium, long or full");
+			assert(sStyle == "short" || sStyle == "medium" || sStyle == "long" || sStyle == "full", "sStyle must be short, medium, long or full");
 			return this._get(getCLDRCalendarName(sCalendarType), "dateTimeFormats", sStyle);
 		},
 
 		/**
-		 * Get combined datetime pattern with given date and and time style.
+		 * Get combined datetime pattern with given date and time style.
 		 *
 		 * @param {string} sDateStyle the required style for the date part
 		 * @param {string} sTimeStyle the required style for the time part
@@ -247,12 +296,81 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getCombinedDateTimePattern: function(sDateStyle, sTimeStyle, sCalendarType) {
-			jQuery.sap.assert(sDateStyle == "short" || sDateStyle == "medium" || sDateStyle == "long" || sDateStyle == "full", "sStyle must be short, medium, long or full");
-			jQuery.sap.assert(sTimeStyle == "short" || sTimeStyle == "medium" || sTimeStyle == "long" || sTimeStyle == "full", "sStyle must be short, medium, long or full");
+			assert(sDateStyle == "short" || sDateStyle == "medium" || sDateStyle == "long" || sDateStyle == "full", "sStyle must be short, medium, long or full");
+			assert(sTimeStyle == "short" || sTimeStyle == "medium" || sTimeStyle == "long" || sTimeStyle == "full", "sStyle must be short, medium, long or full");
 			var sDateTimePattern = this.getDateTimePattern(sDateStyle, sCalendarType),
 				sDatePattern = this.getDatePattern(sDateStyle, sCalendarType),
 				sTimePattern = this.getTimePattern(sTimeStyle, sCalendarType);
 			return sDateTimePattern.replace("{0}", sTimePattern).replace("{1}", sDatePattern);
+		},
+
+		/**
+		 * Get combined pattern with datetime and timezone for the given date and time style.
+		 *
+		 * @example
+		 * // locale de
+		 * oLocaleData.getCombinedDateTimeWithTimezonePattern("long", "long");
+		 * // "d. MMMM y 'um' HH:mm:ss z VV"
+		 *
+		 * // locale en_GB
+		 * oLocaleData.getCombinedDateTimeWithTimezonePattern("long", "long");
+		 * // "d MMMM y 'at' HH:mm:ss z VV"
+		 *
+		 * @param {string} sDateStyle The required style for the date part
+		 * @param {string} sTimeStyle The required style for the time part
+		 * @param {sap.ui.core.CalendarType} [sCalendarType] The type of calendar. If it's not set,
+		 *   it falls back to the calendar type either set in the configuration or calculated from
+		 *   the locale.
+		 * @returns {string} the combined pattern with datetime and timezone
+		 * @private
+		 * @ui5-restricted sap.ui.core.format.DateFormat
+		 * @since 1.101
+		 */
+		getCombinedDateTimeWithTimezonePattern: function(sDateStyle, sTimeStyle, sCalendarType) {
+			return this.applyTimezonePattern(this.getCombinedDateTimePattern(sDateStyle, sTimeStyle, sCalendarType));
+		},
+
+		/**
+		 * Applies the timezone to the pattern
+		 *
+		 * @param {string} sPattern pattern, e.g. <code>y</code>
+		 * @returns {string} applied timezone, e.g. <code>y VV</code>
+		 * @private
+		 * @ui5-restricted sap.ui.core.format.DateFormat
+		 * @since 1.101
+		 */
+		applyTimezonePattern: function(sPattern) {
+			var aPatterns = [sPattern];
+			var aMissingTokens = [{
+				group: "Timezone",
+				length: 2,
+				field: "zone",
+				symbol: "V"
+			}];
+			this._appendItems(aPatterns, aMissingTokens);
+			return aPatterns[0];
+		},
+
+		/**
+		 * Retrieves all timezone translations.
+		 *
+		 * E.g. for locale "en"
+		 * <pre>
+		 * {
+		 *  "America/New_York": "Americas, New York"
+		 *  ...
+		 * }
+		 * </pre>
+		 *
+		 * @return {Object<string, string>} the mapping, with 'key' being the IANA timezone ID, and 'value' being the translation.
+		 * @ui5-restricted sap.ui.core.format.DateFormat, sap.ui.export
+		 * @private
+		 */
+		getTimezoneTranslations: function() {
+			this.mTimezoneTranslations = this.mTimezoneTranslations || _resolveTimezoneTranslationStructure(this._get("timezoneNames"));
+
+			// retrieve a copy such that the original object won't be modified.
+			return Object.assign({}, this.mTimezoneTranslations);
 		},
 
 		/**
@@ -388,7 +506,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		_createFormatPattern: function(sSkeleton, oAvailableFormats, sCalendarType, vDiff) {
 			var aTokens = this._parseSkeletonFormat(sSkeleton), aPatterns,
 				oBestMatch = this._findBestMatch(aTokens, sSkeleton, oAvailableFormats),
-				oToken, oAvailableDateTimeFormats,
+				oToken, oAvailableDateTimeFormats, oSymbol, oGroup,
 				sPattern, sSinglePattern, sDiffSymbol, sDiffGroup,
 				rMixedSkeleton = /^([GyYqQMLwWEecdD]+)([hHkKjJmszZvVOXx]+)$/,
 				bSingleDate,
@@ -408,6 +526,20 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 					sDiffSymbol = vDiff;
 				} else {
 					bSingleDate = true;
+					// Special handling of "y" (Year) in case patterns contains also "G" (Era)
+					if (aTokens[0].symbol === "y" && oBestMatch && oBestMatch.pattern.G) {
+						oSymbol = mCLDRSymbols["G"];
+						oGroup = mCLDRSymbolGroups[oSymbol.group];
+						aTokens.splice(0, 0, {
+							symbol: "G",
+							group: oSymbol.group,
+							match: oSymbol.match,
+							index: oGroup.index,
+							field: oGroup.field,
+							length: 1
+						});
+					}
+
 					// Check if at least one token's group appears in the interval diff
 					// If not, a single date pattern is returned
 					for (i = aTokens.length - 1; i >= 0; i--){
@@ -659,13 +791,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 					i = 0,
 					iSkeletonLength,
 					iPatternLength,
-					iOldLength,
+					iBestLength,
 					iNewLength,
 					oSkeletonToken,
 					oBestToken,
 					oSymbol,
-					oSkeletonSymbol,
-					oBestSymbol,
 					sChar;
 
 				// Create a map of group names to token
@@ -687,32 +817,30 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 					} else {
 						oSymbol = mCLDRSymbols[sChar];
 						// If symbol is a CLDR symbol and is contained in the group, expand length
-					if (oSymbol && mGroups[oSymbol.group] && mPatternGroups[oSymbol.group]) {
+						if (oSymbol && mGroups[oSymbol.group] && mPatternGroups[oSymbol.group]) {
 							oSkeletonToken = mGroups[oSymbol.group];
 							oBestToken = mPatternGroups[oSymbol.group];
-							oSkeletonSymbol = mCLDRSymbols[oSkeletonToken.symbol];
-							oBestSymbol = mCLDRSymbols[oBestToken.symbol];
 
 							iSkeletonLength = oSkeletonToken.length;
-							iPatternLength = oBestToken.length;
+							iBestLength = oBestToken.length;
 
-							iOldLength = 1;
+							iPatternLength = 1;
 							while (sPattern.charAt(i + 1) == sChar) {
 								i++;
-								iOldLength++;
+								iPatternLength++;
 							}
 
 							// Prevent expanding the length of the field when:
-							// 1. The length in the best matching skeleton (iPatternLength) matches the length of the application provided skeleton (iSkeletonLength) or
-							// 2. The length of the provided skeleton (iSkeletonLength) and the length of the result pattern (iOldLength) are not in the same category (numeric or text)
+							// 1. The length in the best matching skeleton (iBestLength) matches the length of the application provided skeleton (iSkeletonLength) or
+							// 2. The length of the provided skeleton (iSkeletonLength) and the length of the result pattern (iPatternLength) are not in the same category (numeric or text)
 							//	because switching between numeric to text representation is wrong in all cases
-							if (iSkeletonLength === iPatternLength ||
-								((iSkeletonLength < oSkeletonSymbol.numericCeiling) ?
-									(iPatternLength >= oBestSymbol.numericCeiling) : (iPatternLength < oBestSymbol.numericCeiling)
+							if (iSkeletonLength === iBestLength ||
+								((iSkeletonLength < oSymbol.numericCeiling) ?
+									(iPatternLength >= oSymbol.numericCeiling) : (iPatternLength < oSymbol.numericCeiling)
 								)) {
-								iNewLength = iOldLength;
+								iNewLength = iPatternLength;
 							} else {
-								iNewLength = Math.max(iOldLength, iSkeletonLength);
+								iNewLength = Math.max(iPatternLength, iSkeletonLength);
 							}
 
 							for (var j = 0; j < iNewLength; j++) {
@@ -794,8 +922,20 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @public
 		 */
 		getNumberSymbol: function(sType) {
-			jQuery.sap.assert(sType == "decimal" || sType == "group" || sType == "plusSign" || sType == "minusSign" || sType == "percentSign", "sType must be decimal, group, plusSign, minusSign or percentSign");
+			assert(sType == "decimal" || sType == "group" || sType == "plusSign" || sType == "minusSign" || sType == "percentSign", "sType must be decimal, group, plusSign, minusSign or percentSign");
 			return this._get("symbols-latn-" + sType);
+		},
+
+		/**
+		 * Get lenient number symbols for "plusSign" or "minusSign".
+		 *
+		 * @param {string} sType the required type of symbol
+		 * @returns {string} the selected lenient number symbols, e.g. "-‒⁻₋−➖﹣"
+		 * @public
+		 */
+		getLenientNumberSymbols: function(sType) {
+			assert(sType == "plusSign" || sType == "minusSign", "sType must be plusSign or minusSign");
+			return this._get("lenient-scope-number")[sType];
 		},
 
 		/**
@@ -811,11 +951,26 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		/**
 		 * Get currency format pattern.
 		 *
+		 * CLDR format pattern:
+		 *
+		 * @example standard with currency symbol in front of the number
+		 * ¤#,##0.00
+		 * $100,000.00
+		 * $-100,000.00
+		 *
+		 * @example accounting with negative number pattern after the semicolon
+		 * ¤#,##0.00;(¤#,##0.00)
+		 * $100,000.00
+		 * ($100,000.00)
+		 *
+		 * @see http://cldr.unicode.org/translation/numbers-currency/number-patterns
+		 *
 		 * @param {string} sContext the context of the currency pattern (standard or accounting)
 		 * @returns {string} The pattern
 		 * @public
 		 */
 		getCurrencyPattern: function(sContext) {
+			// Undocumented contexts for NumberFormat internal use: "sap-standard" and "sap-accounting"
 			return this._get("currencyFormat")[sContext] || this._get("currencyFormat").standard;
 		},
 
@@ -831,6 +986,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 */
 		getPercentPattern: function() {
 			return this._get("percentFormat").standard;
+		},
+
+		/**
+		 * Get miscellaneous pattern.
+		 *
+		 * @param {string} sName the name of the misc pattern, can be "approximately", "atLeast", "atMost" or "range"
+		 * @returns {string} The pattern
+		 * @public
+		 */
+		getMiscPattern: function(sName) {
+			assert(sName == "approximately" || sName == "atLeast" || sName == "atMost" || sName == "range", "sName must be approximately, atLeast, atMost or range");
+			return this._get("miscPattern")[sName];
 		},
 
 		/**
@@ -905,6 +1072,30 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		},
 
 		/**
+		 * Returns a map of custom currency codes, defined via global configuration.
+		 * @returns {object} map of custom currency codes, e.g.
+		 * {
+		 *     "AUD": "AUD",
+		 *     "BRL": "BRL",
+		 *     "EUR": "EUR",
+		 *     "GBP": "GBP",
+		 * }
+		 * @private
+		 * @ui5-restricted sap.ui.core.format.NumberFormat
+		 * @since 1.63
+		 */
+		getCustomCurrencyCodes: function () {
+			var mCustomCurrencies = this._get("currency") || {},
+				mCustomCurrencyCodes = {};
+
+			Object.keys(mCustomCurrencies).forEach(function (sCurrencyKey) {
+				mCustomCurrencyCodes[sCurrencyKey] = sCurrencyKey;
+			});
+
+			return mCustomCurrencyCodes;
+		},
+
+		/**
 		 * Returns the number of digits of the specified currency.
 		 *
 		 * @param {string} sCurrency ISO 4217 currency code
@@ -944,7 +1135,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @since 1.21.1
 		 */
 		getCurrencySymbol: function(sCurrency) {
-			var oCurrencySymbols = this._get("currencySymbols");
+			var oCurrencySymbols = this.getCurrencySymbols();
 			return (oCurrencySymbols && oCurrencySymbols[sCurrency]) || sCurrency;
 		},
 
@@ -964,6 +1155,39 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 				}
 			}
 			return sCurrencySymbol;
+		},
+
+		/**
+		 * Returns the currency symbols available for this locale.
+		 * Currency symbols get accumulated by custom currency symbols.
+		 *
+		 * @returns {Object.<string, string>} the map of all currency symbols available in this locale, e.g.
+		 * {
+		 *     "AUD": "A$",
+		 *     "BRL": "R$",
+		 *     "EUR": "€",
+		 *     "GBP": "£",
+		 * }
+		 * @public
+		 * @since 1.60
+		 */
+		getCurrencySymbols: function() {
+			// Lookup into global Config
+			var mCustomCurrencies = this._get("currency"),
+				mCustomCurrencySymbols = {},
+				sIsoCode;
+
+			for (var sCurrencyKey in mCustomCurrencies) {
+				sIsoCode = mCustomCurrencies[sCurrencyKey].isoCode;
+
+				if (mCustomCurrencies[sCurrencyKey].symbol) {
+					mCustomCurrencySymbols[sCurrencyKey] = mCustomCurrencies[sCurrencyKey].symbol;
+				} else if (sIsoCode) {
+					mCustomCurrencySymbols[sCurrencyKey] = this._get("currencySymbols")[sIsoCode];
+				}
+			}
+
+			return Object.assign({}, this._get("currencySymbols"), mCustomCurrencySymbols);
 		},
 
 		/**
@@ -1005,7 +1229,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 				sStyle = "wide";
 			}
 
-			jQuery.sap.assert(sStyle === "wide" || sStyle === "short" || sStyle === "narrow", "sStyle is only allowed to be set with 'wide', 'short' or 'narrow'");
+			assert(sStyle === "wide" || sStyle === "short" || sStyle === "narrow", "sStyle is only allowed to be set with 'wide', 'short' or 'narrow'");
 
 			var aPatterns = [],
 				aPluralCategories = this.getPluralCategories(),
@@ -1022,7 +1246,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 				oScale = this._get("dateFields", sScale + "-" + sStyle);
 				for (var sEntry in oScale) {
 					if (sEntry.indexOf("relative-type-") === 0) {
-						iValue = parseInt(sEntry.substr(14), 10);
+						iValue = parseInt(sEntry.substr(14));
 						aPatterns.push({
 							scale: sScale,
 							value: iValue,
@@ -1072,7 +1296,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 				sStyle = "wide";
 			}
 
-			jQuery.sap.assert(sStyle === "wide" || sStyle === "short" || sStyle === "narrow", "sStyle is only allowed to be set with 'wide', 'short' or 'narrow'");
+			assert(sStyle === "wide" || sStyle === "short" || sStyle === "narrow", "sStyle is only allowed to be set with 'wide', 'short' or 'narrow'");
 
 			sKey = sScale + "-" + sStyle;
 
@@ -1145,7 +1369,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 
 		/**
 		 * Returns the relative day resource pattern (like "Today", "Yesterday", "{0} days ago") based on the given
-		 * difference of days (0 means today, 1 means tommorrow, -1 means yesterday, ...).
+		 * difference of days (0 means today, 1 means tomorrow, -1 means yesterday, ...).
 		 *
 		 * @param {int} iDiff the difference in days
 		 * @param {string} [sStyle="wide"] @since 1.32.10, 1.34.4 the style of the pattern. The valid values are "wide", "short" and "narrow"
@@ -1195,7 +1419,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @since 1.34.0
 		 */
 		getDisplayName: function(sType, sStyle) {
-			jQuery.sap.assert(sType == "second" || sType == "minute" || sType == "hour" || sType == "zone" || sType == "day"
+			assert(sType == "second" || sType == "minute" || sType == "hour" || sType == "zone" || sType == "day"
 				|| sType == "weekday" || sType == "week" || sType == "month" || sType == "quarter" || sType == "year" || sType == "era",
 				"sType must be second, minute, hour, zone, day, weekday, week, month, quarter, year, era");
 
@@ -1203,7 +1427,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 				sStyle = "wide";
 			}
 
-			jQuery.sap.assert(sStyle === "wide" || sStyle === "short" || sStyle === "narrow", "sStyle is only allowed to be set with 'wide', 'short' or 'narrow'");
+			assert(sStyle === "wide" || sStyle === "short" || sStyle === "narrow", "sStyle is only allowed to be set with 'wide', 'short' or 'narrow'");
 
 			var aSingleFormFields = ["era", "weekday", "zone"],
 				sKey = aSingleFormFields.indexOf(sType) === -1 ? sType + "-" + sStyle : sType;
@@ -1276,12 +1500,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		getCurrencyFormat: function(sStyle, sNumber, sPlural) {
 
 			var sFormat;
-			var oFormats;
+			var oFormats = this._get("currencyFormat-" + sStyle);
 
-			switch (sStyle) {
-			default: //short
+			// Defaults to "short" if not found
+			if (!oFormats) {
+				if (sStyle === "sap-short") {
+					throw new Error("Failed to get CLDR data for property \"currencyFormat-sap-short\"");
+				}
 				oFormats = this._get("currencyFormat-short");
-				break;
 			}
 
 			if (oFormats) {
@@ -1383,13 +1609,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @since 1.32.0
 		 */
 		getEras: function(sWidth, sCalendarType) {
-			jQuery.sap.assert(sWidth == "wide" || sWidth == "abbreviated" || sWidth == "narrow" , "sWidth must be wide, abbreviate or narrow");
+			assert(sWidth == "wide" || sWidth == "abbreviated" || sWidth == "narrow" , "sWidth must be wide, abbreviate or narrow");
 
 			//TODO Adapt generation so that eras are an array instead of object
 			var oEras = this._get(getCLDRCalendarName(sCalendarType), "era-" + sWidth),
 				aEras = [];
 			for (var i in oEras) {
-				aEras[parseInt(i, 10)] = oEras[i];
+				aEras[parseInt(i)] = oEras[i];
 			}
 			return aEras;
 		},
@@ -1407,7 +1633,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 			var oEraDates = this._get("eras-" + sCalendarType.toLowerCase()),
 				aEraDates = [];
 			for (var i in oEraDates) {
-				aEraDates[parseInt(i, 10)] = oEraDates[i];
+				aEraDates[parseInt(i)] = oEraDates[i];
 			}
 			return aEraDates;
 		},
@@ -1423,12 +1649,24 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		 * @since 1.32.0
 		 */
 		getCalendarWeek: function(sStyle, iWeekNumber) {
-			jQuery.sap.assert(sStyle == "wide" || sStyle == "narrow" , "sStyle must be wide or narrow");
+			assert(sStyle == "wide" || sStyle == "narrow" , "sStyle must be wide or narrow");
 
 			var oMessageBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.core", this.oLocale.toString()),
 				sKey = "date.week.calendarweek." + sStyle;
 
 			return oMessageBundle.getText(sKey, iWeekNumber);
+		},
+
+		/**
+		 * Whether 1 January is the first day of the first calendar week.
+		 * This is the definition of the calendar week in the US.
+		 *
+		 * @return {boolean} true if the first week of the year starts with 1 January.
+		 * @public
+		 * @since 1.92.0
+		 */
+		firstDayStartsFirstWeek: function() {
+			return this.oLocale.getLanguage() === "en" && this.oLocale.getRegion() === "US";
 		},
 
 		/**
@@ -1443,14 +1681,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 				aCalendars = sCalendarPreference ? sCalendarPreference.split(" ") : [],
 				sCalendarName, sType, i;
 
-			// lazy load of sap.ui.core library to avoid cyclic dependencies
-			sap.ui.getCore().loadLibrary('sap.ui.core');
-			var CalendarType = sap.ui.require("sap/ui/core/library").CalendarType;
-
 			for ( i = 0 ; i < aCalendars.length ; i++ ) {
-				sCalendarName = aCalendars[i];
+				// No support for calendar subtypes (islamic) yet, so ignore part after -
+				sCalendarName = aCalendars[i].split("-")[0];
 				for (sType in CalendarType) {
-					if (sCalendarName === getCLDRCalendarName(sType).substring(3)) {
+					if (sCalendarName === sType.toLowerCase()) {
 						return sType;
 					}
 				}
@@ -1601,7 +1836,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 				var fnOperand;
 				fnOperand = operand();
 				if (accept(OP_MOD)) {
-					var iDivisor = parseInt(consume(), 10);
+					var iDivisor = parseInt(consume());
 					return function(o) {
 						return fnOperand(o) % iDivisor;
 					};
@@ -1647,10 +1882,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 				aParts.forEach(function(sPart) {
 					aRange = sPart.split(RANGE);
 					if (aRange.length === 1) {
-						aValues.push(parseInt(sPart, 10));
+						aValues.push(parseInt(sPart));
 					} else {
-						iFrom = parseInt(aRange[0], 10);
-						iTo = parseInt(aRange[1], 10);
+						iFrom = parseInt(aRange[0]);
+						iTo = parseInt(aRange[1]);
 						for (var i = iFrom; i <= iTo; i++) {
 							aValues.push(i);
 						}
@@ -1681,11 +1916,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 
 				o = {
 					n: parseFloat(sValue),
-					i: parseInt(sDecimal, 10),
+					i: parseInt(sDecimal),
 					v: sFraction.length,
 					w: sFractionNoZeros.length,
-					f: parseInt(sFraction, 10),
-					t: parseInt(sFractionNoZeros, 10)
+					f: parseInt(sFraction),
+					t: parseInt(sFractionNoZeros)
 				};
 				return fnOr(o);
 			};
@@ -1747,1325 +1982,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		"A": { group: "Other", numericCeiling: 100}
 	};
 
-	/**
-	 * Default data, in case neither the region specific, nor the language specific fallback can be found.
-	 *
-	 * @private
-	 */
-	var M_DEFAULT_DATA = {
-			"orientation":"left-to-right",
-			"languages":{},
-			"scripts":{},
-			"territories":{},
-			"ca-gregorian": {
-				"dateFormats": {
-					"full":"EEEE, MMMM d, y",
-					"long":"MMMM d, y",
-					"medium":"MMM d, y",
-					"short":"M/d/yy"
-				},
-				"timeFormats": {
-					"full":"h:mm:ss a zzzz",
-					"long":"h:mm:ss a z",
-					"medium":"h:mm:ss a",
-					"short":"h:mm a"
-				},
-				"dateTimeFormats": {
-					"full":"{1} 'at' {0}",
-					"long":"{1} 'at' {0}",
-					"medium":"{1}, {0}",
-					"short":"{1}, {0}",
-					"availableFormats": {
-						"d": "d",
-						"E": "ccc",
-						"Ed": "d E",
-						"Ehm": "E h:mm a",
-						"EHm": "E HH:mm",
-						"Ehms": "E h:mm:ss a",
-						"EHms": "E HH:mm:ss",
-						"Gy": "y G",
-						"GyMMM": "MMM y G",
-						"GyMMMd": "MMM d, y G",
-						"GyMMMEd": "E, MMM d, y G",
-						"h": "h a",
-						"H": "HH",
-						"hm": "h:mm a",
-						"Hm": "HH:mm",
-						"hms": "h:mm:ss a",
-						"Hms": "HH:mm:ss",
-						"hmsv": "h:mm:ss a v",
-						"Hmsv": "HH:mm:ss v",
-						"hmv": "h:mm a v",
-						"Hmv": "HH:mm v",
-						"M": "L",
-						"Md": "M/d",
-						"MEd": "E, M/d",
-						"MMM": "LLL",
-						"MMMd": "MMM d",
-						"MMMEd": "E, MMM d",
-						"MMMMd": "MMMM d",
-						"ms": "mm:ss",
-						"y": "y",
-						"yM": "M/y",
-						"yMd": "M/d/y",
-						"yMEd": "E, M/d/y",
-						"yMMM": "MMM y",
-						"yMMMd": "MMM d, y",
-						"yMMMEd": "E, MMM d, y",
-						"yMMMM": "MMMM y",
-						"yQQQ": "QQQ y",
-						"yQQQQ": "QQQQ y"
-					},
-					"appendItems": {
-						"Day": "{0} ({2}: {1})",
-						"Day-Of-Week": "{0} {1}",
-						"Era": "{0} {1}",
-						"Hour": "{0} ({2}: {1})",
-						"Minute": "{0} ({2}: {1})",
-						"Month": "{0} ({2}: {1})",
-						"Quarter": "{0} ({2}: {1})",
-						"Second": "{0} ({2}: {1})",
-						"Timezone": "{0} {1}",
-						"Week": "{0} ({2}: {1})",
-						"Year": "{0} {1}"
-					},
-					"intervalFormats": {
-						"intervalFormatFallback":"{0} – {1}",
-						"d": {
-							"d": "d – d"
-						},
-						"h": {
-							"a": "h a – h a",
-							"h": "h – h a"
-						},
-						"H": {
-							"H": "HH – HH"
-						},
-						"hm": {
-							"a": "h:mm a – h:mm a",
-							"h": "h:mm – h:mm a",
-							"m": "h:mm – h:mm a"
-						},
-						"Hm": {
-							"H": "HH:mm – HH:mm",
-							"m": "HH:mm – HH:mm"
-						},
-						"hmv": {
-							"a": "h:mm a – h:mm a v",
-							"h": "h:mm – h:mm a v",
-							"m": "h:mm – h:mm a v"
-						},
-						"Hmv": {
-							"H": "HH:mm – HH:mm v",
-							"m": "HH:mm – HH:mm v"
-						},
-						"hv": {
-							"a": "h a – h a v",
-							"h": "h – h a v"
-						},
-						"Hv": {
-							"H": "HH – HH v"
-						},
-						"M": {
-							"M": "M – M"
-						},
-						"Md": {
-							"d": "M/d – M/d",
-							"M": "M/d – M/d"
-						},
-						"MEd": {
-							"d": "E, M/d – E, M/d",
-							"M": "E, M/d – E, M/d"
-						},
-						"MMM": {
-							"M": "MMM – MMM"
-						},
-						"MMMd": {
-							"d": "MMM d – d",
-							"M": "MMM d – MMM d"
-						},
-						"MMMEd": {
-							"d": "E, MMM d – E, MMM d",
-							"M": "E, MMM d – E, MMM d"
-						},
-						"y": {
-							"y": "y – y"
-						},
-						"yM": {
-							"M": "M/y – M/y",
-							"y": "M/y – M/y"
-						},
-						"yMd": {
-							"d": "M/d/y – M/d/y",
-							"M": "M/d/y – M/d/y",
-							"y": "M/d/y – M/d/y"
-						},
-						"yMEd": {
-							"d": "E, M/d/y – E, M/d/y",
-							"M": "E, M/d/y – E, M/d/y",
-							"y": "E, M/d/y – E, M/d/y"
-						},
-						"yMMM": {
-							"M": "MMM – MMM y",
-							"y": "MMM y – MMM y"
-						},
-						"yMMMd": {
-							"d": "MMM d – d, y",
-							"M": "MMM d – MMM d, y",
-							"y": "MMM d, y – MMM d, y"
-						},
-						"yMMMEd": {
-							"d": "E, MMM d – E, MMM d, y",
-							"M": "E, MMM d – E, MMM d, y",
-							"y": "E, MMM d, y – E, MMM d, y"
-						},
-						"yMMMM": {
-							"M": "MMMM – MMMM y",
-							"y": "MMMM y – MMMM y"
-						}
-					}
-				},
-				"months": {
-					"format": {
-						"abbreviated": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-						"narrow": ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
-						"wide": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-					},
-					"stand-alone": {
-						"abbreviated": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-						"narrow": ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
-						"wide": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-					}
-				},
-				"days": {
-					"format": {
-						"abbreviated": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-						"narrow": ["S", "M", "T", "W", "T", "F", "S"],
-						"short": ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-						"wide": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-					},
-					"stand-alone": {
-						"abbreviated": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-						"narrow": ["S", "M", "T", "W", "T", "F", "S"],
-						"short": ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-						"wide": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-					}
-				},
-				"quarters": {
-					"format": {
-						"abbreviated": ["Q1", "Q2", "Q3", "Q4"],
-						"narrow": ["1", "2", "3", "4"],
-						"wide": ["1st quarter", "2nd quarter", "3rd quarter", "4th quarter"]
-					},
-					"stand-alone": {
-						"abbreviated": ["Q1", "Q2", "Q3", "Q4"],
-						"narrow": ["1", "2", "3", "4"],
-						"wide": ["1st quarter", "2nd quarter", "3rd quarter", "4th quarter"]
-					}
-				},
-				"dayPeriods": {
-					"format": {
-						"abbreviated": ["AM", "PM"],
-						"narrow": ["a", "p"],
-						"wide": ["AM", "PM"]
-					},
-					"stand-alone": {
-						"abbreviated": ["AM", "PM"],
-						"narrow": ["AM", "PM"],
-						"wide": ["AM", "PM"]
-					}
-				},
-				"era-wide":{"0":"Before Christ","1":"Anno Domini"},
-				"era-abbreviated":{"0":"BC","1":"AD"},
-				"era-narrow":{"0":"B","1":"A"}
-			},
-			"eras-gregorian": {
-				"0":{"_end":"0-12-31"},
-				"1":{"_start":"1-01-01"}
-			},
-			"dateFields": {
-				"era": {
-					"displayName": "era"
-				},
-				"year-wide": {
-					"displayName": "year",
-					"relative-type--1": "last year",
-					"relative-type-0": "this year",
-					"relative-type-1": "next year",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} year",
-						"relativeTimePattern-count-other": "in {0} years"
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} year ago",
-						"relativeTimePattern-count-other": "{0} years ago"
-					}
-				},
-				"year-short": {
-					"displayName": "yr.",
-					"relative-type--1": "last yr.",
-					"relative-type-0": "this yr.",
-					"relative-type-1": "next yr.",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} yr.",
-						"relativeTimePattern-count-other": "in {0} yr."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} yr. ago",
-						"relativeTimePattern-count-other": "{0} yr. ago"
-					}
-				},
-				"year-narrow": {
-					"displayName": "yr.",
-					"relative-type--1": "last yr.",
-					"relative-type-0": "this yr.",
-					"relative-type-1": "next yr.",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} yr.",
-						"relativeTimePattern-count-other": "in {0} yr."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} yr. ago",
-						"relativeTimePattern-count-other": "{0} yr. ago"
-					}
-				},
-				"quarter-wide": {
-					"displayName": "quarter",
-					"relative-type--1": "last quarter",
-					"relative-type-0": "this quarter",
-					"relative-type-1": "next quarter",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} quarter",
-						"relativeTimePattern-count-other": "in {0} quarters"
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} quarter ago",
-						"relativeTimePattern-count-other": "{0} quarters ago"
-					}
-				},
-				"quarter-short": {
-					"displayName": "qtr.",
-					"relative-type--1": "last qtr.",
-					"relative-type-0": "this qtr.",
-					"relative-type-1": "next qtr.",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} qtr.",
-						"relativeTimePattern-count-other": "in {0} qtrs."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} qtr. ago",
-						"relativeTimePattern-count-other": "{0} qtrs. ago"
-					}
-				},
-				"quarter-narrow": {
-					"displayName": "qtr.",
-					"relative-type--1": "last qtr.",
-					"relative-type-0": "this qtr.",
-					"relative-type-1": "next qtr.",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} qtr.",
-						"relativeTimePattern-count-other": "in {0} qtrs."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} qtr. ago",
-						"relativeTimePattern-count-other": "{0} qtrs. ago"
-					}
-				},
-				"month-wide": {
-					"displayName": "month",
-					"relative-type--1": "last month",
-					"relative-type-0": "this month",
-					"relative-type-1": "next month",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} month",
-						"relativeTimePattern-count-other": "in {0} months"
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} month ago",
-						"relativeTimePattern-count-other": "{0} months ago"
-					}
-				},
-				"month-short": {
-					"displayName": "mo.",
-					"relative-type--1": "last mo.",
-					"relative-type-0": "this mo.",
-					"relative-type-1": "next mo.",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} mo.",
-						"relativeTimePattern-count-other": "in {0} mo."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} mo. ago",
-						"relativeTimePattern-count-other": "{0} mo. ago"
-					}
-				},
-				"month-narrow": {
-					"displayName": "mo.",
-					"relative-type--1": "last mo.",
-					"relative-type-0": "this mo.",
-					"relative-type-1": "next mo.",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} mo.",
-						"relativeTimePattern-count-other": "in {0} mo."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} mo. ago",
-						"relativeTimePattern-count-other": "{0} mo. ago"
-					}
-				},
-				"week-wide": {
-					"displayName": "week",
-					"relative-type--1": "last week",
-					"relative-type-0": "this week",
-					"relative-type-1": "next week",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} week",
-						"relativeTimePattern-count-other": "in {0} weeks"
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} week ago",
-						"relativeTimePattern-count-other": "{0} weeks ago"
-					},
-					"relativePeriod": "the week of {0}"
-				},
-				"week-short": {
-					"displayName": "wk.",
-					"relative-type--1": "last wk.",
-					"relative-type-0": "this wk.",
-					"relative-type-1": "next wk.",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} wk.",
-						"relativeTimePattern-count-other": "in {0} wk."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} wk. ago",
-						"relativeTimePattern-count-other": "{0} wk. ago"
-					},
-					"relativePeriod": "the week of {0}"
-				},
-				"week-narrow": {
-					"displayName": "wk.",
-					"relative-type--1": "last wk.",
-					"relative-type-0": "this wk.",
-					"relative-type-1": "next wk.",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} wk.",
-						"relativeTimePattern-count-other": "in {0} wk."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} wk. ago",
-						"relativeTimePattern-count-other": "{0} wk. ago"
-					},
-					"relativePeriod": "the week of {0}"
-				},
-				"day-wide": {
-					"displayName": "day",
-					"relative-type--1": "yesterday",
-					"relative-type-0": "today",
-					"relative-type-1": "tomorrow",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} day",
-						"relativeTimePattern-count-other": "in {0} days"
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} day ago",
-						"relativeTimePattern-count-other": "{0} days ago"
-					}
-				},
-				"day-short": {
-					"displayName": "day",
-					"relative-type--1": "yesterday",
-					"relative-type-0": "today",
-					"relative-type-1": "tomorrow",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} day",
-						"relativeTimePattern-count-other": "in {0} days"
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} day ago",
-						"relativeTimePattern-count-other": "{0} days ago"
-					}
-				},
-				"day-narrow": {
-					"displayName": "day",
-					"relative-type--1": "yesterday",
-					"relative-type-0": "today",
-					"relative-type-1": "tomorrow",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} day",
-						"relativeTimePattern-count-other": "in {0} days"
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} day ago",
-						"relativeTimePattern-count-other": "{0} days ago"
-					}
-				},
-				"weekday": {
-					"displayName": "day of the week"
-				},
-				"hour-wide": {
-					"displayName": "hour",
-					"relative-type-0": "this hour",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} hour",
-						"relativeTimePattern-count-other": "in {0} hours"
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} hour ago",
-						"relativeTimePattern-count-other": "{0} hours ago"
-					}
-				},
-				"hour-short": {
-					"displayName": "hr.",
-					"relative-type-0": "this hour",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} hr.",
-						"relativeTimePattern-count-other": "in {0} hr."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} hr. ago",
-						"relativeTimePattern-count-other": "{0} hr. ago"
-					}
-				},
-				"hour-narrow": {
-					"displayName": "hr.",
-					"relative-type-0": "this hour",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} hr.",
-						"relativeTimePattern-count-other": "in {0} hr."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} hr. ago",
-						"relativeTimePattern-count-other": "{0} hr. ago"
-					}
-				},
-				"minute-wide": {
-					"displayName": "minute",
-					"relative-type-0": "this minute",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} minute",
-						"relativeTimePattern-count-other": "in {0} minutes"
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} minute ago",
-						"relativeTimePattern-count-other": "{0} minutes ago"
-					}
-				},
-				"minute-short": {
-					"displayName": "min.",
-					"relative-type-0": "this minute",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} min.",
-						"relativeTimePattern-count-other": "in {0} min."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} min. ago",
-						"relativeTimePattern-count-other": "{0} min. ago"
-					}
-				},
-				"minute-narrow": {
-					"displayName": "min.",
-					"relative-type-0": "this minute",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} min.",
-						"relativeTimePattern-count-other": "in {0} min."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} min. ago",
-						"relativeTimePattern-count-other": "{0} min. ago"
-					}
-				},
-				"second-wide": {
-					"displayName": "second",
-					"relative-type-0": "now",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} second",
-						"relativeTimePattern-count-other": "in {0} seconds"
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} second ago",
-						"relativeTimePattern-count-other": "{0} seconds ago"
-					}
-				},
-				"second-short": {
-					"displayName": "sec.",
-					"relative-type-0": "now",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} sec.",
-						"relativeTimePattern-count-other": "in {0} sec."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} sec. ago",
-						"relativeTimePattern-count-other": "{0} sec. ago"
-					}
-				},
-				"second-narrow": {
-					"displayName": "sec.",
-					"relative-type-0": "now",
-					"relativeTime-type-future": {
-						"relativeTimePattern-count-one": "in {0} sec.",
-						"relativeTimePattern-count-other": "in {0} sec."
-					},
-					"relativeTime-type-past": {
-						"relativeTimePattern-count-one": "{0} sec. ago",
-						"relativeTimePattern-count-other": "{0} sec. ago"
-					}
-				},
-				"zone": {
-					"displayName": "time zone"
-				}
-			},
-			"decimalFormat": { "standard": "#,##0.###" },
-			"currencyFormat": {
-				"standard": "¤#,##0.00",
-				"currencySpacing": {
-					"beforeCurrency": {
-						"currencyMatch": "[:^S:]",
-						"surroundingMatch": "[:digit:]",
-						"insertBetween": " "
-					},
-					"afterCurrency": {
-						"currencyMatch": "[:^S:]",
-						"surroundingMatch": "[:digit:]",
-						"insertBetween": " "
-					}
-				}
-			},
-			"percentFormat": { "standard": "#,##0%"},
-			"symbols-latn-decimal":".",
-			"symbols-latn-group":",",
-			"symbols-latn-plusSign":"+",
-			"symbols-latn-minusSign":"-",
-			"symbols-latn-percentSign":"%",
-			"weekData-minDays":4,
-			"weekData-firstDay":1,
-			"weekData-weekendStart":6,
-			"weekData-weekendEnd":0,
-			"timeData": {
-				_allowed: "H h",
-				_preferred: "H"
-			},
-			"plurals": {},
-			"units": {
-			"short": {
-				"per": {
-					"compoundUnitPattern": "{0}/{1}"
-				},
-				"acceleration-g-force": {
-					"displayName": "g-force",
-					"unitPattern-count-one": "{0} G",
-					"unitPattern-count-other": "{0} G"
-				},
-				"acceleration-meter-per-second-squared": {
-					"displayName": "meters/sec²",
-					"unitPattern-count-one": "{0} m/s²",
-					"unitPattern-count-other": "{0} m/s²"
-				},
-				"angle-revolution": {
-					"displayName": "rev",
-					"unitPattern-count-one": "{0} rev",
-					"unitPattern-count-other": "{0} rev"
-				},
-				"angle-radian": {
-					"displayName": "radians",
-					"unitPattern-count-one": "{0} rad",
-					"unitPattern-count-other": "{0} rad"
-				},
-				"angle-degree": {
-					"displayName": "degrees",
-					"unitPattern-count-one": "{0} deg",
-					"unitPattern-count-other": "{0} deg"
-				},
-				"angle-arc-minute": {
-					"displayName": "arcmins",
-					"unitPattern-count-one": "{0} arcmin",
-					"unitPattern-count-other": "{0} arcmins"
-				},
-				"angle-arc-second": {
-					"displayName": "arcsecs",
-					"unitPattern-count-one": "{0} arcsec",
-					"unitPattern-count-other": "{0} arcsecs"
-				},
-				"area-square-kilometer": {
-					"displayName": "km²",
-					"unitPattern-count-one": "{0} km²",
-					"unitPattern-count-other": "{0} km²",
-					"perUnitPattern": "{0}/km²"
-				},
-				"area-hectare": {
-					"displayName": "hectares",
-					"unitPattern-count-one": "{0} ha",
-					"unitPattern-count-other": "{0} ha"
-				},
-				"area-square-meter": {
-					"displayName": "meters²",
-					"unitPattern-count-one": "{0} m²",
-					"unitPattern-count-other": "{0} m²",
-					"perUnitPattern": "{0}/m²"
-				},
-				"area-square-centimeter": {
-					"displayName": "cm²",
-					"unitPattern-count-one": "{0} cm²",
-					"unitPattern-count-other": "{0} cm²",
-					"perUnitPattern": "{0}/cm²"
-				},
-				"area-square-mile": {
-					"displayName": "sq miles",
-					"unitPattern-count-one": "{0} sq mi",
-					"unitPattern-count-other": "{0} sq mi",
-					"perUnitPattern": "{0}/mi²"
-				},
-				"area-acre": {
-					"displayName": "acres",
-					"unitPattern-count-one": "{0} ac",
-					"unitPattern-count-other": "{0} ac"
-				},
-				"area-square-yard": {
-					"displayName": "yards²",
-					"unitPattern-count-one": "{0} yd²",
-					"unitPattern-count-other": "{0} yd²"
-				},
-				"area-square-foot": {
-					"displayName": "sq feet",
-					"unitPattern-count-one": "{0} sq ft",
-					"unitPattern-count-other": "{0} sq ft"
-				},
-				"area-square-inch": {
-					"displayName": "inches²",
-					"unitPattern-count-one": "{0} in²",
-					"unitPattern-count-other": "{0} in²",
-					"perUnitPattern": "{0}/in²"
-				},
-				"concentr-karat": {
-					"displayName": "karats",
-					"unitPattern-count-one": "{0} kt",
-					"unitPattern-count-other": "{0} kt"
-				},
-				"concentr-milligram-per-deciliter": {
-					"displayName": "mg/dL",
-					"unitPattern-count-one": "{0} mg/dL",
-					"unitPattern-count-other": "{0} mg/dL"
-				},
-				"concentr-millimole-per-liter": {
-					"displayName": "millimol/liter",
-					"unitPattern-count-one": "{0} mmol/L",
-					"unitPattern-count-other": "{0} mmol/L"
-				},
-				"concentr-part-per-million": {
-					"displayName": "parts/million",
-					"unitPattern-count-one": "{0} ppm",
-					"unitPattern-count-other": "{0} ppm"
-				},
-				"consumption-liter-per-kilometer": {
-					"displayName": "liters/km",
-					"unitPattern-count-one": "{0} L/km",
-					"unitPattern-count-other": "{0} L/km"
-				},
-				"consumption-liter-per-100kilometers": {
-					"displayName": "L/100 km",
-					"unitPattern-count-one": "{0} L/100 km",
-					"unitPattern-count-other": "{0} L/100 km"
-				},
-				"consumption-mile-per-gallon": {
-					"displayName": "miles/gal",
-					"unitPattern-count-one": "{0} mpg",
-					"unitPattern-count-other": "{0} mpg"
-				},
-				"consumption-mile-per-gallon-imperial": {
-					"displayName": "miles/gal Imp.",
-					"unitPattern-count-one": "{0} mpg Imp.",
-					"unitPattern-count-other": "{0} mpg Imp."
-				},
-				"digital-terabyte": {
-					"displayName": "TByte",
-					"unitPattern-count-one": "{0} TB",
-					"unitPattern-count-other": "{0} TB"
-				},
-				"digital-terabit": {
-					"displayName": "Tbit",
-					"unitPattern-count-one": "{0} Tb",
-					"unitPattern-count-other": "{0} Tb"
-				},
-				"digital-gigabyte": {
-					"displayName": "GByte",
-					"unitPattern-count-one": "{0} GB",
-					"unitPattern-count-other": "{0} GB"
-				},
-				"digital-gigabit": {
-					"displayName": "Gbit",
-					"unitPattern-count-one": "{0} Gb",
-					"unitPattern-count-other": "{0} Gb"
-				},
-				"digital-megabyte": {
-					"displayName": "MByte",
-					"unitPattern-count-one": "{0} MB",
-					"unitPattern-count-other": "{0} MB"
-				},
-				"digital-megabit": {
-					"displayName": "Mbit",
-					"unitPattern-count-one": "{0} Mb",
-					"unitPattern-count-other": "{0} Mb"
-				},
-				"digital-kilobyte": {
-					"displayName": "kByte",
-					"unitPattern-count-one": "{0} kB",
-					"unitPattern-count-other": "{0} kB"
-				},
-				"digital-kilobit": {
-					"displayName": "kbit",
-					"unitPattern-count-one": "{0} kb",
-					"unitPattern-count-other": "{0} kb"
-				},
-				"digital-byte": {
-					"displayName": "byte",
-					"unitPattern-count-one": "{0} byte",
-					"unitPattern-count-other": "{0} byte"
-				},
-				"digital-bit": {
-					"displayName": "bit",
-					"unitPattern-count-one": "{0} bit",
-					"unitPattern-count-other": "{0} bit"
-				},
-				"duration-century": {
-					"displayName": "c",
-					"unitPattern-count-one": "{0} c",
-					"unitPattern-count-other": "{0} c"
-				},
-				"duration-year": {
-					"displayName": "years",
-					"unitPattern-count-one": "{0} yr",
-					"unitPattern-count-other": "{0} yrs",
-					"perUnitPattern": "{0}/y"
-				},
-				"duration-month": {
-					"displayName": "months",
-					"unitPattern-count-one": "{0} mth",
-					"unitPattern-count-other": "{0} mths",
-					"perUnitPattern": "{0}/m"
-				},
-				"duration-week": {
-					"displayName": "weeks",
-					"unitPattern-count-one": "{0} wk",
-					"unitPattern-count-other": "{0} wks",
-					"perUnitPattern": "{0}/w"
-				},
-				"duration-day": {
-					"displayName": "days",
-					"unitPattern-count-one": "{0} day",
-					"unitPattern-count-other": "{0} days",
-					"perUnitPattern": "{0}/d"
-				},
-				"duration-hour": {
-					"displayName": "hours",
-					"unitPattern-count-one": "{0} hr",
-					"unitPattern-count-other": "{0} hr",
-					"perUnitPattern": "{0}/h"
-				},
-				"duration-minute": {
-					"displayName": "mins",
-					"unitPattern-count-one": "{0} min",
-					"unitPattern-count-other": "{0} min",
-					"perUnitPattern": "{0}/min"
-				},
-				"duration-second": {
-					"displayName": "secs",
-					"unitPattern-count-one": "{0} sec",
-					"unitPattern-count-other": "{0} sec",
-					"perUnitPattern": "{0}/s"
-				},
-				"duration-millisecond": {
-					"displayName": "millisecs",
-					"unitPattern-count-one": "{0} ms",
-					"unitPattern-count-other": "{0} ms"
-				},
-				"duration-microsecond": {
-					"displayName": "μsecs",
-					"unitPattern-count-one": "{0} μs",
-					"unitPattern-count-other": "{0} μs"
-				},
-				"duration-nanosecond": {
-					"displayName": "nanosecs",
-					"unitPattern-count-one": "{0} ns",
-					"unitPattern-count-other": "{0} ns"
-				},
-				"electric-ampere": {
-					"displayName": "amps",
-					"unitPattern-count-one": "{0} A",
-					"unitPattern-count-other": "{0} A"
-				},
-				"electric-milliampere": {
-					"displayName": "milliamps",
-					"unitPattern-count-one": "{0} mA",
-					"unitPattern-count-other": "{0} mA"
-				},
-				"electric-ohm": {
-					"displayName": "ohms",
-					"unitPattern-count-one": "{0} Ω",
-					"unitPattern-count-other": "{0} Ω"
-				},
-				"electric-volt": {
-					"displayName": "volts",
-					"unitPattern-count-one": "{0} V",
-					"unitPattern-count-other": "{0} V"
-				},
-				"energy-kilocalorie": {
-					"displayName": "kcal",
-					"unitPattern-count-one": "{0} kcal",
-					"unitPattern-count-other": "{0} kcal"
-				},
-				"energy-calorie": {
-					"displayName": "cal",
-					"unitPattern-count-one": "{0} cal",
-					"unitPattern-count-other": "{0} cal"
-				},
-				"energy-foodcalorie": {
-					"displayName": "Cal",
-					"unitPattern-count-one": "{0} Cal",
-					"unitPattern-count-other": "{0} Cal"
-				},
-				"energy-kilojoule": {
-					"displayName": "kilojoule",
-					"unitPattern-count-one": "{0} kJ",
-					"unitPattern-count-other": "{0} kJ"
-				},
-				"energy-joule": {
-					"displayName": "joules",
-					"unitPattern-count-one": "{0} J",
-					"unitPattern-count-other": "{0} J"
-				},
-				"energy-kilowatt-hour": {
-					"displayName": "kW-hour",
-					"unitPattern-count-one": "{0} kWh",
-					"unitPattern-count-other": "{0} kWh"
-				},
-				"frequency-gigahertz": {
-					"displayName": "GHz",
-					"unitPattern-count-one": "{0} GHz",
-					"unitPattern-count-other": "{0} GHz"
-				},
-				"frequency-megahertz": {
-					"displayName": "MHz",
-					"unitPattern-count-one": "{0} MHz",
-					"unitPattern-count-other": "{0} MHz"
-				},
-				"frequency-kilohertz": {
-					"displayName": "kHz",
-					"unitPattern-count-one": "{0} kHz",
-					"unitPattern-count-other": "{0} kHz"
-				},
-				"frequency-hertz": {
-					"displayName": "Hz",
-					"unitPattern-count-one": "{0} Hz",
-					"unitPattern-count-other": "{0} Hz"
-				},
-				"length-kilometer": {
-					"displayName": "km",
-					"unitPattern-count-one": "{0} km",
-					"unitPattern-count-other": "{0} km",
-					"perUnitPattern": "{0}/km"
-				},
-				"length-meter": {
-					"displayName": "m",
-					"unitPattern-count-one": "{0} m",
-					"unitPattern-count-other": "{0} m",
-					"perUnitPattern": "{0}/m"
-				},
-				"length-decimeter": {
-					"displayName": "dm",
-					"unitPattern-count-one": "{0} dm",
-					"unitPattern-count-other": "{0} dm"
-				},
-				"length-centimeter": {
-					"displayName": "cm",
-					"unitPattern-count-one": "{0} cm",
-					"unitPattern-count-other": "{0} cm",
-					"perUnitPattern": "{0}/cm"
-				},
-				"length-millimeter": {
-					"displayName": "mm",
-					"unitPattern-count-one": "{0} mm",
-					"unitPattern-count-other": "{0} mm"
-				},
-				"length-micrometer": {
-					"displayName": "µmeters",
-					"unitPattern-count-one": "{0} µm",
-					"unitPattern-count-other": "{0} µm"
-				},
-				"length-nanometer": {
-					"displayName": "nm",
-					"unitPattern-count-one": "{0} nm",
-					"unitPattern-count-other": "{0} nm"
-				},
-				"length-picometer": {
-					"displayName": "pm",
-					"unitPattern-count-one": "{0} pm",
-					"unitPattern-count-other": "{0} pm"
-				},
-				"length-mile": {
-					"displayName": "miles",
-					"unitPattern-count-one": "{0} mi",
-					"unitPattern-count-other": "{0} mi"
-				},
-				"length-yard": {
-					"displayName": "yards",
-					"unitPattern-count-one": "{0} yd",
-					"unitPattern-count-other": "{0} yd"
-				},
-				"length-foot": {
-					"displayName": "feet",
-					"unitPattern-count-one": "{0} ft",
-					"unitPattern-count-other": "{0} ft",
-					"perUnitPattern": "{0}/ft"
-				},
-				"length-inch": {
-					"displayName": "inches",
-					"unitPattern-count-one": "{0} in",
-					"unitPattern-count-other": "{0} in",
-					"perUnitPattern": "{0}/in"
-				},
-				"length-parsec": {
-					"displayName": "parsecs",
-					"unitPattern-count-one": "{0} pc",
-					"unitPattern-count-other": "{0} pc"
-				},
-				"length-light-year": {
-					"displayName": "light yrs",
-					"unitPattern-count-one": "{0} ly",
-					"unitPattern-count-other": "{0} ly"
-				},
-				"length-astronomical-unit": {
-					"displayName": "au",
-					"unitPattern-count-one": "{0} au",
-					"unitPattern-count-other": "{0} au"
-				},
-				"length-furlong": {
-					"displayName": "furlongs",
-					"unitPattern-count-one": "{0} fur",
-					"unitPattern-count-other": "{0} fur"
-				},
-				"length-fathom": {
-					"displayName": "fathoms",
-					"unitPattern-count-one": "{0} ftm",
-					"unitPattern-count-other": "{0} ftm"
-				},
-				"length-nautical-mile": {
-					"displayName": "nmi",
-					"unitPattern-count-one": "{0} nmi",
-					"unitPattern-count-other": "{0} nmi"
-				},
-				"length-mile-scandinavian": {
-					"displayName": "smi",
-					"unitPattern-count-one": "{0} smi",
-					"unitPattern-count-other": "{0} smi"
-				},
-				"length-point": {
-					"displayName": "points",
-					"unitPattern-count-one": "{0} pt",
-					"unitPattern-count-other": "{0} pt"
-				},
-				"light-lux": {
-					"displayName": "lux",
-					"unitPattern-count-one": "{0} lx",
-					"unitPattern-count-other": "{0} lx"
-				},
-				"mass-metric-ton": {
-					"displayName": "t",
-					"unitPattern-count-one": "{0} t",
-					"unitPattern-count-other": "{0} t"
-				},
-				"mass-kilogram": {
-					"displayName": "kg",
-					"unitPattern-count-one": "{0} kg",
-					"unitPattern-count-other": "{0} kg",
-					"perUnitPattern": "{0}/kg"
-				},
-				"mass-gram": {
-					"displayName": "grams",
-					"unitPattern-count-one": "{0} g",
-					"unitPattern-count-other": "{0} g",
-					"perUnitPattern": "{0}/g"
-				},
-				"mass-milligram": {
-					"displayName": "mg",
-					"unitPattern-count-one": "{0} mg",
-					"unitPattern-count-other": "{0} mg"
-				},
-				"mass-microgram": {
-					"displayName": "µg",
-					"unitPattern-count-one": "{0} µg",
-					"unitPattern-count-other": "{0} µg"
-				},
-				"mass-ton": {
-					"displayName": "tons",
-					"unitPattern-count-one": "{0} tn",
-					"unitPattern-count-other": "{0} tn"
-				},
-				"mass-stone": {
-					"displayName": "stones",
-					"unitPattern-count-one": "{0} st",
-					"unitPattern-count-other": "{0} st"
-				},
-				"mass-pound": {
-					"displayName": "pounds",
-					"unitPattern-count-one": "{0} lb",
-					"unitPattern-count-other": "{0} lb",
-					"perUnitPattern": "{0}/lb"
-				},
-				"mass-ounce": {
-					"displayName": "oz",
-					"unitPattern-count-one": "{0} oz",
-					"unitPattern-count-other": "{0} oz",
-					"perUnitPattern": "{0}/oz"
-				},
-				"mass-ounce-troy": {
-					"displayName": "oz troy",
-					"unitPattern-count-one": "{0} oz t",
-					"unitPattern-count-other": "{0} oz t"
-				},
-				"mass-carat": {
-					"displayName": "carats",
-					"unitPattern-count-one": "{0} CD",
-					"unitPattern-count-other": "{0} CD"
-				},
-				"power-gigawatt": {
-					"displayName": "GW",
-					"unitPattern-count-one": "{0} GW",
-					"unitPattern-count-other": "{0} GW"
-				},
-				"power-megawatt": {
-					"displayName": "MW",
-					"unitPattern-count-one": "{0} MW",
-					"unitPattern-count-other": "{0} MW"
-				},
-				"power-kilowatt": {
-					"displayName": "kW",
-					"unitPattern-count-one": "{0} kW",
-					"unitPattern-count-other": "{0} kW"
-				},
-				"power-watt": {
-					"displayName": "watts",
-					"unitPattern-count-one": "{0} W",
-					"unitPattern-count-other": "{0} W"
-				},
-				"power-milliwatt": {
-					"displayName": "mW",
-					"unitPattern-count-one": "{0} mW",
-					"unitPattern-count-other": "{0} mW"
-				},
-				"power-horsepower": {
-					"displayName": "hp",
-					"unitPattern-count-one": "{0} hp",
-					"unitPattern-count-other": "{0} hp"
-				},
-				"pressure-hectopascal": {
-					"displayName": "hPa",
-					"unitPattern-count-one": "{0} hPa",
-					"unitPattern-count-other": "{0} hPa"
-				},
-				"pressure-millimeter-of-mercury": {
-					"displayName": "mmHg",
-					"unitPattern-count-one": "{0} mmHg",
-					"unitPattern-count-other": "{0} mmHg"
-				},
-				"pressure-pound-per-square-inch": {
-					"displayName": "psi",
-					"unitPattern-count-one": "{0} psi",
-					"unitPattern-count-other": "{0} psi"
-				},
-				"pressure-inch-hg": {
-					"displayName": "inHg",
-					"unitPattern-count-one": "{0} inHg",
-					"unitPattern-count-other": "{0} inHg"
-				},
-				"pressure-millibar": {
-					"displayName": "mbar",
-					"unitPattern-count-one": "{0} mbar",
-					"unitPattern-count-other": "{0} mbar"
-				},
-				"speed-kilometer-per-hour": {
-					"displayName": "km/hour",
-					"unitPattern-count-one": "{0} kph",
-					"unitPattern-count-other": "{0} kph"
-				},
-				"speed-meter-per-second": {
-					"displayName": "meters/sec",
-					"unitPattern-count-one": "{0} m/s",
-					"unitPattern-count-other": "{0} m/s"
-				},
-				"speed-mile-per-hour": {
-					"displayName": "miles/hour",
-					"unitPattern-count-one": "{0} mph",
-					"unitPattern-count-other": "{0} mph"
-				},
-				"speed-knot": {
-					"displayName": "kn",
-					"unitPattern-count-one": "{0} kn",
-					"unitPattern-count-other": "{0} kn"
-				},
-				"temperature-generic": {
-					"displayName": "°",
-					"unitPattern-count-other": "{0}°"
-				},
-				"temperature-celsius": {
-					"displayName": "deg. C",
-					"unitPattern-count-one": "{0}°C",
-					"unitPattern-count-other": "{0}°C"
-				},
-				"temperature-fahrenheit": {
-					"displayName": "deg. F",
-					"unitPattern-count-one": "{0}°F",
-					"unitPattern-count-other": "{0}°F"
-				},
-				"temperature-kelvin": {
-					"displayName": "K",
-					"unitPattern-count-one": "{0} K",
-					"unitPattern-count-other": "{0} K"
-				},
-				"volume-cubic-kilometer": {
-					"displayName": "km³",
-					"unitPattern-count-one": "{0} km³",
-					"unitPattern-count-other": "{0} km³"
-				},
-				"volume-cubic-meter": {
-					"displayName": "m³",
-					"unitPattern-count-one": "{0} m³",
-					"unitPattern-count-other": "{0} m³",
-					"perUnitPattern": "{0}/m³"
-				},
-				"volume-cubic-centimeter": {
-					"displayName": "cm³",
-					"unitPattern-count-one": "{0} cm³",
-					"unitPattern-count-other": "{0} cm³",
-					"perUnitPattern": "{0}/cm³"
-				},
-				"volume-cubic-mile": {
-					"displayName": "mi³",
-					"unitPattern-count-one": "{0} mi³",
-					"unitPattern-count-other": "{0} mi³"
-				},
-				"volume-cubic-yard": {
-					"displayName": "yards³",
-					"unitPattern-count-one": "{0} yd³",
-					"unitPattern-count-other": "{0} yd³"
-				},
-				"volume-cubic-foot": {
-					"displayName": "feet³",
-					"unitPattern-count-one": "{0} ft³",
-					"unitPattern-count-other": "{0} ft³"
-				},
-				"volume-cubic-inch": {
-					"displayName": "inches³",
-					"unitPattern-count-one": "{0} in³",
-					"unitPattern-count-other": "{0} in³"
-				},
-				"volume-megaliter": {
-					"displayName": "ML",
-					"unitPattern-count-one": "{0} ML",
-					"unitPattern-count-other": "{0} ML"
-				},
-				"volume-hectoliter": {
-					"displayName": "hL",
-					"unitPattern-count-one": "{0} hL",
-					"unitPattern-count-other": "{0} hL"
-				},
-				"volume-liter": {
-					"displayName": "liters",
-					"unitPattern-count-one": "{0} L",
-					"unitPattern-count-other": "{0} L",
-					"perUnitPattern": "{0}/L"
-				},
-				"volume-deciliter": {
-					"displayName": "dL",
-					"unitPattern-count-one": "{0} dL",
-					"unitPattern-count-other": "{0} dL"
-				},
-				"volume-centiliter": {
-					"displayName": "cL",
-					"unitPattern-count-one": "{0} cL",
-					"unitPattern-count-other": "{0} cL"
-				},
-				"volume-milliliter": {
-					"displayName": "mL",
-					"unitPattern-count-one": "{0} mL",
-					"unitPattern-count-other": "{0} mL"
-				},
-				"volume-pint-metric": {
-					"displayName": "mpt",
-					"unitPattern-count-one": "{0} mpt",
-					"unitPattern-count-other": "{0} mpt"
-				},
-				"volume-cup-metric": {
-					"displayName": "mcup",
-					"unitPattern-count-one": "{0} mc",
-					"unitPattern-count-other": "{0} mc"
-				},
-				"volume-acre-foot": {
-					"displayName": "acre ft",
-					"unitPattern-count-one": "{0} ac ft",
-					"unitPattern-count-other": "{0} ac ft"
-				},
-				"volume-bushel": {
-					"displayName": "bushels",
-					"unitPattern-count-one": "{0} bu",
-					"unitPattern-count-other": "{0} bu"
-				},
-				"volume-gallon": {
-					"displayName": "gal",
-					"unitPattern-count-one": "{0} gal",
-					"unitPattern-count-other": "{0} gal",
-					"perUnitPattern": "{0}/gal US"
-				},
-				"volume-gallon-imperial": {
-					"displayName": "Imp. gal",
-					"unitPattern-count-one": "{0} gal Imp.",
-					"unitPattern-count-other": "{0} gal Imp.",
-					"perUnitPattern": "{0}/gal Imp."
-				},
-				"volume-quart": {
-					"displayName": "qts",
-					"unitPattern-count-one": "{0} qt",
-					"unitPattern-count-other": "{0} qt"
-				},
-				"volume-pint": {
-					"displayName": "pints",
-					"unitPattern-count-one": "{0} pt",
-					"unitPattern-count-other": "{0} pt"
-				},
-				"volume-cup": {
-					"displayName": "cups",
-					"unitPattern-count-one": "{0} c",
-					"unitPattern-count-other": "{0} c"
-				},
-				"volume-fluid-ounce": {
-					"displayName": "fl oz",
-					"unitPattern-count-one": "{0} fl oz",
-					"unitPattern-count-other": "{0} fl oz"
-				},
-				"volume-tablespoon": {
-					"displayName": "tbsp",
-					"unitPattern-count-one": "{0} tbsp",
-					"unitPattern-count-other": "{0} tbsp"
-				},
-				"volume-teaspoon": {
-					"displayName": "tsp",
-					"unitPattern-count-one": "{0} tsp",
-					"unitPattern-count-other": "{0} tsp"
-				},
-				"coordinateUnit": {
-					"east": "{0} E",
-					"north": "{0} N",
-					"south": "{0} S",
-					"west": "{0} W"
-				}
-			}
-		}
-	};
-
 	var M_ISO639_OLD_TO_NEW = {
 			"iw" : "he",
-			"ji" : "yi",
-			"in" : "id",
-			"sh" : "sr"
+			"ji" : "yi"
 	};
 
 	/**
@@ -3097,6 +2016,60 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 	var mLocaleDatas = {};
 
 	/**
+	 * Creates a flat map from an object structure which contains a link to the parent ("_parent").
+	 * The values should contain the parent(s) and the element joined by <code>", "</code>.
+	 * The keys are the keys of the object structure joined by "/" excluding "_parent".
+	 *
+	 * E.g. input
+	 * <code>
+	 * {
+	 *     a: {
+	 *         a1: {
+	 *             a11: "A11",
+	 *             _parent: "A1"
+	 *         },
+	 *         _parent: "A"
+	 *     }
+	 * }
+	 * </code>
+	 *
+	 * output:
+	 * <code>
+	 * {
+	 *     "a/a1/a11": "A, A1, A11"
+	 * }
+	 * </code>
+	 *
+	 * @param {object} oNode the node which will be processed
+	 * @param {string} [sKey=""] the key inside the node which should be processed
+	 * @param {object} [oResult={}] the result which is passed through the recursion
+	 * @param {string[]} [aParentTranslations=[]] the list of parent translations, e.g. ["A", "A1"]
+	 * @returns {Object<string, string>} object map with key being the keys joined by "/" and the values joined by ", ".
+	 * @private
+	 */
+	function _resolveTimezoneTranslationStructure (oNode, sKey, oResult, aParentTranslations) {
+		aParentTranslations = aParentTranslations ? aParentTranslations.slice() : [];
+		oResult = oResult || {};
+
+		sKey = sKey || "";
+		Object.keys(oNode).forEach(function (sChildKey) {
+			var vChildNode = oNode[sChildKey];
+			if (typeof vChildNode === "object") {
+				var aParentTranslationForChild = aParentTranslations.slice();
+				var sParent = vChildNode["_parent"];
+				if (sParent) {
+					aParentTranslationForChild.push(sParent);
+				}
+				_resolveTimezoneTranslationStructure(vChildNode, sKey + sChildKey + "/", oResult, aParentTranslationForChild);
+			} else if (typeof vChildNode === "string" && sChildKey !== "_parent") {
+				var sParents = aParentTranslations.length ? aParentTranslations.join(", ") + ", " : "";
+				oResult[sKey + sChildKey] = sParents + vChildNode;
+			}
+		});
+		return oResult;
+	}
+
+	/**
 	 * Returns the corresponding calendar name in CLDR of the given calendar type, or the calendar type
 	 * from the configuration, in case sCalendarType is undefined.
 	 *
@@ -3123,8 +2096,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		/*
 		 * Merge a CLDR delta file and a CLDR fallback file.
 		 *
-		 * Note: the contract of this method reg. null values differs from both,
-		 * jQuery.extend as well as jQuery.sap.extend.
+		 * Note: this function can't be replaced by sap/base/util/extend or sap/base/util/merge
+		 * as its contract for null values differs from those modules.
 		 */
 		function merge(obj, fallbackObj) {
 			var name, value, fallbackValue;
@@ -3160,7 +2133,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 
 		function getOrLoad(sId) {
 			if ( !mLocaleDatas[sId] && (!M_SUPPORTED_LOCALES || M_SUPPORTED_LOCALES[sId] === true) ) {
-				var data = mLocaleDatas[sId] = jQuery.sap.loadResource("sap/ui/core/cldr/" + sId + ".json", {
+				var data = mLocaleDatas[sId] = LoaderExtensions.loadResource("sap/ui/core/cldr/" + sId + ".json", {
 					dataType: "json",
 					failOnError : false
 				});
@@ -3193,7 +2166,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 			}
 		}
 
-		var sId = sLanguage + "_" + sRegion; // the originally requested locale; this is the key under which the result (even a fallback one) will be stored in the end
+		// Special case 3: for Serbian, there is script cyrillic and latin, "sh" and "sr-latn" map to "latin", "sr" maps to cyrillic
+		// CLDR files: sr.json (cyrillic) and sr_Latn.json (latin)
+		if (sLanguage === "sh" || (sLanguage === "sr" && sScript === "Latn")) {
+			sLanguage = "sr_Latn";
+		}
+
+		// sId is the originally requested locale.
+		// this is the key under which the result (even a fallback one) will be stored in the end
+		var sId = sLanguage + "_" + sRegion;
+
+		// the locale of the loaded json file
+		var sCLDRLocaleId = sId;
+
 		// first try: load CLDR data for specific language / region combination
 		if ( sLanguage && sRegion ) {
 			mData = getOrLoad(sId);
@@ -3201,11 +2186,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 		// second try: load data for language only
 		if ( !mData && sLanguage ) {
 			mData = getOrLoad(sLanguage);
+			sCLDRLocaleId = sLanguage;
 		}
-		// last try: use fallback data
-		mLocaleDatas[sId] = mData || M_DEFAULT_DATA;
+		// last try: load data for default language "en" (english)
+		if (!mData) {
+			mData = getOrLoad("en");
+			sCLDRLocaleId = "en";
+		}
 
-		return mLocaleDatas[sId];
+		// store in cache
+		mLocaleDatas[sId] = mData;
+
+		sCLDRLocaleId = sCLDRLocaleId.replace(/_/g, "-");
+		return {
+			mData: mData,
+			sCLDRLocaleId: sCLDRLocaleId
+		};
 	}
 
 
@@ -3265,7 +2261,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Locale'],
 			var mData = this._getDeep(this.mData, arguments);
 			var mCustomData = this._getDeep(this.mCustomData, arguments);
 
-			return jQuery.extend({}, mData, mCustomData);
+			return extend({}, mData, mCustomData);
 		}
 	});
 

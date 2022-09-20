@@ -1,11 +1,11 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["jquery.sap.global", "./DragDropBase"],
-	function(jQuery, DragDropBase) {
+sap.ui.define(["./DragDropBase"],
+	function(DragDropBase) {
 	"use strict";
 
 	/**
@@ -21,7 +21,7 @@ sap.ui.define(["jquery.sap.global", "./DragDropBase"],
 	 * @extends sap.ui.core.dnd.DragDropBase
 	 *
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 *
 	 * @public
 	 * @since 1.56
@@ -85,7 +85,7 @@ sap.ui.define(["jquery.sap.global", "./DragDropBase"],
 			 * @param {object} oControlEvent.getParameters
 			 * @param {sap.ui.core.Element} oControlEvent.getParameters.target The target element on which the dragged element will be dropped
 			 * @param {sap.ui.core.dnd.DragSession} oControlEvent.getParameters.dragSession The UI5 <code>dragSession</code> object that exists only during drag and drop
-			 * @param {string} oControlEvent.getParameters.dropPosition The calculated position of the drop action relative to the <code>target</code>, possible values are <code>Before</code>, <code>On</code>, <code>After</code>
+			 * @param {sap.ui.core.dnd.RelativeDropPosition} oControlEvent.getParameters.dropPosition The calculated position of the drop action relative to the <code>target</code>.
 			 * @param {Event} oControlEvent.getParameters.browserEvent The underlying browser event
 			 * @public
 			 * @since 1.56
@@ -104,7 +104,7 @@ sap.ui.define(["jquery.sap.global", "./DragDropBase"],
 			 * @param {sap.ui.core.dnd.DragSession} oControlEvent.getParameters.dragSession The UI5 <code>dragSession</code> object that exists only during drag and drop
 			 * @param {sap.ui.core.Element} oControlEvent.getParameters.draggedControl The element being dragged
 			 * @param {sap.ui.core.Element} oControlEvent.getParameters.droppedControl The element being dropped
-			 * @param {string} oControlEvent.getParameters.dropPosition The calculated position of the drop action relative to the <code>droppedControl</code>, possible values are <code>Before</code>, <code>On</code>, <code>After</code>
+			 * @param {sap.ui.core.dnd.RelativeDropPosition} oControlEvent.getParameters.dropPosition The calculated position of the drop action relative to the <code>droppedControl</code>.
 			 * @param {Event} oControlEvent.getParameters.browserEvent The underlying browser event
 			 * @public
 			 */
@@ -131,9 +131,7 @@ sap.ui.define(["jquery.sap.global", "./DragDropBase"],
 
 		// droppable by default
 		var sTargetAggregation = this.getTargetAggregation();
-		var oMetadata = oDropTarget.getMetadata().getDragDropInfo(sTargetAggregation);
-		if (!oMetadata.droppable) {
-			jQuery.sap.log.warning((sTargetAggregation ? sTargetAggregation + " aggregation of " : "") + oDropTarget + " is not configured to be droppable");
+		if (!this.checkMetadata(oDropTarget, sTargetAggregation, "droppable")) {
 			return false;
 		}
 
@@ -223,4 +221,4 @@ sap.ui.define(["jquery.sap.global", "./DragDropBase"],
 
 	return DropInfo;
 
-}, /* bExport= */ true);
+});

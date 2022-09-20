@@ -1,12 +1,12 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.PlanningCalendarLegend.
-sap.ui.define(['sap/ui/unified/CalendarLegend', './PlanningCalendarLegendRenderer'],
-	function(CalendarLegend, PlanningCalendarLegendRenderer) {
+sap.ui.define(['sap/ui/unified/CalendarLegend', 'sap/ui/unified/CalendarAppointment', 'sap/ui/core/Core', './PlanningCalendarLegendRenderer'],
+	function(CalendarLegend, CalendarAppointment, Core, PlanningCalendarLegendRenderer) {
 		"use strict";
 
 
@@ -23,7 +23,7 @@ sap.ui.define(['sap/ui/unified/CalendarLegend', './PlanningCalendarLegendRendere
 		 * @extends sap.ui.unified.CalendarLegend
 		 *
 		 * @author SAP SE
-		 * @version 1.56.5
+		 * @version 1.106.0
 		 *
 		 * @constructor
 		 * @public
@@ -38,12 +38,12 @@ sap.ui.define(['sap/ui/unified/CalendarLegend', './PlanningCalendarLegendRendere
 				/**
 				 * Defines the text displayed in the header of the items list. It is commonly related to the calendar days.
 				 */
-				itemsHeader: { type: "string", group: "Appearance", defaultValue: "Calendar" },
+				itemsHeader: { type: "string", group: "Appearance" },
 
 				/**
 				 * Defines the text displayed in the header of the appointment items list. It is commonly related to the calendar appointments.
 				 */
-				appointmentItemsHeader: { type: "string", group: "Appearance", defaultValue: "Appointments" }
+				appointmentItemsHeader: { type: "string", group: "Appearance" }
 			},
 			aggregations : {
 				/**
@@ -70,6 +70,63 @@ sap.ui.define(['sap/ui/unified/CalendarLegend', './PlanningCalendarLegendRendere
 				sWidth = PlanningCalendarLegend._COLUMN_WIDTH_DEFAULT;
 			}
 			return this.setProperty("columnWidth", sWidth);
+		};
+
+		/*
+		* Finds the legend text for a given appointment or legend item.
+		*
+		* @param {sap.m.PlanningCalendarLegend} oLegend A legend
+		* @param {sap.ui.unified.CalendarLegendItem|sap.ui.unified.CalendarAppointment} oSpecialItem An appointment or a legend type
+		* @returns {string} The matching legend item's default text.
+		* @private
+		*/
+		PlanningCalendarLegend.findLegendItemForItem = function(oLegend, oSpecialItem) {
+			var aLegendAppointments = oLegend ? oLegend.getAppointmentItems() : null,
+				aLegendItems = oLegend ? oLegend.getItems() : null,
+				bAppointmentItem = oSpecialItem instanceof CalendarAppointment,
+				aItems = bAppointmentItem ? aLegendAppointments : aLegendItems,
+				oItemType = bAppointmentItem ? oSpecialItem.getType() : oSpecialItem.type,
+				oItem,
+				sLegendItemText,
+				i;
+
+			if (aItems && aItems.length) {
+				for (i = 0; i < aItems.length; i++) {
+					oItem = aItems[i];
+					if (oItem.getType() === oItemType) {
+						sLegendItemText = oItem.getText();
+						break;
+					}
+				}
+			}
+
+			// if the special item's type is not present in the legend's items,
+			// the screen reader has to read it's type
+			if (!sLegendItemText) {
+				sLegendItemText = oItemType;
+			}
+
+			return sLegendItemText;
+		};
+
+		PlanningCalendarLegend.prototype._getItemsHeader = function() {
+			var sItemsHeader = this.getItemsHeader();
+
+			if (sItemsHeader == undefined) {
+				return Core.getLibraryResourceBundle('sap.m').getText("PLANNING_CALENDAR_LEGEND_ITEMS_HEADER");
+			}
+
+			return sItemsHeader;
+		};
+
+		PlanningCalendarLegend.prototype._getAppointmentItemsHeader = function() {
+			var sAppointmentItemsHeader = this.getAppointmentItemsHeader();
+
+			if (sAppointmentItemsHeader == undefined) {
+				return Core.getLibraryResourceBundle('sap.m').getText("PLANNING_CALENDAR_LEGEND_APPOINTMENT_ITEMS_HEADER");
+			}
+
+			return sAppointmentItemsHeader;
 		};
 
 		return PlanningCalendarLegend;

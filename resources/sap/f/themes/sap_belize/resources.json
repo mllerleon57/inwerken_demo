@@ -3,54 +3,103 @@
 	"resources": [
 		{
 			"name": ".theming",
+			"size": 650,
 			"theme": "sap_belize"
 		},
 		{
-			"name": "Avatar.less",
+			"name": "Card.less",
+			"size": 207,
 			"designtime": true,
 			"theme": "sap_belize"
 		},
 		{
 			"name": "DynamicPage.less",
+			"size": 3242,
+			"designtime": true,
+			"theme": "sap_belize"
+		},
+		{
+			"name": "DynamicPageHeader.less",
+			"size": 374,
+			"designtime": true,
+			"theme": "sap_belize"
+		},
+		{
+			"name": "DynamicPageTitle.less",
+			"size": 668,
 			"designtime": true,
 			"theme": "sap_belize"
 		},
 		{
 			"name": "FlexibleColumnLayout.less",
+			"size": 803,
 			"designtime": true,
 			"theme": "sap_belize"
 		},
 		{
-			"name": "library-RTL-dbg.css",
-			"isDebug": true,
+			"name": "ShellBar.less",
+			"size": 304,
+			"designtime": true,
+			"theme": "sap_belize"
+		},
+		{
+			"name": "css_variables.css",
+			"size": 5485,
+			"theme": "sap_belize"
+		},
+		{
+			"name": "css_variables.less",
+			"size": 122418,
+			"designtime": true,
+			"theme": "sap_belize"
+		},
+		{
+			"name": "css_variables.source.less",
+			"size": 122058,
+			"designtime": true,
 			"theme": "sap_belize"
 		},
 		{
 			"name": "library-RTL.css",
-			"theme": "sap_belize"
-		},
-		{
-			"name": "library-dbg.css",
-			"isDebug": true,
+			"size": 108472,
 			"theme": "sap_belize"
 		},
 		{
 			"name": "library-parameters.json",
+			"module": "sap/f/themes/sap_belize/library-parameters.json",
+			"size": 2274,
 			"theme": "sap_belize"
 		},
 		{
 			"name": "library.css",
+			"size": 108467,
 			"theme": "sap_belize"
 		},
 		{
 			"name": "library.less",
+			"size": 6492,
 			"designtime": true,
 			"theme": "sap_belize"
 		},
 		{
 			"name": "library.source.less",
+			"size": 497,
 			"designtime": true,
 			"theme": "sap_belize"
+		},
+		{
+			"name": "library_skeleton-RTL.css",
+			"size": 111667,
+			"theme": "sap_belize"
+		},
+		{
+			"name": "library_skeleton.css",
+			"size": 111663,
+			"theme": "sap_belize"
+		},
+		{
+			"name": "resources.json",
+			"size": 1816
 		}
 	]
 }

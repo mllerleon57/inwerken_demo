@@ -3,64 +3,103 @@
 	"resources": [
 		{
 			"name": ".theming",
+			"size": 611,
 			"theme": "sap_belize_plus"
 		},
 		{
-			"name": "Avatar.less",
+			"name": "Card.less",
+			"size": 407,
 			"designtime": true,
 			"theme": "sap_belize_plus"
 		},
 		{
 			"name": "DynamicPage.less",
+			"size": 2551,
 			"designtime": true,
 			"theme": "sap_belize_plus"
 		},
 		{
 			"name": "DynamicPageHeader.less",
+			"size": 580,
 			"designtime": true,
 			"theme": "sap_belize_plus"
 		},
 		{
 			"name": "DynamicPageTitle.less",
+			"size": 698,
 			"designtime": true,
 			"theme": "sap_belize_plus"
 		},
 		{
 			"name": "FlexibleColumnLayout.less",
+			"size": 499,
 			"designtime": true,
 			"theme": "sap_belize_plus"
 		},
 		{
-			"name": "library-RTL-dbg.css",
-			"isDebug": true,
+			"name": "ShellBar.less",
+			"size": 292,
+			"designtime": true,
+			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "css_variables.css",
+			"size": 5493,
+			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "css_variables.less",
+			"size": 122428,
+			"designtime": true,
+			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "css_variables.source.less",
+			"size": 122058,
+			"designtime": true,
 			"theme": "sap_belize_plus"
 		},
 		{
 			"name": "library-RTL.css",
-			"theme": "sap_belize_plus"
-		},
-		{
-			"name": "library-dbg.css",
-			"isDebug": true,
+			"size": 112676,
 			"theme": "sap_belize_plus"
 		},
 		{
 			"name": "library-parameters.json",
+			"module": "sap/f/themes/sap_belize_plus/library-parameters.json",
+			"size": 2278,
 			"theme": "sap_belize_plus"
 		},
 		{
 			"name": "library.css",
+			"size": 112671,
 			"theme": "sap_belize_plus"
 		},
 		{
 			"name": "library.less",
+			"size": 5942,
 			"designtime": true,
 			"theme": "sap_belize_plus"
 		},
 		{
 			"name": "library.source.less",
+			"size": 513,
 			"designtime": true,
 			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "library_skeleton-RTL.css",
+			"size": 116062,
+			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "library_skeleton.css",
+			"size": 116058,
+			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "resources.json",
+			"size": 1906
 		}
 	]
 }

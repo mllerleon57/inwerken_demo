@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([],function(){"use strict";var R={};(function(){R.render=function(r,c){r.write("<div");r.writeControlData(c);r.addClass("sapUiRFL");r.writeClasses();var s=c._getAccessibleRole();var a;if(s){a={role:s};}r.writeAccessibilityState(c,a);r.write(">");r.write("</div>");};}());return R;},true);
+sap.ui.define([],function(){"use strict";var e={apiVersion:2};(function(){e.render=function(e,i){e.openStart("div",i);e.class("sapUiRFL");var n=i._getAccessibleRole();var t;if(n){t={role:n}}e.accessibilityState(i,t);e.openEnd();e.close("div")}})();return e},true);
+//# sourceMappingURL=ResponsiveFlowLayoutRenderer.js.map

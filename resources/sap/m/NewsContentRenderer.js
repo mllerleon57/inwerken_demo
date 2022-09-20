@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([],function(){"use strict";var N={};N.render=function(r,c){var s=c.getSubheader();var t=c.getTooltip_AsString();if(typeof t!=="string"){t="";}r.write("<div");r.writeControlData(c);r.writeAttribute("id",c.getId()+"-news-content");r.writeAttribute("role","presentation");r.writeAttributeEscaped("aria-label",t);r.addClass("sapMNwC");if(c.hasListeners("press")){r.addClass("sapMPointer");r.writeAttribute("tabindex","0");}r.writeClasses();r.write(">");r.write("<div");r.addClass("sapMNwCCTxt");r.writeClasses();r.write(">");r.renderControl(c._oContentText);r.write("</div>");r.write("<div");r.writeAttribute("id",c.getId()+"-subheader");r.addClass("sapMNwCSbh");r.writeClasses();r.write(">");r.writeEscaped(s);r.write("</div>");r.write("</div>");};return N;},true);
+sap.ui.define([],function(){"use strict";var e={apiVersion:2};e.render=function(e,t){var r=t.getTooltip_AsString();if(typeof r!=="string"){r=""}e.openStart("div",t);e.attr("role","presentation");e.attr("aria-label",r);e.class("sapMNwC");if(t.hasListeners("press")){e.class("sapMPointer");e.attr("tabindex","0")}e.openEnd();e.openStart("div");e.class("sapMNwCCTxt");e.openEnd();e.renderControl(t._oContentText);e.close("div");e.openStart("div",t.getId()+"-subheader");e.class("sapMNwCSbh");e.openEnd();e.renderControl(t._oSubHeaderText);e.close("div");e.close("div")};return e},true);
+//# sourceMappingURL=NewsContentRenderer.js.map

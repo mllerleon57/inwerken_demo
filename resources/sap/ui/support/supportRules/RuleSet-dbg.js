@@ -1,6 +1,6 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -8,11 +8,13 @@
  * The RuleSet is an interface used to create, update and delete ruleset containing rules.
  */
 sap.ui.define([
-	"jquery.sap.global",
+	"sap/base/Log",
+	"sap/base/util/Version",
+	"sap/ui/support/library",
 	"sap/ui/support/supportRules/Storage",
 	"sap/ui/support/supportRules/Constants"
 ],
-function (jQuery, storage, constants) {
+function (Log, Version, library, storage, constants) {
 	"use strict";
 
 	/**
@@ -37,7 +39,7 @@ function (jQuery, storage, constants) {
 	 * @name sap.ui.support.RuleSet
 	 * @memberof sap.ui.support
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 * @param {object} oSettings Name of the initiated
 	 * @returns {void}
 	 */
@@ -45,7 +47,7 @@ function (jQuery, storage, constants) {
 		oSettings = oSettings || {};
 
 		if (!oSettings.name) {
-			jQuery.sap.log.error("Please provide a name for the RuleSet.");
+			Log.error("Please provide a name for the RuleSet.");
 		}
 
 		if (mRuleSets[oSettings.name]) {
@@ -116,58 +118,58 @@ function (jQuery, storage, constants) {
 	RuleSet.prototype._verifySettingsObject = function (oSettings, bUpdate) {
 
 		if (!oSettings.id) {
-			jQuery.sap.log.error("Support rule needs an id.");
+			Log.error("Support rule needs an id.");
 			return "Support rule needs an unique id.";
 		}
 
 		if (!bUpdate && this._mRules[oSettings.id]) {
-			jQuery.sap.log.error("Support rule with the id " + oSettings.id + " already exists.");
+			Log.error("Support rule with the id " + oSettings.id + " already exists.");
 			return "Support rule with the id " + oSettings.id + " already exists.";
 		}
 
 		if (!oSettings.check) {
-			jQuery.sap.log.error("Support rule with the id " + oSettings.id + " needs a check function.");
+			Log.error("Support rule with the id " + oSettings.id + " needs a check function.");
 			return "Support rule with the id " + oSettings.id + " needs a check function.";
 		}
 
 		if (!oSettings.title) {
-			jQuery.sap.log.error("Support rule with the id " + oSettings.id + " needs a title.");
+			Log.error("Support rule with the id " + oSettings.id + " needs a title.");
 			return "Support rule with the id " + oSettings.id + " needs a title.";
 		}
 
 		if (!oSettings.description) {
-			jQuery.sap.log.error("Support rule with the id " + oSettings.id + " needs a description.");
+			Log.error("Support rule with the id " + oSettings.id + " needs a description.");
 			return "Support rule with the id " + oSettings.id + " needs a description.";
 		}
 
-		if (!oSettings.resolution && (!oSettings.resolutionurls || !oSettings.resolutionurls.length > 0)) {
-			jQuery.sap.log.error("Support rule with the id " + oSettings.id + " needs either a resolution or resolutionurls or should have a ticket handler function");
+		if (!oSettings.resolution && (!oSettings.resolutionurls || oSettings.resolutionurls.length === 0)) {
+			Log.error("Support rule with the id " + oSettings.id + " needs either a resolution or resolutionurls or should have a ticket handler function");
 			return "Support rule with the id " + oSettings.id + " needs either a resolution or resolutionurls or should have a ticket handler function";
 		}
 
 		if (!oSettings.audiences || oSettings.audiences.length === 0) {
-			jQuery.sap.log.error("Support rule with the id " + oSettings.id + " should have an audience. Applying audience ['Control']");
-			oSettings.audiences = [sap.ui.support.Audiences.Control];
+			Log.error("Support rule with the id " + oSettings.id + " should have an audience. Applying audience ['Control']");
+			oSettings.audiences = [library.Audiences.Control];
 		}
 
 		if (oSettings.audiences && oSettings.audiences.forEach) {
 			var bIsWrongAudience = false,
 				sAudienceName = "";
 			oSettings.audiences.forEach(function (aud) {
-				if (!sap.ui.support.Audiences[aud]) {
+				if (!library.Audiences[aud]) {
 					bIsWrongAudience = true;
 					sAudienceName = aud;
 				}
 			});
 
 			if (bIsWrongAudience) {
-				jQuery.sap.log.error("Audience " + sAudienceName + " does not exist. Please use the audiences from sap.ui.support.Audiences");
+				Log.error("Audience " + sAudienceName + " does not exist. Please use the audiences from sap.ui.support.Audiences");
 				return "Audience " + sAudienceName + " does not exist. Please use the audiences from sap.ui.support.Audiences";
 			}
 		}
 
 		if (!oSettings.categories || oSettings.categories.length === 0) {
-			jQuery.sap.log.error("Support rule with the id " + oSettings.id + " should have a category. Applying category ['Performance']");
+			Log.error("Support rule with the id " + oSettings.id + " should have a category. Applying category ['Performance']");
 			oSettings.categories = ["Performance"];
 		}
 
@@ -175,14 +177,14 @@ function (jQuery, storage, constants) {
 			var bIsWrongCategory = false,
 				sCategoryName = "";
 			oSettings.categories.forEach(function (cat) {
-				if (!sap.ui.support.Categories[cat]) {
+				if (!library.Categories[cat]) {
 					bIsWrongCategory = true;
 					sCategoryName = cat;
 				}
 			});
 
 			if (bIsWrongCategory) {
-				jQuery.sap.log.error("Category " + sCategoryName + " does not exist. Please use the categories from sap.ui.support.Categories");
+				Log.error("Category " + sCategoryName + " does not exist. Please use the categories from sap.ui.support.Categories");
 				return "Category " + sCategoryName + " does not exist. Please use the categories from sap.ui.support.Categories";
 			}
 		}
@@ -199,9 +201,9 @@ function (jQuery, storage, constants) {
 	 * @param {object} oSettings Settings object with rule information
 	 * @returns {string} sRuleVerificationStatus Verification status
 	 */
-	RuleSet.prototype.addRule = function (oSettings) {
+	RuleSet.prototype.addRule = function (oSettings, oVersionInfo) {
 
-		var sCurrentVersion = RuleSet.versionInfo ? RuleSet.versionInfo.version : '';
+		var sCurrentVersion = RuleSet.versionInfo ? RuleSet.versionInfo.version : oVersionInfo.version;
 
 		var sRuleVersion = oSettings.minversion ? oSettings.minversion : '';
 
@@ -212,7 +214,7 @@ function (jQuery, storage, constants) {
 
 		// Do not add a rule that is for higher version of UI5
 		// because APIs might not be in place
-		if (sRuleVersion && jQuery.sap.Version(sCurrentVersion).compareTo(sRuleVersion) < 0) {
+		if (sRuleVersion && Version(sCurrentVersion).compareTo(sRuleVersion) < 0) {
 			return "Rule " + oSettings.id + " should be used with a version >= " + oSettings.minversion;
 		}
 
@@ -227,21 +229,16 @@ function (jQuery, storage, constants) {
 	};
 
 	/**
-	 * Adds all previously created temporary rules to the current library rules.
+	 * Remove rule from RuleSet.
 	 * @public
-	 * @static
 	 * @method
-	 * @name sap.ui.support.RuleSet.addToTempRules
+	 * @name sap.ui.support.RuleSet.removeRule
 	 * @memberof sap.ui.support.RuleSet
-	 * @param {object} oLibraries The loaded libraries and their rules
-	 * @param {string[]} aTempRules The temporary rules previously created by the user
+	 * @param {object} oRule Rule object that will be removed
 	 */
-	RuleSet.addToTempRules = function (oLibraries, aTempRules) {
-		if (aTempRules) {
-			aTempRules.forEach(function (tempRule) {
-				var ruleName = tempRule.id;
-				oLibraries[constants.TEMP_RULESETS_NAME].RuleSet._mRules[ruleName] = tempRule;
-			});
+	RuleSet.prototype.removeRule = function (oRule) {
+		if (this._mRules[oRule.id]) {
+			delete this._mRules[oRule.id];
 		}
 	};
 

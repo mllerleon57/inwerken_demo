@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],function(q){"use strict";try{sap.ui.getCore().loadLibrary("sap.ui.unified");}catch(e){q.sap.log.error("The controls/elements 'sap.ui.commons.Menu*' needs library 'sap.ui.unified'.");throw(e);}q.sap.require("sap.ui.unified.MenuItemBase");return sap.ui.require("sap/ui/unified/MenuItemBase");},true);
+sap.ui.define(["sap/base/Log","sap/ui/core/Core"],function(e,i){"use strict";try{sap.ui.getCore().loadLibrary("sap.ui.unified")}catch(i){e.error("The controls/elements 'sap.ui.commons.Menu*' needs library 'sap.ui.unified'.");throw i}jQuery.sap.require("sap.ui.unified.MenuItemBase");return sap.ui.require("sap/ui/unified/MenuItemBase")},true);
+//# sourceMappingURL=MenuItemBase.js.map

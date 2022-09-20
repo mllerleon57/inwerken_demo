@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','./CalloutBaseRenderer','sap/ui/core/Renderer'],function(q,C,R){"use strict";var a=R.extend(C);a.renderContent=function(r,c){var b=r;var d=c.getContent();for(var i=0;i<d.length;i++){b.renderControl(d[i]);}};a.addRootClasses=function(r,c){r.addClass("sapUiClt");};a.addContentClasses=function(r,c){r.addClass("sapUiCltCont");};a.addArrowClasses=function(r,c){r.addClass("sapUiCltArr");};return a;},true);
+sap.ui.define(["./CalloutBaseRenderer","sap/ui/core/Renderer"],function(e,n){"use strict";var t=n.extend(e);t.renderContent=function(e,n){var t=n.getContent();for(var s=0;s<t.length;s++){e.renderControl(t[s])}};t.addRootClasses=function(e,n){e.addClass("sapUiClt")};t.addContentClasses=function(e,n){e.addClass("sapUiCltCont")};t.addArrowClasses=function(e,n){e.addClass("sapUiCltArr")};return t},true);
+//# sourceMappingURL=CalloutRenderer.js.map

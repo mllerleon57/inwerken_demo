@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['./SemanticButton'],function(S){"use strict";var F=S.extend("sap.f.semantic.FullScreenAction",{metadata:{library:"sap.f"}});return F;});
+sap.ui.define(["./SemanticButton"],function(t){"use strict";var e=t.extend("sap.f.semantic.FullScreenAction",{metadata:{library:"sap.f"}});return e});
+//# sourceMappingURL=FullScreenAction.js.map

@@ -1,1 +1,2 @@
-ace.define("ace/snippets/gitignore",["require","exports","module"],function(r,e,m){"use strict";e.snippetText=undefined;e.scope="gitignore";});
+(function(){ace.require(["ace/snippets/gitignore"],function(e){if(typeof module=="object"&&typeof exports=="object"&&module){module.exports=e}})})();
+//# sourceMappingURL=gitignore.js.map

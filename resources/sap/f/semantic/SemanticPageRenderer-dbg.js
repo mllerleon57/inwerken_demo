@@ -1,6 +1,6 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define([], function() {
@@ -9,22 +9,22 @@ sap.ui.define([], function() {
 	/**
 	* <code>sap.f.semantic.SemanticPage</code> renderer.
 	*/
-	var SemanticPageRenderer = {};
+	var SemanticPageRenderer = {
+		apiVersion: 2
+	};
 
 	/**
 	* Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	*
 	* @param {sap.ui.core.RenderManager} oRenderManager The RenderManager that can be used for writing to the Render-Output-Buffer
-	* @param {sap.ui.core.Control} oSemanticPage An object representation of the control that should be rendered
+	* @param {sap.f.semantic.SemanticPage} oSemanticPage An object representation of the control that should be rendered
 	*/
 	SemanticPageRenderer.render = function(oRenderManager, oSemanticPage) {
-		oRenderManager.write("<div");
-		oRenderManager.writeControlData(oSemanticPage);
-		oRenderManager.addClass("sapFSemanticPage");
-		oRenderManager.writeClasses();
-		oRenderManager.write(">");
+		oRenderManager.openStart("div", oSemanticPage);
+		oRenderManager.class("sapFSemanticPage");
+		oRenderManager.openEnd();
 		oRenderManager.renderControl(oSemanticPage._getPage());
-		oRenderManager.write("</div>");
+		oRenderManager.close("div");
 	};
 
 	return SemanticPageRenderer;

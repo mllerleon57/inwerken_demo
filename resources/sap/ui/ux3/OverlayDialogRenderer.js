@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','sap/ui/core/Renderer','./OverlayRenderer'],function(q,R,O){"use strict";var a=R.extend(O);a.renderContent=function(r,c){var b=r;b.write("<div role='Main' class='sapUiUx3ODContent' id='"+c.getId()+"-content'>");var d=c.getContent();for(var i=0;i<d.length;i++){var e=d[i];b.renderControl(e);}b.write("</div>");};a.addRootClasses=function(r,c){var b=r;b.addClass("sapUiUx3OD");};a.addOverlayClasses=function(r,c){var b=r;b.addClass("sapUiUx3ODOverlay");};return a;},true);
+sap.ui.define(["sap/ui/core/Renderer","./OverlayRenderer"],function(e,n){"use strict";var r=e.extend(n);r.renderContent=function(e,n){e.write("<div role='Main' class='sapUiUx3ODContent' id='"+n.getId()+"-content'>");var r=n.getContent();for(var t=0;t<r.length;t++){var a=r[t];e.renderControl(a)}e.write("</div>")};r.addRootClasses=function(e,n){e.addClass("sapUiUx3OD")};r.addOverlayClasses=function(e,n){e.addClass("sapUiUx3ODOverlay")};return r},true);
+//# sourceMappingURL=OverlayDialogRenderer.js.map

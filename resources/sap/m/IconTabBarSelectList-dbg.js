@@ -1,359 +1,391 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.IconTabBarSelectList.
 sap.ui.define([
-	'jquery.sap.global',
-	'./library',
-	'sap/ui/core/Control',
-	'sap/ui/core/delegate/ItemNavigation',
-	'./IconTabBarDragAndDropUtil',
-	'./IconTabBarSelectListRenderer',
-	'sap/ui/core/dnd/DragInfo',
-	'sap/ui/core/dnd/DropInfo'
-],
-	function(jQuery, library, Control, ItemNavigation, IconTabBarDragAndDropUtil, IconTabBarSelectListRenderer, DragInfo, DropInfo) {
-		"use strict";
+	"./library",
+	"./IconTabBarDragAndDropUtil",
+	"./IconTabBarSelectListRenderer",
+	"sap/ui/core/Control",
+	"sap/ui/core/delegate/ItemNavigation",
+	"sap/ui/core/theming/Parameters",
+	"sap/ui/core/library"
+], function(
+	library,
+	IconTabBarDragAndDropUtil,
+	IconTabBarSelectListRenderer,
+	Control,
+	ItemNavigation,
+	Parameters,
+	coreLibrary
+) {
+	"use strict";
 
-		/**
-		 * Constructor for a new <code>sap.m.IconTabBarSelectList</code>.
-		 *
-		 * @param {string} [sId] ID for the new control, generated automatically if no ID is given.
-		 * @param {object} [mSettings] Initial settings for the new control.
-		 *
-		 * @class
-		 * The <code>sap.m.IconTabBarSelectList</code> displays a list of items that allows the user to select an item.
-		 * @extends sap.ui.core.Control
-		 *
-		 * @author SAP SE
-		 * @version 1.56.5
-		 *
-		 * @constructor
-		 * @private
-		 * @since 1.42.0
-		 * @alias sap.m.IconTabBarSelectList
-		 * @ui5-metamodel This control will also be described in the UI5 (legacy) design time meta model.
-		 */
-		var IconTabBarSelectList = Control.extend("sap.m.IconTabBarSelectList", /** @lends sap.m.IconTabBarSelectList.prototype */ {
-			metadata: {
-				library: "sap.m",
-				aggregations : {
+	// shortcut for sap.ui.core.dnd.DropPosition
+	var DropPosition = coreLibrary.dnd.DropPosition;
+
+	/**
+	 * Constructor for a new <code>sap.m.IconTabBarSelectList</code>.
+	 *
+	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given.
+	 * @param {object} [mSettings] Initial settings for the new control.
+	 *
+	 * @class
+	 * The <code>sap.m.IconTabBarSelectList</code> displays a list of items that allows the user to select an item.
+	 * @extends sap.ui.core.Control
+	 *
+	 * @author SAP SE
+	 * @version 1.106.0
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.42.0
+	 * @alias sap.m.IconTabBarSelectList
+	 * @ui5-metamodel This control will also be described in the UI5 (legacy) design time meta model.
+	 */
+	var IconTabBarSelectList = Control.extend("sap.m.IconTabBarSelectList", /** @lends sap.m.IconTabBarSelectList.prototype */ { metadata: {
+		library: "sap.m",
+		aggregations : {
+			/**
+			 * The items displayed in the list.
+			 */
+			items : {type : "sap.m.IconTab", multiple : true, singularName : "item", dnd : true}
+		},
+		events: {
+			/**
+			 * This event is fired when the selection has changed.
+			 *
+			 * <b>Note: </b> The selection can be changed by pressing a non-selected item,
+			 * via keyboard and after the Enter or Space key is pressed.
+			 */
+			selectionChange: {
+				parameters: {
 					/**
-					 * The items displayed in the list.
+					 * The selected item.
 					 */
-					items : {type : "sap.m.IconTabFilter", multiple : true, singularName : "item", dnd : true}
-				},
-				events: {
-					/**
-					 * This event is fired when the selection has changed.
-					 *
-					 * <b>Note: </b> The selection can be changed by pressing a non-selected item,
-					 * via keyboard and after the Enter or Space key is pressed.
-					 */
-					selectionChange: {
-						parameters: {
-							/**
-							 * The selected item.
-							 */
-							selectedItem: { type: "sap.m.IconTabFilter" }
-						}
-					}
+					selectedItem: { type: "sap.m.IconTabFilter" }
 				}
+			}
+		}
+	}});
+
+	/**
+	 * Initializes the control.
+	 * @private
+	 * @override
+	 */
+	IconTabBarSelectList.prototype.init = function () {
+		this._oItemNavigation = new ItemNavigation();
+		this._oItemNavigation.setCycling(false);
+		this.addEventDelegate(this._oItemNavigation);
+		this._oItemNavigation.setPageSize(10);
+		this._oIconTabHeader = null;
+		this._oTabFilter = null;
+	};
+
+	/**
+	 * Clears the control dependencies.
+	 * @private
+	 */
+	IconTabBarSelectList.prototype.exit = function () {
+		this._oItemNavigation.destroy();
+		this._oItemNavigation = null;
+		this._oIconTabHeader = null;
+		this._oTabFilter = null;
+	};
+
+	/**
+	 * Called before the control is rendered.
+	 *
+	 * @private
+	 */
+	IconTabBarSelectList.prototype.onBeforeRendering = function () {
+		if (!this._oIconTabHeader) {
+			return;
+		}
+		this.destroyDragDropConfig();
+		this._setsDragAndConfiguration();
+	};
+
+	/**
+	 * Called after the control is rendered.
+	 *
+	 * @private
+	 */
+	IconTabBarSelectList.prototype.onAfterRendering = function () {
+		this._initItemNavigation();
+
+		// notify items that they are rendered
+		this.getItems().forEach(function (oItem) {
+			if (oItem._onAfterParentRendering) {
+				oItem._onAfterParentRendering();
 			}
 		});
+	};
 
-		/**
-		 * Initializes the control.
-		 * @private
-		 * @override
-		 */
-		IconTabBarSelectList.prototype.init = function () {
-			this._itemNavigation = new ItemNavigation();
-			this._itemNavigation.setCycling(false);
-			this.addEventDelegate(this._itemNavigation);
+	/**
+	 * Sets or remove Drag and Drop configuration.
+	 * @private
+	 */
+	IconTabBarSelectList.prototype._setsDragAndConfiguration = function () {
+		if (this._oIconTabHeader.getEnableTabReordering() && !this.getDragDropConfig().length) {
+			IconTabBarDragAndDropUtil.setDragDropAggregations(this, "Vertical", this._oIconTabHeader._getDropPosition());
+		}
+	};
 
-			this._itemNavigation.setPageSize(10);
-		};
+	/**
+	 * Initialize item navigation
+	 * @private
+	 */
+	IconTabBarSelectList.prototype._initItemNavigation = function () {
+		var aItems = this.getItems(),
+			aDomRefs = [],
+			oPrevSelectedItem = this._oIconTabHeader.oSelectedItem,
+			iSelectedDomIndex = -1,
+			oItem,
+			i;
 
-		/**
-		 * Clears the control dependencies.
-		 * @private
-		 */
-		IconTabBarSelectList.prototype.exit = function () {
-			if (this._itemNavigation) {
-				this._itemNavigation.destroy();
-				this._itemNavigation = null;
-			}
-		};
+		for (i = 0; i < aItems.length; i++) {
+			oItem = aItems[i];
 
-		/**
-		 * Called after the control is rendered.
-		 *
-		 * @private
-		 */
-		IconTabBarSelectList.prototype.onAfterRendering = function () {
-			this._initItemNavigation();
-		};
-
-		/**
-		 * Sets or remove Drag and Drop configuration.
-		 * @private
-		 */
-		IconTabBarSelectList.prototype._setsDragAndConfiguration = function() {
-			if (!this._iconTabHeader.getEnableTabReordering() && this.getDragDropConfig().length) {
-				//Destroying Drag&Drop aggregation
-				this.destroyDragDropConfig();
-			} else if (this._iconTabHeader.getEnableTabReordering() && !this.getDragDropConfig().length) {
-				IconTabBarDragAndDropUtil.setDragDropAggregations(this, DragInfo, DropInfo, "Vertical");
-			}
-		};
-
-		/**
-		 * Called before the control is rendered.
-		 *
-		 * @private
-		 */
-		IconTabBarSelectList.prototype.onBeforeRendering = function () {
-			if (!this._iconTabHeader) {
-				return;
+			if (oItem.isA("sap.m.IconTabFilter")) {
+				var aChildren = oItem._getAllSubFiltersDomRefs();
+				aDomRefs = aDomRefs.concat(oItem.getDomRef(), aChildren);
 			}
 
-			this._setsDragAndConfiguration();
-		};
-
-		/**
-		 * Initialize item navigation
-		 * @private
-		 */
-		IconTabBarSelectList.prototype._initItemNavigation = function() {
-			var item,
-				items = this.getItems(),
-				domRefs = [];
-
-			for (var i = 0; i < items.length; i++) {
-				item = items[i];
-				domRefs.push(item.getDomRef());
+			if (oPrevSelectedItem && this.getSelectedItem() && this.getSelectedItem()._getRealTab() === oPrevSelectedItem) {
+				iSelectedDomIndex = i;
 			}
+		}
 
-			this._itemNavigation.setRootDomRef(this.getDomRef());
-			this._itemNavigation.setItemDomRefs(domRefs);
+		if (oPrevSelectedItem && aDomRefs.indexOf(oPrevSelectedItem.getDomRef()) !== -1) {
+			iSelectedDomIndex = aDomRefs.indexOf(oPrevSelectedItem.getDomRef());
+		}
+
+		//Reinitialize the ItemNavigation after rendering
+		this._oItemNavigation.setRootDomRef(this.getDomRef())
+			.setItemDomRefs(aDomRefs)
+			.setSelectedIndex(iSelectedDomIndex);
+	};
+
+	/**
+	 * Returns all the items aggregations marked as visible.
+	 * @private
+	 * @returns {Array} Array of visible items.
+	 */
+	IconTabBarSelectList.prototype.getVisibleItems = function () {
+		return this.getItems().filter(function (oItem) {
+			return oItem.getVisible();
+		});
+	};
+
+	/**
+	 * Returns all IconTabFilters marked as visible.
+	 * @private
+	 * @returns {sap.m.IconTabFilter[]} Array of visible tab filters.
+	 */
+	IconTabBarSelectList.prototype.getVisibleTabFilters = function () {
+		return this.getVisibleItems().filter(function (oItem) {
+			return oItem.isA("sap.m.IconTabFilter");
+		});
+	};
+
+	IconTabBarSelectList.prototype.setSelectedItem = function (item) {
+		this._selectedItem = item;
+	};
+
+	IconTabBarSelectList.prototype.getSelectedItem = function () {
+		return this._selectedItem;
+	};
+
+	/**
+	 * Returns the IconTabHeader instance which holds all the TabFilters.
+	 */
+	IconTabBarSelectList.prototype._getIconTabHeader = function () {
+		return this._oIconTabHeader;
+	};
+
+	IconTabBarSelectList.prototype._getParams = function () {
+		var mParams = Object.assign({
+			"_sap_m_IconTabBar_SelectListItem_PaddingLeft": "0.5rem",
+			"_sap_m_IconTabBar_SelectListItem_PaddingLeftAdditional": "0"
+		}, Parameters.get({
+			name: [
+				"_sap_m_IconTabBar_SelectListItem_PaddingLeft",
+				"_sap_m_IconTabBar_SelectListItem_PaddingLeftAdditional"
+			],
+			callback: this.invalidate.bind(this)
+		}));
+
+		return {
+			fNestedItemPaddingLeft: Number.parseFloat(mParams["_sap_m_IconTabBar_SelectListItem_PaddingLeft"]),
+			fAdditionalPadding: Number.parseFloat(mParams["_sap_m_IconTabBar_SelectListItem_PaddingLeftAdditional"])
 		};
+	};
 
-		/**
-		 * Returns all the items aggregations marked as visible.
-		 *
-		 * @private
-		 */
-		IconTabBarSelectList.prototype.getVisibleItems = function() {
-			var items = this.getItems(),
-				visibleItems = [],
-				item;
+	/**
+	 * Checks if all tabs are textOnly version.
+	 * @private
+	 * @returns {boolean} True if all tabs are textOnly version, otherwise false
+	 */
+	IconTabBarSelectList.prototype._checkTextOnly = function () {
+		return this.getItems().every(function (oItem) {
+			return oItem.isA('sap.m.IconTabSeparator') || !oItem.getIcon();
+		});
+	};
 
-			for (var i = 0; i < items.length; i++) {
-				item = items[i];
+	/**
+	 * Handles tap event.
+	 * @private
+	 */
+	IconTabBarSelectList.prototype.ontap = function (oEvent) {
+		var oTappedItem = oEvent.srcControl;
 
-				if (item.getVisible()) {
-					visibleItems.push(item);
-				}
-			}
+		if (!oTappedItem) {
+			return;
+		}
 
-			return visibleItems;
-		};
+		if (!oTappedItem.isA("sap.m.IconTabFilter")) {
+			return;
+		}
 
-		IconTabBarSelectList.prototype.setSelectedItem = function (item) {
-			if (this._selectedItem) {
-				this._deselectItem(this._selectedItem);
-			}
+		if (this._oIconTabHeader._isUnselectable(oTappedItem)) {
+			return;
+		}
 
-			if (item) {
-				this._selectItem(item);
-			}
+		oEvent.preventDefault();
 
-			this._selectedItem = item;
-		};
+		if (oTappedItem != this.getSelectedItem()) {
+			this.fireSelectionChange({
+				selectedItem: oTappedItem
+			});
+		}
 
-		IconTabBarSelectList.prototype.getSelectedItem = function () {
-			return this._selectedItem;
-		};
+	};
 
-		/**
-		 * Deselects an item.
-		 * @private
-		 */
-		IconTabBarSelectList.prototype._deselectItem = function(item) {
-			var $item = item.$();
-			if ($item) {
-				$item.removeClass('sapMITBSelectItemSelected');
-				$item.removeAttr('aria-selected');
-			}
-		};
+	IconTabBarSelectList.prototype.onsapenter = IconTabBarSelectList.prototype.ontap;
+	IconTabBarSelectList.prototype.onsapspace = IconTabBarSelectList.prototype.ontap;
 
-		/**
-		 * Selects an item.
-		 * @private
-		 */
-		IconTabBarSelectList.prototype._selectItem = function(item) {
-			var $item = item.$();
-			if ($item) {
-				$item.addClass('sapMITBSelectItemSelected');
-				$item.attr('aria-selected', true);
-			}
-		};
+	/**
+	 * Checks if only an icon should be rendered.
+	 * @private
+	 * @returns {boolean} Flag indicating if all items are without text or count.
+	 */
+	IconTabBarSelectList.prototype.checkIconOnly = function () {
+		this._bIconOnly = this.getVisibleTabFilters().every(function (oItem) {
+			return !oItem.getText() && !oItem.getCount();
+		});
 
-		/**
-		 * Handles tap event.
-		 * @private
-		 */
-		IconTabBarSelectList.prototype.ontap = function (event) {
+		return this._bIconOnly;
+	};
 
-			var $target = jQuery(event.target);
+	/* =========================================================== */
+	/*           start: tab drag-drop                              */
+	/* =========================================================== */
 
-			if (!$target.hasClass('sapMITBSelectItem')) {
-				$target = $target.parent(".sapMITBSelectItem");
-			}
+	/**
+	 * Handles drop event for drag &  drop functionality
+	 * @param {jQuery.Event} oEvent
+	 * @private
+	 */
+	IconTabBarSelectList.prototype._handleDragAndDrop = function (oEvent) {
+		var sDropPosition = oEvent.getParameter("dropPosition"),
+			oDraggedControl = oEvent.getParameter("draggedControl"),
+			oDroppedControl = oEvent.getParameter("droppedControl"),
+			oContext = oDroppedControl._getRealTab().getParent(),
+			allowedNestingLevel = this._oIconTabHeader.getMaxNestingLevel();
 
-			var source = sap.ui.getCore().byId($target[0].id);
-			if (source && source.getEnabled()) {
+		if (this._oTabFilter._isOverflow()) {
+			oContext = this._oIconTabHeader;
+		}
 
-				event.preventDefault();
+		if (sDropPosition === DropPosition.On) {
+			oContext = oDroppedControl._getRealTab();
+		}
 
-				if (source != this.getSelectedItem()) {
-					this._selectItem(source);
-					this.fireSelectionChange({
-						selectedItem: source
-					});
-				}
-			}
+		IconTabBarDragAndDropUtil.handleDrop(oContext, sDropPosition, oDraggedControl._getRealTab(), oDroppedControl._getRealTab(), true, allowedNestingLevel);
 
-			if (this._iconTabHeader) {
-				this._iconTabHeader._closeOverflow();
-			}
-		};
+		this._oIconTabHeader._setItemsForStrip();
+		this._oIconTabHeader._initItemNavigation();
 
-		IconTabBarSelectList.prototype.onsapenter = IconTabBarSelectList.prototype.ontap;
-		IconTabBarSelectList.prototype.onsapspace = IconTabBarSelectList.prototype.ontap;
+		this._oTabFilter._setSelectListItems();
+		this._initItemNavigation();
 
-		/**
-		 * Checks if only an icon should be rendered.
-		 * @private
-		 */
-		IconTabBarSelectList.prototype.checkIconOnly = function (items) {
-			var item,
-				length = items.length;
+		oDroppedControl._getRealTab().getParent().$().trigger("focus");
+	};
 
-			for (var i = 0; i < length; i++) {
+	/* =========================================================== */
+	/*           start: tab keyboard handling - drag-drop          */
+	/* =========================================================== */
 
-				item = items[i];
+	/**
+	 * Handles keyboard drag&drop
+	 * @param {jQuery.Event} oEvent
+	 * @private
+	 */
+	IconTabBarSelectList.prototype.ondragrearranging = function (oEvent) {
+		if (!this._oIconTabHeader.getEnableTabReordering()) {
+			return;
+		}
 
-				if (item.getText() || item.getCount()) {
-					return false;
-				}
-			}
+		var oTabToBeMoved = oEvent.srcControl,
+			iKeyCode = oEvent.keyCode,
+			iIndexBeforeMove = this.indexOfItem(oTabToBeMoved),
+			oContext = this;
 
-			return true;
-		};
+		IconTabBarDragAndDropUtil.moveItem.call(oContext, oTabToBeMoved, iKeyCode, oContext.getItems().length - 1);
 
-		/* =========================================================== */
-		/*           start: tab drag-drop		                       */
-		/* =========================================================== */
+		this._initItemNavigation();
+		oTabToBeMoved.$().trigger("focus");
 
-		/**
-		 * Handles drop event for drag &  drop functionality
-		 * @param {jQuery.Event} oEvent
-		 * @private
-		 */
-		IconTabBarSelectList.prototype._handleDragAndDrop = function (oEvent) {
-			var oDropPosition = oEvent.getParameter("dropPosition"),
-				oDraggedControl = oEvent.getParameter("draggedControl"),
-				oDroppedControl = oEvent.getParameter("droppedControl"),
-				bDraggedHeaderItem = oDraggedControl.getParent().getMetadata().getName() === "sap.m.IconTabHeader",
-				oDragDropItemsFromList;
+		if (iIndexBeforeMove === this.indexOfItem(oTabToBeMoved)) {
+			return;
+		}
+		oContext = oTabToBeMoved._getRealTab().getParent();
+		if (this._oTabFilter._isOverflow() && oTabToBeMoved._getRealTab()._getNestedLevel() === 1) {
+			this._oIconTabHeader._moveTab(oTabToBeMoved._getRealTab(), iKeyCode, this._oIconTabHeader.getItems().length - 1);
+		} else {
+			IconTabBarDragAndDropUtil.moveItem.call(oContext, oTabToBeMoved._getRealTab(), iKeyCode, oContext.getItems().length - 1);
+		}
+	};
 
-				if (bDraggedHeaderItem) {
-					oDragDropItemsFromList = IconTabBarDragAndDropUtil.getDraggedDroppedItemsFromList(this.getAggregation("items"), oDraggedControl, oDroppedControl);
-					this._handleDropOfListAndHeaderItems(oDropPosition, oDragDropItemsFromList.oDraggedControlFromList, oDragDropItemsFromList.oDroppedControlFromList, oDraggedControl, oDroppedControl._tabFilter);
-				} else {
-					this._handleDropOfListAndHeaderItems(oDropPosition,oDraggedControl, oDroppedControl, oDraggedControl._tabFilter, oDroppedControl._tabFilter);
-				}
+	/**
+	 * Moves tab on first position
+	 * Ctrl + Home
+	 * @param {jQuery.Event} oEvent
+	 */
+	IconTabBarSelectList.prototype.onsaphomemodifiers = IconTabBarSelectList.prototype.ondragrearranging;
 
-			this._initItemNavigation();
-			oDraggedControl.$().focus();
-		};
+	/**
+	 * Move focused tab of IconTabHeader to last position
+	 * Ctrl + End
+	 * @param {jQuery.Event} oEvent
+	 */
+	IconTabBarSelectList.prototype.onsapendmodifiers = IconTabBarSelectList.prototype.ondragrearranging;
 
-		/**
-		 * Handle drag and drop in overflow list and header
-		 * @private
-		 */
-		IconTabBarSelectList.prototype._handleDropOfListAndHeaderItems = function (oDropPosition, oDraggedControl, oDroppedControl, oDragControlHeader, oDropControlHeader, bIgnoreRTL) {
-			//Handle Drop event for sap.m.IconTabBarSelectList
-			IconTabBarDragAndDropUtil.handleDrop(this, oDropPosition, oDraggedControl, oDroppedControl, true);
+	/**
+	 * Moves tab for Drag&Drop keyboard handling
+	 * Modifier + Right Arrow || Modifier + Arrow Up
+	 * @param {jQuery.Event} oEvent
+	 */
+	IconTabBarSelectList.prototype.onsapincreasemodifiers = IconTabBarSelectList.prototype.ondragrearranging;
 
-			//Handle Drop event for sap.m.IconTabHeader
-			IconTabBarDragAndDropUtil.handleDrop(this._iconTabHeader, oDropPosition, oDragControlHeader, oDropControlHeader, true);
-			this._iconTabHeader._initItemNavigation();
-		};
+	/**
+	 * Moves tab for Drag&Drop keyboard handling
+	 * Modifier + Left Arrow || Modifier + Arrow Down
+	 * @param {jQuery.Event} oEvent
+	 */
+	IconTabBarSelectList.prototype.onsapdecreasemodifiers = IconTabBarSelectList.prototype.ondragrearranging;
 
-		/* =========================================================== */
-		/*           start: tab keyboard handling - drag-drop          */
-		/* =========================================================== */
+	/* =========================================================== */
+	/*           end: tab keyboard handling - drag-drop            */
+	/* =========================================================== */
+	/* =========================================================== */
+	/*           end: tab drag-drop		                           */
+	/* =========================================================== */
 
-		/**
-		 * Handle keyboard drag&drop
-		 * Ctrl + Home
-		 * @param {jQuery.Event} oEvent
-		 * @private
-		 */
-		IconTabBarSelectList.prototype.ondragrearranging = function (oEvent) {
-			if (!this._iconTabHeader.getEnableTabReordering()) {
-				return;
-			}
-			var oTabToBeMoved = oEvent.srcControl,
-				iKeyCode = oEvent.keyCode;
-
-			IconTabBarDragAndDropUtil.moveItem.call(this, oTabToBeMoved, iKeyCode);
-			this._initItemNavigation();
-			oTabToBeMoved.$().focus();
-
-			this._iconTabHeader._moveTab(oTabToBeMoved._tabFilter, iKeyCode);
-		};
-
-		/**
-		 * Moves tab on first position
-		 * Ctrl + Home
-		 * @param {jQuery.Event} oEvent
-		 */
-		IconTabBarSelectList.prototype.onsaphomemodifiers = IconTabBarSelectList.prototype.ondragrearranging;
-
-		/**
-		 * Move focused tab of IconTabHeader to last position
-		 * Ctrl + End
-		 * @param {jQuery.Event} oEvent
-		 */
-		IconTabBarSelectList.prototype.onsapendmodifiers = IconTabBarSelectList.prototype.ondragrearranging;
-
-		/**
-		 * Moves tab for Drag&Drop keyboard handling
-		 * Ctrl + Left Right || Ctrl + Arrow Up
-		 * @param {jQuery.Event} oEvent
-		 */
-		IconTabBarSelectList.prototype.onsapincreasemodifiers = IconTabBarSelectList.prototype.ondragrearranging;
-
-		/**
-		 * Moves tab for Drag&Drop keyboard handling
-		 * Ctrl + Left Arrow || Ctrl + Arrow Down
-		 * @param {jQuery.Event} oEvent
-		 */
-		IconTabBarSelectList.prototype.onsapdecreasemodifiers = IconTabBarSelectList.prototype.ondragrearranging;
-
-		/* =========================================================== */
-		/*           end: tab keyboard handling - drag-drop            */
-		/* =========================================================== */
-		/* =========================================================== */
-		/*           end: tab drag-drop		                           */
-		/* =========================================================== */
-
-		return IconTabBarSelectList;
-	});
+	return IconTabBarSelectList;
+});

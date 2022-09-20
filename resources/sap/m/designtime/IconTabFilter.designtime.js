@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([],function(){"use strict";return{palette:{group:"CONTAINER",icons:{svg:"sap/m/designtime/IconTabFilter.icon.svg"}},actions:{rename:function(p){return{changeType:"rename",domRef:function(c){return c.$().find(".sapMITBText")[0];}};}},aggregations:{content:{domRef:function(c){var i=c.getParent(),I=i&&i.getParent(),C=c.getContent()||[];if(i.oSelectedItem===c&&C.length>0&&I){return I.getDomRef("content");}},actions:{move:"moveControls"}}}};},false);
+sap.ui.define([],function(){"use strict";return{palette:{group:"CONTAINER",icons:{svg:"sap/m/designtime/IconTabFilter.icon.svg"}},actions:{rename:function(e){return{changeType:"rename",domRef:function(e){return e.$().find(".sapMITBText")[0]}}}},aggregations:{content:{domRef:function(e){var n=e.getParent(),t=n&&n.getParent(),o=e.getContent()||[];if(n.oSelectedItem===e&&o.length>0&&t){return t.getDomRef("content")}},actions:{move:"moveControls"}}}}});
+//# sourceMappingURL=IconTabFilter.designtime.js.map

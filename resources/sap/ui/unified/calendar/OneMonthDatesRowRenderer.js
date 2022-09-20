@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['sap/ui/core/Renderer','./MonthRenderer','./DatesRowRenderer'],function(R,M,D){"use strict";var O=R.extend(D);["getClass","renderMonth","renderDays","renderHeader"].forEach(function(h){O[h]=function(r,d){if(d.iMode<2){return M[h].apply(M,arguments);}else{return D[h].apply(D,arguments);}};});return O;},true);
+sap.ui.define(["sap/ui/core/Renderer","./MonthRenderer","./DatesRowRenderer"],function(e,r,a){"use strict";var n=e.extend(a);n.apiVersion=2;["getClass","renderMonth","renderDays","renderHeader"].forEach(function(e){n[e]=function(n,s){if(s.iMode<2){return r[e].apply(r,arguments)}else{if(e==="getClass"){var t=["sapUiCalDatesRow","sapUiCalRow","sapUiCalOneMonthDatesRow"];if(!s.getShowDayNamesLine()){t.push("sapUiCalNoNameLine")}return t}return a[e].apply(a,arguments)}}});return n},true);
+//# sourceMappingURL=OneMonthDatesRowRenderer.js.map

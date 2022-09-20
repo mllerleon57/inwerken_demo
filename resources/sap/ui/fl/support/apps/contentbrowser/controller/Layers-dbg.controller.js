@@ -1,13 +1,14 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
 	"sap/ui/core/mvc/Controller",
-	"sap/ui/fl/support/apps/contentbrowser/utils/ErrorUtils"
-], function (Controller, ErrorUtils) {
+	"sap/ui/fl/support/apps/contentbrowser/utils/ErrorUtils",
+	"sap/ui/core/UIComponent"
+], function (Controller, ErrorUtils, UIComponent) {
 	"use strict";
 
 	/**
@@ -16,13 +17,13 @@ sap.ui.define([
 	 * @constructor
 	 * @alias sap.ui.fl.support.apps.contentbrowser.controller.Layers
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 * @experimental Since 1.45
 	 */
 	return Controller.extend("sap.ui.fl.support.apps.contentbrowser.controller.Layers", {
 		/**
 		 * Handler for triggering the navigation to a selected layer.
-		 * @param {Object} oEvent
+		 * @param {object} oEvent - Event object
 		 * @public
 		 */
 		onLayerSelected: function (oEvent) {
@@ -31,13 +32,13 @@ sap.ui.define([
 			var oLayerModelData = this.getView().getModel("layers").getData();
 			var sLayerName = oLayerModelData[sLayerBindingPath].name;
 
-			var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
-			oRouter.navTo("LayerContentMaster", {"layer": sLayerName});
+			var oRouter = UIComponent.getRouterFor(this);
+			oRouter.navTo("LayerContentMaster", {layer: sLayerName});
 		},
 
 		/**
 		 * Handler for displaying the stored error messages.
-		 * @param {Object} oEvent
+		 * @param {object} oEvent - Event object
 		 * @public
 		 */
 		handleMessagePopoverPress: function (oEvent) {

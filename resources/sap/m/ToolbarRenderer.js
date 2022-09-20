@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['./BarInPageEnabler'],function(B){"use strict";var T={};T.hasNewFlexBoxSupport=(function(){var s=document.documentElement.style;return(s.flex!==undefined||s.webkitFlexShrink!==undefined);}());T.render=B.prototype.render;T.decorateRootElement=function(r,t){r.addClass("sapMTB");r.writeAccessibilityState(t,{role:t._getAccessibilityRole()});if(!T.hasNewFlexBoxSupport){r.addClass("sapMTBOldFlex");}else{r.addClass("sapMTBNewFlex");}if(t.getActive()){r.addClass("sapMTBActive");r.writeAttribute("tabindex","0");}else{r.addClass("sapMTBInactive");}r.addClass("sapMTB"+t.getStyle());r.addClass("sapMTB-"+t.getActiveDesign()+"-CTX");var w=t.getWidth();var h=t.getHeight();w&&r.addStyle("width",w);h&&r.addStyle("height",h);};T.renderBarContent=function(r,t){t.getContent().forEach(function(c){B.addChildClassTo(c,t);r.renderControl(c);});};T.shouldAddIBarContext=function(c){return false;};return T;},true);
+sap.ui.define(["./BarInPageEnabler"],function(e){"use strict";var t={apiVersion:2};t.render=e.prototype.render;t.writeAccessibilityState=function(e,t){var i={role:t._getAccessibilityRole()};if(!t.getAriaLabelledBy().length){i.labelledby=t.getTitleId()}if(t.getActive()){i.haspopup=t.getAriaHasPopup()}if(t._sAriaRoleDescription){i.roledescription=t._sAriaRoleDescription}e.accessibilityState(t,i)};t.decorateRootElement=function(e,t){this.writeAccessibilityState(e,t);e.class("sapMTB");e.class("sapMTBNewFlex");if(t.getActive()){e.class("sapMTBActive");e.attr("tabindex","0")}else{e.class("sapMTBInactive")}e.class("sapMTB"+t.getStyle());e.class("sapMTB-"+t.getActiveDesign()+"-CTX");e.style("width",t.getWidth());e.style("height",t.getHeight())};t.renderBarContent=function(t,i){i.getContent().forEach(function(s){e.addChildClassTo(s,i);t.renderControl(s)})};t.shouldAddIBarContext=function(e){return false};return t},true);
+//# sourceMappingURL=ToolbarRenderer.js.map

@@ -1,14 +1,16 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.plugin.TemplatingSupport
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/core/tmpl/Template'],
-	function(jQuery, Core, Template) {
+sap.ui.define([
+	"sap/base/Log",
+	'sap/ui/core/tmpl/Template', // provides sap.ui.template
+	'sap/ui/core/Core' // provides sap.ui.getCore()
+], function(Log) {
 	"use strict";
-
 
 
 	/**
@@ -18,7 +20,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/core/tmpl/Templa
 	 * @author Peter Muessig
 	 * @public
 	 * @since 1.15.0
-	 * @version 1.56.5
+	 * @deprecated since 1.56, use an {@link sap.ui.core.mvc.XMLView} or a {@link topic:e6bb33d076dc4f23be50c082c271b9f0 Typed View} instead
+	 * @version 1.106.0
 	 * @alias sap.ui.core.plugin.TemplatingSupport
 	 */
 	var TemplatingSupport = function() {
@@ -33,7 +36,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/core/tmpl/Templa
 	 * @public
 	 */
 	TemplatingSupport.prototype.startPlugin = function(oCore, bOnInit) {
-		jQuery.sap.log.info("Starting TemplatingSupport plugin.");
+		Log.info("Starting TemplatingSupport plugin.");
 		this.oCore = oCore;
 		sap.ui.template();
 	};
@@ -43,7 +46,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/core/tmpl/Templa
 	 * @public
 	 */
 	TemplatingSupport.prototype.stopPlugin = function() {
-		jQuery.sap.log.info("Stopping TemplatingSupport plugin.");
+		Log.info("Stopping TemplatingSupport plugin.");
 		this.oCore = null;
 	};
 
@@ -52,10 +55,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/core/tmpl/Templa
 	 * Create the <code>sap.ui.core.plugin.TemplatingSupport</code> plugin and
 	 * register it within the <code>sap.ui.core.Core</code>.
 	 */
-	(function(){
-		var oThis = new TemplatingSupport();
-		sap.ui.getCore().registerPlugin(oThis);
-	}());
+	sap.ui.getCore().registerPlugin(new TemplatingSupport());
 
 	return TemplatingSupport;
 

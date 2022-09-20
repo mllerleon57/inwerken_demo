@@ -1,18 +1,20 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.UploadCollectionItem.
 sap.ui.define([
-	"jquery.sap.global",
 	"./library",
 	"sap/ui/core/Element",
 	"sap/m/ObjectAttribute",
 	"sap/ui/core/util/File",
-	"sap/ui/Device"
-], function(jQuery, library, Element, ObjectAttribute, FileUtil, Device) {
+	"sap/ui/Device",
+	"sap/base/Log",
+	"sap/base/util/ObjectPath",
+	"sap/ui/thirdparty/jquery"
+], function(library, Element, ObjectAttribute, FileUtil, Device, Log, ObjectPath, jQuery) {
 	"use strict";
 
 	/**
@@ -26,10 +28,11 @@ sap.ui.define([
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated as of version 1.88
 	 * @since 1.26.0
 	 * @alias sap.m.UploadCollectionItem
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
@@ -48,7 +51,8 @@ sap.ui.define([
 				contributor: {
 					type: "string",
 					group: "Data",
-					defaultValue: null
+					defaultValue: null,
+					deprecated: true
 				},
 
 				/**
@@ -76,7 +80,8 @@ sap.ui.define([
 				fileSize: {
 					type: "float",
 					group: "Misc",
-					defaultValue: null
+					defaultValue: null,
+					deprecated: true
 				},
 
 				/**
@@ -105,7 +110,8 @@ sap.ui.define([
 				uploadedDate: {
 					type: "string",
 					group: "Misc",
-					defaultValue: null
+					defaultValue: null,
+					deprecated: true
 				},
 
 				/**
@@ -321,23 +327,27 @@ sap.ui.define([
 		}
 		// If there isn't URL, download is not possible
 		if (!this.getUrl()) {
-			jQuery.sap.log.warning("Items to download do not have a URL.");
+			Log.warning("Items to download do not have a URL.");
 			return false;
 		} else if (askForLocation) {
-			var oBlob = null;
-			var oXhr = new window.XMLHttpRequest();
-			oXhr.open("GET", this.getUrl());
-			oXhr.responseType = "blob";// force the HTTP response, response-type header to be blob
-			oXhr.onload = function() {
-				var sFileName = this.getFileName();
-				var oFileNameAndExtension = this._splitFileName(sFileName, false);
-				var sFileExtension = oFileNameAndExtension.extension;
-				sFileName = oFileNameAndExtension.name;
-				oBlob = oXhr.response; // oXhr.response is now a blob object
-				FileUtil.save(oBlob, sFileName, sFileExtension, this.getMimeType(), "utf-8");
-			}.bind(this);
-			oXhr.send();
-			return true;
+            var sFileName = this.getFileName();
+            var oFileNameAndExtension = this._splitFileName(sFileName, false);
+            var data = null;
+            var oXhr = new window.XMLHttpRequest();
+            oXhr.open("GET", this.getUrl());
+            // For "csv" type response type should be "string" as sap.ui.core.util.File.save API expects data to be in string.
+            // To .csv files prepend utf-8 byte-order-mark will be added to string so blob type will fail.
+            if (oFileNameAndExtension.extension !== "csv") {
+                oXhr.responseType = "blob";// force the HTTP response, response-type header to be blob. Note:- by default it will be string.
+            }
+            oXhr.onload = function() {
+                var sFileExtension = oFileNameAndExtension.extension;
+                sFileName = oFileNameAndExtension.name;
+                data = oXhr.response; // oXhr.response is now a blob object
+                FileUtil.save(data, sFileName, sFileExtension, this.getMimeType(), 'utf-8');
+            }.bind(this);
+            oXhr.send();
+            return true;
 		} else {
 			library.URLHelper.redirect(this.getUrl(), true);
 			return true;
@@ -375,7 +385,7 @@ sap.ui.define([
 		jQuery.each(aProperties, function(i, sName) {
 			var sValue = this.getProperty(sName),
 				oAttribute = this._mDeprecatedProperties[sName];
-			if (jQuery.type(sValue) === "number" && !!sValue || !!sValue) {
+			if (sValue) {
 				if (!oAttribute) {
 					oAttribute = new ObjectAttribute({
 						active: false
@@ -414,11 +424,13 @@ sap.ui.define([
 	 * @returns {sap.ui.base.ManagedObject} Newly created instance
 	 */
 	UploadCollectionItem.prototype._getControl = function(name, settings, getterName) {
-		var fnConstructor = jQuery.sap.getObject(name),
+		var fnConstructor = ObjectPath.get(name || ""),
 			oInstance = new fnConstructor(settings);
 		this._aManagedInstances.push(oInstance);
 		if (getterName) {
-			this["_get" + getterName] = jQuery.sap.getter(oInstance);
+			this["_get" + getterName] = function() {
+				return oInstance;
+			};
 		}
 		return oInstance;
 	};
@@ -429,7 +441,17 @@ sap.ui.define([
 	 * @private
 	 */
 	UploadCollectionItem.prototype._getPressEnabled = function() {
-		return this.hasListeners("press") || !!jQuery.trim(this.getUrl());
+		return this.hasListeners("press") || this._hasUrl();
+	};
+
+	/**
+	 * Checks if item has a non-empty URL.
+	 * @returns {boolean} True if item has a non-empty URL.
+	 * @private
+	 */
+	UploadCollectionItem.prototype._hasUrl = function() {
+		var sUrl = this.getUrl();
+		return sUrl != null && !!sUrl.trim();
 	};
 
 	return UploadCollectionItem;

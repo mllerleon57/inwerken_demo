@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],function(q){"use strict";var M={};M.render=function(r,c){var a=r;a.write('<ul class="sapUiMsgList"');a.writeControlData(c);a.write(">");for(var i=c.aMessages.length-1;i>=0;i--){a.write('<li class="sapUiMsgListLi">');a.renderControl(c.aMessages[i]);a.write("</li>");}a.write("</ul>");};return M;},true);
+sap.ui.define([],function(){"use strict";var e={};e.render=function(e,r){e.write('<ul class="sapUiMsgList"');e.writeControlData(r);e.write(">");for(var s=r.aMessages.length-1;s>=0;s--){e.write('<li class="sapUiMsgListLi">');e.renderControl(r.aMessages[s]);e.write("</li>")}e.write("</ul>")};return e},true);
+//# sourceMappingURL=MessageListRenderer.js.map

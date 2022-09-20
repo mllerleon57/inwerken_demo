@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([],function(){"use strict";var V={};V.render=function(r,v){var a=r;a.write("<DIV");a.writeControlData(v);a.addClass("sapUiVlt");a.addClass("sapuiVlt");if(v.getWidth()&&v.getWidth()!=''){a.addStyle("width",v.getWidth());}a.writeStyles();a.writeClasses();a.write(">");var c=v.getContent();for(var i=0;i<c.length;i++){a.write("<DIV class=\"sapUiVltCell sapuiVltCell\">");a.renderControl(c[i]);a.write("</DIV>");}a.write("</DIV>");};return V;},true);
+sap.ui.define([],function(){"use strict";var t={apiVersion:2};t.render=function(t,e){var i=t;i.openStart("div",e);i.class("sapUiVlt");i.class("sapuiVlt");if(e.getWidth()&&e.getWidth()!=""){i.style("width",e.getWidth())}i.openEnd();var n=e.getContent();for(var s=0;s<n.length;s++){i.openStart("div");i.class("sapUiVltCell");i.class("sapuiVltCell");i.openEnd();i.renderControl(n[s]);i.close("div")}i.close("div")};return t},true);
+//# sourceMappingURL=VerticalLayoutRenderer.js.map

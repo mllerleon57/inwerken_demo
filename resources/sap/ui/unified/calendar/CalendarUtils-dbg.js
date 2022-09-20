@@ -1,11 +1,12 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
+// package documentation
 /**
- * Calendar Utility Class
+ * Controls and helper classes around the calendar control.
  *
  * @namespace
  * @name sap.ui.unified.calendar
@@ -13,8 +14,14 @@
  */
 
 // Provides class sap.ui.unified.calendar.CalendarUtils
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './CalendarDate', 'sap/ui/core/Locale', 'sap/ui/core/LocaleData'],
-	function (jQuery, UniversalDate, CalendarDate, Locale, LocaleData) {
+sap.ui.define([
+	'sap/ui/core/date/UniversalDate',
+	'./CalendarDate',
+	'sap/ui/core/Locale',
+	'sap/ui/core/LocaleData',
+	'sap/ui/core/format/TimezoneUtil'
+],
+	function(UniversalDate, CalendarDate, Locale, LocaleData, TimezoneUtil) {
 		"use strict";
 
 		// Static class
@@ -28,14 +35,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 
 		/**
 		 * The maximum ECMAScript Date converted to milliseconds.
-		 * @type {number} milliseconds
+		 * @type {int}
 		 * @private
 		 */
 		CalendarUtils.MAX_MILLISECONDS = 8640000000000000;
 
 		/**
 		 * 24 hours as milliseconds
-		 * @type {number} milliseconds
+		 * @type {int}
 		 * @private
 		 */
 		CalendarUtils.HOURS24 = 1000 * 3600 * 24;
@@ -119,7 +126,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		 * @param {Date} oDate in local timezone
 		 * @param {sap.ui.core.CalendarType} sCalendarType the type of the used calendar
 		 * @param {boolean} bTime if set the time part of the date will be used too, otherwise it will be initial
-		 * @return {UniversalDate} in UTC timezone
+		 * @return {sap.ui.core.date.UniversalDate} in UTC timezone
 		 * @private
 		 */
 		CalendarUtils._createUniversalUTCDate = function (oDate, sCalendarType, bTime) {
@@ -141,7 +148,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		 * @param {Date} oDate date to get week number
 		 * @param {int} iYear year for the week number. (In en-US the week number for the last Days in December depends on the year.)
 		 * @param {string} sLocale used locale
-		 * @param {object} oLocaleData locale date for used locale
+		 * @param {sap.ui.core.LocaleData} oLocaleData locale date for used locale
 		 * @return {int} week number
 		 * @private
 		 */
@@ -150,12 +157,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 			var iWeekNum = 0;
 			var iWeekDay = 0;
 			var iFirstDayOfWeek = oLocaleData.getFirstDayOfWeek();
-			var oLocale = new Locale(sLocale);
 
-			// search Locale for containing "en-US", since sometimes
-			// when any user settings have been defined, subtag "sapufmt" is added to the locale name
-			// this is described inside sap.ui.core.Configuration file
-			if (oLocale && (oLocale.getLanguage() == 'en' && oLocale.getRegion() == 'US')) {
+			var bFirstDayStartsFirstWeek = oLocaleData.firstDayStartsFirstWeek();
+
+			// split week algorithm
+			if (bFirstDayStartsFirstWeek) {
 				/*
 				 * in US the week starts with Sunday
 				 * The first week of the year starts with January 1st. But Dec. 31 is still in the last year
@@ -203,6 +209,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		 * This function works with date values in UTC to produce timezone agnostic results.
 		 * @param {Date} oDate the input date for which we search the first week date.
 		 * This date is considered as is (no UTC conversion, time cut etc).
+		 * @param {{firstDayOfWeek: int, minimalDaysInFirstWeek: int}} [oWeekConfig] calendar week calculation parameters,
+		 * defaults to oLocale but has precedence over oLocale if both are provided.
+		 * Both properties firstDayOfWeek and minimalDaysInFirstWeek must be provided, otherwise it will be ignored.
+		 * If provided US split week is ignored.
+		 * e.g. <code>{firstDayOfWeek: 1, minimalDaysInFirstWeek: 4}</code>
 		 *
 		 * <br>
 		 * The US weeks at the end of December and at the beginning of January(53th and 1st),
@@ -223,26 +234,37 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		 * @returns {Date} first date of the same week as the given <code>oDate</code> in local timezone.
 		 * @public
 		 */
-		CalendarUtils.getFirstDateOfWeek = function (oDate) {
+		CalendarUtils.getFirstDateOfWeek = function (oDate, oWeekConfig) {
 			var oUniversalDate = new UniversalDate(oDate.getTime()),
 				oFirstDateOfWeek,
 				oFirstUniversalDateOfWeek,
 				oLocaleData = LocaleData.getInstance(sap.ui.getCore().getConfiguration().getFormatSettings().getFormatLocale()),
+				oLocale = sap.ui.getCore().getConfiguration().getLocale(),
 				iCLDRFirstWeekDay = oLocaleData.getFirstDayOfWeek(),
 				oWeek;
 
-			oWeek = UniversalDate.getWeekByDate(oUniversalDate.getCalendarType(), oUniversalDate.getUTCFullYear(),
-				oUniversalDate.getUTCMonth(), oUniversalDate.getUTCDate());
-
-			oFirstDateOfWeek = UniversalDate.getFirstDateOfWeek(oUniversalDate.getCalendarType(), oWeek.year, oWeek.week);
-			oFirstUniversalDateOfWeek = new UniversalDate(Date.UTC(oFirstDateOfWeek.year, oFirstDateOfWeek.month, oFirstDateOfWeek.day));
-
-			//In case the day of the computed weekFirstDate is not as in CLDR(e.g. en_US locales), make sure we align it
-			while (oFirstUniversalDateOfWeek.getUTCDay() !== iCLDRFirstWeekDay) {
-				oFirstUniversalDateOfWeek.setUTCDate(oFirstUniversalDateOfWeek.getUTCDate() - 1);
+			if (!oWeekConfig || (oWeekConfig.firstDayOfWeek === -1 || oWeekConfig.firstDayOfWeek === undefined)) {
+				oWeekConfig = {
+					firstDayOfWeek: oLocaleData.getFirstDayOfWeek(),
+					minimalDaysInFirstWeek: oLocaleData.getMinimalDaysInFirstWeek()
+				};
 			}
 
-			return new UniversalDate(Date.UTC(oFirstUniversalDateOfWeek.getUTCFullYear(), oFirstUniversalDateOfWeek.getUTCMonth(),
+			oWeek = UniversalDate.getWeekByDate(oUniversalDate.getCalendarType(), oUniversalDate.getUTCFullYear(),
+				oUniversalDate.getUTCMonth(), oUniversalDate.getUTCDate(), oLocale, oWeekConfig);
+
+			oFirstDateOfWeek = UniversalDate.getFirstDateOfWeek(oUniversalDate.getCalendarType(), oWeek.year, oWeek.week, oLocale, oWeekConfig);
+			oFirstUniversalDateOfWeek = new UniversalDate(UniversalDate.UTC(oFirstDateOfWeek.year, oFirstDateOfWeek.month, oFirstDateOfWeek.day));
+
+			//In case the day of the computed weekFirstDate is not as in CLDR(e.g. en_US locales), make sure we align it
+
+			if (oWeekConfig && (oWeekConfig.firstDayOfWeek === -1 || oWeekConfig.firstDayOfWeek === undefined)) {
+				while (oFirstUniversalDateOfWeek.getUTCDay() !== iCLDRFirstWeekDay) {
+					oFirstUniversalDateOfWeek.setUTCDate(oFirstUniversalDateOfWeek.getUTCDate() - 1);
+				}
+			}
+
+			return new UniversalDate(UniversalDate.UTC(oFirstUniversalDateOfWeek.getUTCFullYear(), oFirstUniversalDateOfWeek.getUTCMonth(),
 				oFirstUniversalDateOfWeek.getUTCDate(), oDate.getUTCHours(), oDate.getUTCMinutes(), oDate.getUTCSeconds())).getJSDate();
 		};
 
@@ -263,8 +285,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 
 		/**
 		 * Calculates the number of weeks for a given year using the current locale settings
-		 * @param {number} iYear The target year of interest in format (YYYY)
-		 * @returns {number} The number of weeks for the given year
+		 * @param {int} iYear The target year of interest in format (YYYY)
+		 * @returns {int} The number of weeks for the given year
 		 * @private
 		 */
 		CalendarUtils._getNumberOfWeeksForYear = function (iYear) {
@@ -314,7 +336,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 
 		/**
 		 * Sets the given values to the date.
-		 * @param {sap.ui.unified.UniversalDate} oDate The date which parameters will be set
+		 * @param {sap.ui.core.date.UniversalDate} oDate The date which parameters will be set
 		 * @param {int} iYear The year to be set
 		 * @param {int} iMonth The month to be set
 		 * @param {int} iDate The date to be set
@@ -325,25 +347,25 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		 * @private
 		 */
 		CalendarUtils._updateUTCDate = function(oDate, iYear, iMonth, iDate, iHours, iMinutes, iSeconds, iMilliseconds) {
-			if (jQuery.isNumeric(iYear)) {
+			if (iYear != null) {
 				oDate.setUTCFullYear(iYear);
 			}
-			if (jQuery.isNumeric(iMonth)) {
+			if (iMonth != null) {
 				oDate.setUTCMonth(iMonth);
 			}
-			if (jQuery.isNumeric(iDate)) {
+			if (iDate != null) {
 				oDate.setUTCDate(iDate);
 			}
-			if (jQuery.isNumeric(iHours)) {
+			if (iHours != null) {
 				oDate.setUTCHours(iHours);
 			}
-			if (jQuery.isNumeric(iMinutes)) {
+			if (iMinutes != null) {
 				oDate.setUTCMinutes(iMinutes);
 			}
-			if (jQuery.isNumeric(iSeconds)) {
+			if (iSeconds != null) {
 				oDate.setUTCSeconds(iSeconds);
 			}
-			if (jQuery.isNumeric(iMilliseconds)) {
+			if (iMilliseconds != null) {
 				oDate.setUTCMilliseconds(iMilliseconds);
 			}
 		};
@@ -356,11 +378,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		CalendarUtils._checkJSDateObject = function(oDate) {
 			// Cross frame check for a date should be performed here otherwise setDateValue would fail in OPA tests
 			// because Date object in the test is different than the Date object in the application (due to the iframe).
-			// We can use jQuery.type or this method:
-			// function isValidDate (date) {
-			//	return date && Object.prototype.toString.call(date) === "[object Date]" && !isNaN(date);
-			//}
-			if (jQuery.type(oDate) !== "date") {
+			if (!oDate || Object.prototype.toString.call(oDate) !== "[object Date]" || isNaN(oDate)) {
 				throw new Error("Date must be a JavaScript date object.");
 			}
 		};
@@ -371,7 +389,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		 * @private
 		 */
 		CalendarUtils._checkYearInValidRange = function(iYear) {
-			if (!jQuery.isNumeric(iYear) || (iYear < 1 || iYear > 9999)) {
+			if (typeof iYear !== "number" || iYear < 1 || iYear > 9999) {
 				throw new Error("Year must be in valid range (between year 0001 and year 9999).");
 			}
 		};
@@ -387,6 +405,102 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		CalendarUtils._isNextMonth = function(oDate1, oDate2) {
 			return (oDate1.getMonth() > oDate2.getMonth() && oDate1.getFullYear() === oDate2.getFullYear())
 				|| oDate1.getFullYear() > oDate2.getFullYear();
+		};
+
+		/**
+		 * Evaluates minutes between two dates.
+		 * @param {Date} oFirstDate JavaScript date
+		 * @param {Date} oSecondDate JavaScript date
+		 * @return {int} iMinutes
+		 * @private
+		 */
+		CalendarUtils._minutesBetween = function(oFirstDate, oSecondDate) {
+			var iMinutes = (oSecondDate.getTime() - oFirstDate.getTime()) / 1000;
+			iMinutes = iMinutes / 60;
+
+			return Math.abs(Math.round(iMinutes));
+		};
+
+		/**
+		 * Evaluates whether the given minutes are less than the current.
+		 * The function uses local js date for comparison.
+		 * @param {int} iMinutes The minutes to check
+		 * @return {boolean} true if the give minutes are less than the current
+		 * @private
+		 */
+		CalendarUtils._areCurrentMinutesLessThan = function (iMinutes) {
+			var iCurrentMinutes = new Date().getMinutes();
+
+			return iMinutes >= iCurrentMinutes;
+		};
+
+		/**
+		 * Evaluates whether the given minutes are more than the current.
+		 * The function uses local js date for comparison.
+		 * @param {int} iMinutes The minutes to check
+		 * @return {boolean} true if the give minutes are more than the current
+		 * @private
+		 */
+		CalendarUtils._areCurrentMinutesMoreThan = function (iMinutes) {
+			var iCurrentMinutes = new Date().getMinutes();
+
+			return iMinutes <= iCurrentMinutes;
+		};
+
+		/**
+		 * Evaluates months between two dates.
+		 * @param {Date} oFirstDate JavaScript date
+		 * @param {Date} oSecondDate JavaScript date
+		 * @param {boolean} bDontAbsResult if omitted or false, the result will be positive number of months between dates;
+		 * 					if true, the result will be positive or negative depending of the direction of the difference
+		 * @return {int} iMonths
+		 * @private
+		 */
+		CalendarUtils._monthsBetween = function(oFirstDate, oSecondDate, bDontAbsResult) {
+			var oUTCFirstDate = new Date(Date.UTC(oFirstDate.getUTCFullYear(), oFirstDate.getUTCMonth(), oFirstDate.getUTCDate())),
+				oUTCSecondDate = new Date(Date.UTC(oSecondDate.getUTCFullYear(), oSecondDate.getUTCMonth(), oSecondDate.getUTCDate())),
+				iMonths;
+
+			oUTCFirstDate.setUTCFullYear(oFirstDate.getUTCFullYear());
+			oUTCSecondDate.setUTCFullYear(oSecondDate.getUTCFullYear());
+
+			iMonths = (oUTCSecondDate.getUTCFullYear() * 12 + oUTCSecondDate.getUTCMonth())
+				- (oUTCFirstDate.getUTCFullYear() * 12 + oUTCFirstDate.getUTCMonth());
+
+			if (!bDontAbsResult) {
+				iMonths = Math.abs(iMonths);
+			}
+
+			return iMonths;
+		};
+
+		/**
+		 * Evaluates hours between two dates.
+		 * @param {Date} oFirstDate JavaScript date
+		 * @param {Date} oSecondDate JavaScript date
+		 * @return {int} iMinutes
+		 * @private
+		 */
+		CalendarUtils._hoursBetween = function(oFirstDate, oSecondDate) {
+			var oNewFirstDate = new Date(Date.UTC(oFirstDate.getUTCFullYear(),
+				oFirstDate.getUTCMonth(), oFirstDate.getUTCDate(), oFirstDate.getUTCHours()));
+			var oNewSecondDate = new Date(Date.UTC(oSecondDate.getUTCFullYear(),
+				oSecondDate.getUTCMonth(), oSecondDate.getUTCDate(), oSecondDate.getUTCHours()));
+
+			oNewFirstDate.setUTCFullYear(oFirstDate.getUTCFullYear());
+			oNewSecondDate.setUTCFullYear(oSecondDate.getUTCFullYear());
+
+			return Math.abs((oNewFirstDate.getTime() - oNewSecondDate.getTime()) / (1000 * 60 * 60));
+		};
+
+		/**
+		 * Evaluates whether a given date time part indicates midniht.
+		 *
+		 * @param {Date} oDate - JavaScript date
+		 * @returns {boolean}
+		 */
+		CalendarUtils._isMidnight = function(oDate) {
+			return oDate.getHours() === 0 && oDate.getMinutes() === 0 && oDate.getSeconds() === 0 && oDate.getMilliseconds() === 0;
 		};
 
 		 // Utilities for working with sap.ui.unified.calendar.CalendarDate
@@ -427,16 +541,34 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		 * week start date in the previous year(e.g. Sunday, 28 Dec 2014, week 53).
 		 *
 		 * @param {sap.ui.unified.calendar.CalendarDate} oCalendarDate the input date for which we search the first week date.
+		 * @param {{firstDayOfWeek: int, minimalDaysInFirstWeek: int}} [oWeekConfig] calendar week calculation parameters,
+		 * defaults to oLocale but has precedence over oLocale if both are provided.
+		 * Both properties firstDayOfWeek and minimalDaysInFirstWeek must be provided, otherwise it will be ignored.
+		 * If provided US split week is ignored.
+		 * e.g. <code>{firstDayOfWeek: 1, minimalDaysInFirstWeek: 4}</code>
 		 * @returns {sap.ui.unified.calendar.CalendarDate} first date of the same week as the given <code>oDate</code> in local timezone.
 		 * @throws Will throw an error if the arguments are null or are not of the correct type.
 		 * @private
 		 */
-		CalendarUtils._getFirstDateOfWeek = function (oCalendarDate) {
+		CalendarUtils._getFirstDateOfWeek = function (oCalendarDate, oWeekConfig) {
+			var oLocaleData = LocaleData.getInstance(sap.ui.getCore().getConfiguration().getFormatSettings().getFormatLocale());
 			this._checkCalendarDate(oCalendarDate);
-			var oJSDate = CalendarUtils.getFirstDateOfWeek(oCalendarDate.toUTCJSDate());
-			oJSDate.setFullYear(oJSDate.getUTCFullYear(), oJSDate.getUTCMonth(), oJSDate.getUTCDate());
 
-			return CalendarDate.fromLocalJSDate(oJSDate, oCalendarDate.getCalendarType());
+			if (!oWeekConfig || (oWeekConfig.firstDayOfWeek === -1 || oWeekConfig.firstDayOfWeek === undefined)) {
+				oWeekConfig = {
+					firstDayOfWeek: oLocaleData.getFirstDayOfWeek(),
+					minimalDaysInFirstWeek: oLocaleData.getMinimalDaysInFirstWeek()
+				};
+			}
+
+			if (oCalendarDate.getDay() !== oWeekConfig.firstDayOfWeek) {
+				var oJSDate = CalendarUtils.getFirstDateOfWeek(oCalendarDate.toUTCJSDate(), oWeekConfig);
+				oJSDate.setFullYear(oJSDate.getUTCFullYear(), oJSDate.getUTCMonth(), oJSDate.getUTCDate());
+
+				return CalendarDate.fromLocalJSDate(oJSDate, oCalendarDate.getCalendarType());
+			}
+
+			return oCalendarDate;
 		};
 
 		/**
@@ -462,7 +594,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		 * @private
 		 */
 		CalendarUtils._minDate = function (sCalendarType) {
-			return new CalendarDate(1, 0, 1, sCalendarType);
+			var oCalDate = new CalendarDate(1, 0, 1, sCalendarType);
+			oCalDate.setYear(1);
+			oCalDate.setMonth(0);
+			oCalDate.setDate(1);
+			return oCalDate;
 		};
 
 		/**
@@ -473,6 +609,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		 */
 		CalendarUtils._maxDate = function (sCalendarType) {
 			var oCalDate = new CalendarDate(9999, 11, 1, sCalendarType);
+			oCalDate.setYear(9999);
+			oCalDate.setMonth(11);
 			oCalDate.setDate(this._daysInMonth(oCalDate));// 31st for Gregorian Calendar
 			return new CalendarDate(oCalDate);
 		};
@@ -529,18 +667,20 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		};
 
 		/**
-		 * Checks if given first date has the same month and year as the given second date.
+		 * Checks if given first date has the same month, year and era as the given second date.
 		 * @param {sap.ui.unified.calendar.CalendarDate} oCalendarDate1 the first date
 		 * @param {sap.ui.unified.calendar.CalendarDate} oCalendarDate2 the second date
-		 * @return {boolean} true if month and year matches for both given dates, false otherwise
+		 * @return {boolean} true if month, year and era matches for both given dates, false otherwise
 		 * @throws Will throw an error if the arguments are null or are not of the correct type.
 		 * @private
 		 */
-		CalendarUtils._isSameMonthAndYear = function (oCalendarDate1, oCalendarDate2) {
+		CalendarUtils._isSameMonthAndYear = function(oCalendarDate1, oCalendarDate2) {
 			this._checkCalendarDate(oCalendarDate1);
 			this._checkCalendarDate(oCalendarDate2);
 
-			return oCalendarDate1.getYear() === oCalendarDate2.getYear() && oCalendarDate1.getMonth() === oCalendarDate2.getMonth();
+			return oCalendarDate1.getEra() === oCalendarDate2.getEra()
+				&& oCalendarDate1.getYear() === oCalendarDate2.getYear()
+				&& oCalendarDate1.getMonth() === oCalendarDate2.getMonth();
 		};
 
 		/**
@@ -558,12 +698,41 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', './Calenda
 		/**
 		* Returns week information for given calendar date.
 		* @param {sap.ui.unified.calendar.CalendarDate} oCalendarDate The date whose week wll be returned
-		* @return {Object} Week information - year and week, for given calendar date
+		* @return {object} Week information - year and week, for given calendar date
 		* @private
 		*/
 		CalendarUtils._getWeek = function (oCalendarDate) {
 			this._checkCalendarDate(oCalendarDate);
 			return UniversalDate.getWeekByDate(oCalendarDate.getCalendarType(), oCalendarDate.getYear(), oCalendarDate.getMonth(), oCalendarDate.getDate());
+		};
+
+		/**
+		 * Evaluates whether the given date is part of the weekend.
+		 * @param {sap.ui.unified.calendar.CalendarDate} oCalDate The date to be checked
+		 * @param {sap.ui.core.LocaleData} oLocaleData locale date for the used locale
+		 * @return {boolean} True if the date is part of the weekend
+		 * @private
+		 */
+		CalendarUtils._isWeekend = function (oCalDate, oLocaleData) {
+			var iDay = oCalDate.getDay();
+
+			return iDay === oLocaleData.getWeekendStart() || iDay === oLocaleData.getWeekendEnd();
+		};
+
+		/**
+		 * Converts a JS Date object as if the machine was in the provided timezone.
+		 * @param {object} oDate JS Date object
+		 * @param {string} sTimezone IANA timezone key
+		 * @returns {object} The corresponding JS Date object as if the machine was in the provided timezone
+		 * @private
+		 */
+		CalendarUtils._convertToTimezone = function(oDate, sTimezone) {
+			var oNewDate = new Date(oDate.getUTCFullYear(), oDate.getUTCMonth(), oDate.getUTCDate(), oDate.getUTCHours(), oDate.getUTCMinutes(), oDate.getUTCSeconds());
+
+			oNewDate.setUTCFullYear(oDate.getUTCFullYear());
+			oNewDate = TimezoneUtil.convertToTimezone(oNewDate, sTimezone);
+
+			return oNewDate;
 		};
 
 		return CalendarUtils;

@@ -1,6 +1,6 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -21,17 +21,13 @@ sap.ui.define(["sap/ui/core/library"],
 	 * rules to check all aspects of an application.
 	 *
 	 * @namespace
-	 * @name sap.ui.support
+	 * @alias sap.ui.support
 	 * @author SAP SE
-	 * @version 1.56.5
-	 *
+	 * @version 1.106.0
+	 * @since 1.50
 	 * @public
 	 */
-
-	// library dependencies
-
-	// delegate further initialization of this library to the Core
-	sap.ui.getCore().initLibrary({
+	var thisLib = sap.ui.getCore().initLibrary({
 		name : "sap.ui.support",
 		dependencies : ["sap.ui.core"],
 		types: [
@@ -41,7 +37,7 @@ sap.ui.define(["sap/ui/core/library"],
 		controls: [],
 		elements: [],
 		noLibraryCSS: true,
-		version: "1.56.5",
+		version: "1.106.0",
 		extensions: {
 			//Configuration used for rule loading of Support Assistant
 			"sap.ui.support": {
@@ -53,10 +49,10 @@ sap.ui.define(["sap/ui/core/library"],
 	/**
 	 * Defines severity types.
 	 * @enum {string}
-	 * @since 1.56.5
+	 * @since 1.50
 	 * @public
 	 */
-	sap.ui.support.Severity = {
+	thisLib.Severity = {
 		/**
 		 * Medium issue severity.
 		 * @public
@@ -77,10 +73,10 @@ sap.ui.define(["sap/ui/core/library"],
 	/**
 	 * Defines the Audiences.
 	 * @enum {string}
-	 * @since 1.56.5
+	 * @since 1.50
 	 * @public
 	 */
-	sap.ui.support.Audiences = {
+	thisLib.Audiences = {
 		/**
 		 * Audience just on Control level.
 		 * @public
@@ -101,10 +97,10 @@ sap.ui.define(["sap/ui/core/library"],
 	/**
 	 * Issue Categories.
 	 * @enum {string}
-	 * @since 1.56.5
+	 * @since 1.50
 	 * @public
 	 */
-	sap.ui.support.Categories = {
+	thisLib.Categories = {
 		/**
 		 * Accessibility issue category.
 		 * @public
@@ -131,31 +127,102 @@ sap.ui.define(["sap/ui/core/library"],
 		 */
 		Consistency: "Consistency",
 		/**
+		 * Fiori Guidelines issue category.
+		 * @since 1.58
+		 * @public
+		 */
+		FioriGuidelines : "FioriGuidelines",
+		/**
 		 * Functionality issue category.
 		 * @public
 		 */
-		Functionality : "Functionality",
+		Functionality: "Functionality",
 		/**
 		 * Usability issue category.
 		 * @public
 		 */
-		Usability : "Usability",
+		Usability: "Usability",
 		/**
 		 * DataModel issue category.
 		 * @public
 		 */
 		DataModel: "DataModel",
 		/**
+		 * Modularization issue category.
+		 * @since 1.60
+		 * @public
+		 */
+		Modularization: "Modularization",
+		/**
 		 * Usage issue category.
 		 * @public
 		 */
 		Usage: "Usage",
 		/**
-		 * Accessibility issue category.
+		 * Other issue category.
 		 * @public
 		 */
 		Other: "Other"
 	};
 
-	return sap.ui.support;
+	/**
+	 * Analysis history formats.
+	 * @enum {string}
+	 * @since 1.58
+	 * @public
+	 */
+	thisLib.HistoryFormats = {
+		/**
+		 * ABAP history format.
+		 * @public
+		 */
+		Abap: "Abap",
+		/**
+		 * String history format.
+		 * @public
+		 */
+		String: "String"
+	};
+
+	/**
+	 * Contains the available system presets.
+	 * @enum {object}
+	 * @since 1.60
+	 * @public
+	 */
+	thisLib.SystemPresets = {
+		/**
+		 * The accessibility preset.
+		 *
+		 * @public
+		 */
+		Accessibility : {
+			id: "Accessibility",
+			title: "Accessibility",
+			description: "Accessibility related rules",
+			selections: [
+				// Grouped by library
+				// Public
+				{ruleId: "dialogAriaLabelledBy", libName: "sap.m"},
+				{ruleId: "onlyIconButtonNeedsTooltip", libName: "sap.m"},
+				{ruleId: "inputNeedsLabel", libName: "sap.m"},
+				{ruleId: "titleLevelProperty", libName: "sap.m"},
+				{ruleId: "formTitleOrAriaLabel", libName: "sap.ui.layout"},
+				{ruleId: "formTitleInToolbarAria", libName: "sap.ui.layout"},
+				{ruleId: "formMissingLabel", libName: "sap.ui.layout"},
+				{ruleId: "gridTableAccessibleLabel", libName: "sap.ui.table"},
+				{ruleId: "gridTableColumnTemplateIcon", libName: "sap.ui.table"},
+				{ruleId: "smartFormLabelOrAriaLabel", libName: "sap.ui.comp"},
+				// Internal
+				{ruleId: "icontabbarlabels", libName: "sap.m"},
+				{ruleId: "labeltooltip", libName: "sap.m"},
+				{ruleId: "labelfor", libName: "sap.m"},
+				{ruleId: "labelInDisplayMode", libName: "sap.m"},
+				{ruleId: "texttooltip", libName: "sap.m"},
+				{ruleId: "rbText", libName: "sap.m"}
+			]
+		}
+	};
+
+	return thisLib;
 });

@@ -1,12 +1,12 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.unified.CalendarAppointment.
-sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateFormat', './library'],
-	function(jQuery, DateTypeRange, DateFormat, library) {
+sap.ui.define(['./DateTypeRange', 'sap/ui/core/format/DateFormat', 'sap/ui/core/format/NumberFormat', 'sap/ui/core/format/TimezoneUtil', 'sap/ui/core/Core', './calendar/CalendarUtils', './library', "sap/base/Log"],
+	function(DateTypeRange, DateFormat, NumberFormat, TimezoneUtil, Core, CalendarUtils, library, Log) {
 	"use strict";
 
 	/**
@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateF
 	 *
 	 * Applications could inherit from this element to add own fields.
 	 * @extends sap.ui.unified.DateTypeRange
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 *
 	 * @constructor
 	 * @public
@@ -43,6 +43,12 @@ sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateF
 			 * Text of the appointment.
 			 */
 			text : {type : "string", group : "Data"},
+
+			/**
+			 * Description of the appointment.
+			 * @since 1.81.0
+			 */
+			description: {type: "string", group: "Data"},
 
 			/**
 			 * Icon of the Appointment. (e.g. picture of the person)
@@ -72,8 +78,32 @@ sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateF
 			 * @since 1.46.0
 			 */
 			color: {type : "sap.ui.core.CSSColor", group : "Appearance", defaultValue : null}
+		},
+		aggregations: {
+			/**
+			 * Holds the content of the appointment.
+			 *
+			 * <b>Note </b>, If the <code>customContent</code> aggregation is added then:
+			 *
+			 * <ul>
+			 * <li>The <code>title</code>, <code>text</code>, <code>description</code>, and <code>icon</code> properties
+			 * are ignored.</li>
+			 * <li>The application developer has to ensure, that all the accessibility requirements are met, and that
+			 * the height of the content conforms with the height provided by the appointment.</li>
+			 * <li>Do not use interactive controls as content, as they may trigger unwanted selection of the appointment
+			 * and may lead to unpredictable results.</li>
+			 * </ul>
+			 *
+			 * @since 1.93.0
+			 * @experimental Since 1.93, providing only limited functionality. Also, the API might be changed in the future.
+			 */
+			customContent: { type: "sap.ui.core.Control", multiple: true }
 		}
 	}});
+
+	CalendarAppointment.prototype.init = function () {
+		this._sAppointmentPartSuffix = null;
+	};
 
 	CalendarAppointment.prototype.applyFocusInfo = function (oFocusInfo) {
 
@@ -91,32 +121,55 @@ sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateF
 	/**
 	 * Gets the text for an appointment that intersects with a given date.
 	 * @param {object} oCurrentlyDisplayedDate The displayed day
-	 * @returns {string} A string that shows how the appointment intersects with the given date
+	 * @returns {object} An object with a start and end fields, which represent how the appointment intersects with the given date
 	 * @private
 	 */
 	CalendarAppointment.prototype._getDateRangeIntersectionText = function (oCurrentlyDisplayedDate) {
-		var oStartDate = this.getStartDate(),
-			oEndDate = this.getEndDate() ? this.getEndDate() : new Date(864000000000000), //in case of emergency call this number
-			sText,
+		var oStartDate = this._getStartDateWithTimezoneAdaptation(),
+			oEndDate = this._getEndDateWithTimezoneAdaptation() ? this._getEndDateWithTimezoneAdaptation() : new Date(864000000000000), //in case of emergency call this number
+			sFirstLineText,
+			sSecondLineText,
 			oCurrentDayStart = new Date(oCurrentlyDisplayedDate.getFullYear(), oCurrentlyDisplayedDate.getMonth(), oCurrentlyDisplayedDate.getDate(), 0, 0, 0),
-			oNextDayStart = new Date(oCurrentDayStart.getTime() + 24 * 60 * 60 * 1000),
+			oNextDayStart = new Date(oCurrentDayStart.getFullYear(), oCurrentDayStart.getMonth(), oCurrentDayStart.getDate() + 1),
 			oTimeFormat = DateFormat.getTimeInstance({pattern: "HH:mm"}),
-			oResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+			oResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m"),
+			oHourFormat = NumberFormat.getUnitInstance({
+				allowedUnits: ["duration-hour"]
+			}, sap.ui.getCore().getConfiguration().getFormatSettings().getFormatLocale()),
+			oMinuteFormat = NumberFormat.getUnitInstance({
+				allowedUnits: ["duration-minute"]
+			}, sap.ui.getCore().getConfiguration().getFormatSettings().getFormatLocale()),
+			iHour, iMinute, sHour, sMinute;
 
 		//have no intersection with the given day
-		if (oStartDate.getTime() > oNextDayStart.getTime() || oEndDate.getTime() < oCurrentDayStart.getTime()) {
-			sText = "";
-		} else if (oStartDate.getTime() < oCurrentDayStart.getTime() && oEndDate.getTime() > oNextDayStart.getTime()) {
-			sText = oResourceBundle.getText("PLANNINGCALENDAR_ALLDAY");
+		if (oStartDate.getTime() >= oNextDayStart.getTime() || oEndDate.getTime() <= oCurrentDayStart.getTime()) {
+			sFirstLineText = "";
+		} else if (oStartDate.getTime() <= oCurrentDayStart.getTime() && oEndDate.getTime() >= oNextDayStart.getTime()) {
+			sFirstLineText = oResourceBundle.getText("PLANNINGCALENDAR_ALLDAY");
 		} else if (oStartDate.getTime() < oCurrentDayStart.getTime()) {
-			sText = oResourceBundle.getText("PLANNINGCALENDAR_UNTIL", [oTimeFormat.format(oEndDate)]);
+			sFirstLineText = oResourceBundle.getText("PLANNINGCALENDAR_UNTIL");
+			sSecondLineText = oTimeFormat.format(oEndDate);
 		} else if (oEndDate.getTime() > oNextDayStart.getTime()) {
-			sText = oTimeFormat.format(oStartDate);
+			sFirstLineText = oResourceBundle.getText("PLANNINGCALENDAR_FROM");
+			sSecondLineText = oTimeFormat.format(oStartDate);
 		} else {
-			sText = oTimeFormat.format(oStartDate) + " - " + oTimeFormat.format(oEndDate);
+			sFirstLineText = oTimeFormat.format(oStartDate);
+			if (oEndDate.getTime() - oStartDate.getTime() < 3600000) { // less than 1 hour
+				iMinute = (oEndDate.getTime() - oStartDate.getTime()) / 60000;
+				sSecondLineText = oMinuteFormat.format(iMinute, "duration-minute");
+			} else if (((oEndDate.getTime() - oStartDate.getTime()) % 3600000) === 0) { // difference is full hours
+				iHour = (oEndDate.getTime() - oStartDate.getTime()) / 3600000;
+				sSecondLineText = oHourFormat.format(iHour, "duration-hour");
+			} else { // difference is longer than an hour and less than full hours
+				iHour = Math.floor((oEndDate.getTime() - oStartDate.getTime()) / 3600000);
+				sHour = oHourFormat.format(iHour, "duration-hour");
+				iMinute = (oEndDate.getTime() - oStartDate.getTime()) / 60000 % 60;
+				sMinute = oMinuteFormat.format(iMinute, "duration-minute");
+				sSecondLineText = oResourceBundle.getText("PLANNINGCALENDAR_APP_DURATION", [sHour, sMinute]);
+			}
 		}
 
-		return sText;
+		return {start: sFirstLineText, end: sSecondLineText};
 	};
 
 	/**
@@ -132,10 +185,10 @@ sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateF
 			iNextDayStart = iCurrentDayStartTime + ONE_DAY;
 
 		return function(oAppInfo1, oAppInfo2) {
-			var iStartDateTime1 = oAppInfo1.appointment.getStartDate().getTime(),
-				iStartDateTime2 = oAppInfo2.appointment.getStartDate().getTime(),
-				iEndDateTime1 = oAppInfo1.appointment.getEndDate() ? oAppInfo1.appointment.getEndDate().getTime() : 864000000000000, //this is max date in case of no max date
-				iEndDateTime2 = oAppInfo2.appointment.getEndDate() ? oAppInfo2.appointment.getEndDate().getTime() : 864000000000000,
+			var iStartDateTime1 = oAppInfo1.appointment._getStartDateWithTimezoneAdaptation().getTime(),
+				iStartDateTime2 = oAppInfo2.appointment._getStartDateWithTimezoneAdaptation().getTime(),
+				iEndDateTime1 = oAppInfo1.appointment._getEndDateWithTimezoneAdaptation() ? oAppInfo1.appointment._getEndDateWithTimezoneAdaptation().getTime() : 864000000000000, //this is max date in case of no max date
+				iEndDateTime2 = oAppInfo2.appointment._getEndDateWithTimezoneAdaptation() ? oAppInfo2.appointment._getEndDateWithTimezoneAdaptation().getTime() : 864000000000000,
 				bWholeDay1 = iStartDateTime1 <= iCurrentDayStartTime && iEndDateTime1 >= iNextDayStart,
 				bWholeDay2 = iStartDateTime2 <= iCurrentDayStartTime && iEndDateTime2 >= iNextDayStart,
 				iResult;
@@ -164,8 +217,8 @@ sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateF
 	 * @since 1.46.0
 	 */
 	CalendarAppointment.prototype.setColor = function (sColor) {
-		if (sColor && sColor.match(/^#[0-9a-f]{6}$/i)) {
-			jQuery.sap.log.warning("setColor accepts only full hex color value with pound symbol.");
+		if (sColor && !sColor.match(/^#[0-9a-f]{6}$/i)) {
+			Log.warning("setColor accepts only full hex color value with pound symbol, but value is '" + sColor + "'");
 		}
 		return this.setProperty("color", sColor);
 	};
@@ -182,6 +235,59 @@ sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateF
 				parseInt(sHex.substr(3, 2), 16), // Green
 				parseInt(sHex.substr(5, 2), 16) // Blue
 			].join(",") + ", 0.2)";
+	};
+
+	CalendarAppointment.prototype._setAppointmentPartSuffix = function (sSuffix) {
+		this._sAppointmentPartSuffix = sSuffix;
+		return this;
+	};
+
+	CalendarAppointment.prototype.getDomRef = function (sSuffix) {
+		if (document.getElementById(this.getId())) {
+			return document.getElementById(sSuffix ? this.getId() + "-" + sSuffix : this.getId());
+		} else if (this._sAppointmentPartSuffix) {
+			return document.getElementById(sSuffix ? this.getId() + "-" + this._sAppointmentPartSuffix + "-" + sSuffix : this.getId() + "-" + this._sAppointmentPartSuffix);
+		}
+
+		var oAppointmentParts = document.querySelectorAll(".sapUiCalendarRowApps[id^='" + this. getId() + "']");
+		return oAppointmentParts.length > 0 ? oAppointmentParts[0] : null;
+	};
+
+	CalendarAppointment.prototype._getEndDateWithTimezoneAdaptation = function() {
+		if (!this.getProperty("endDate")) {
+			return null;
+		}
+
+		var oEndDate = this._convertToTimezone(this.getEndDate());
+
+		return oEndDate;
+	};
+
+	CalendarAppointment.prototype._getStartDateWithTimezoneAdaptation = function() {
+		if (!this.getProperty("startDate")) {
+			return null;
+		}
+
+		var oStartDate = this._convertToTimezone(this.getStartDate());
+
+		return oStartDate;
+	};
+
+	/**
+	 * Aligns a date to the timezone from the configuration.
+	 *
+	 * @returns {Object} <code>oNewDate</code> aligned to the configured timezone.
+	 * @private
+	 */
+	CalendarAppointment.prototype._convertToTimezone = function(oDate) {
+		var sTimezone = Core.getConfiguration().getTimezone();
+		var oNewDate = CalendarUtils._createUniversalUTCDate(oDate, undefined, true);
+
+		oNewDate = new Date(oDate.getUTCFullYear(), oDate.getUTCMonth(), oDate.getUTCDate(), oDate.getUTCHours(), oDate.getUTCMinutes(), oDate.getUTCSeconds());
+		oNewDate.setUTCFullYear(oDate.getUTCFullYear());
+		oNewDate = TimezoneUtil.convertToTimezone(oNewDate, sTimezone);
+
+		return oNewDate;
 	};
 
 	return CalendarAppointment;

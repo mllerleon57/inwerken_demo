@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['sap/ui/core/Renderer','./CalendarDateIntervalRenderer'],function(R,C){"use strict";var a=R.extend(C);a.addAttributes=function(r,c){C.addAttributes.apply(this,arguments);r.addClass("sapUiCalOneMonthInt");};return a;},true);
+sap.ui.define(["sap/ui/core/Renderer","./CalendarDateIntervalRenderer"],function(e,t){"use strict";var n=e.extend(t);n.apiVersion=2;n.addAttributes=function(e,n){t.addAttributes.apply(this,arguments);e.class("sapUiCalOneMonthInt")};return n},true);
+//# sourceMappingURL=CalendarOneMonthIntervalRenderer.js.map

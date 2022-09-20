@@ -1,125 +1,115 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["sap/ui/core/InvisibleText", "sap/ui/Device", "sap/m/library"],
-	function (InvisibleText, Device, mobileLibrary) {
+sap.ui.define(["sap/ui/Device", "sap/m/library"],
+	function (Device, mobileLibrary) {
 		"use strict";
 
-		var FCLRenderer = {};
+		var FCLRenderer = {
+			apiVersion: 2
+		};
 
 		FCLRenderer.render = function (oRm, oControl) {
 
-			var sBackgroundDesign = oControl.getBackgroundDesign();
+			var sBackgroundDesign = oControl.getBackgroundDesign(),
+				oLandmarkInfo = oControl.getLandmarkInfo();
 
-			oRm.write("<div");
-			oRm.writeControlData(oControl);
-			oRm.addClass("sapFFCL");
+			oRm.openStart("div", oControl);
+			oRm.class("sapFFCL");
 
 			if (sBackgroundDesign !== mobileLibrary.BackgroundDesign.Transparent) {
-				oRm.addClass("sapFFCLBackgroundDesign" + sBackgroundDesign);
+				oRm.class("sapFFCLBackgroundDesign" + sBackgroundDesign);
 			}
 
-			oRm.writeClasses();
-			oRm.write(">");
+			oRm.openEnd();
 
-			FCLRenderer.renderBeginColumn(oRm, oControl);
-			FCLRenderer.renderMidColumn(oRm, oControl);
-			FCLRenderer.renderEndColumn(oRm, oControl);
+			FCLRenderer.renderBeginColumn(oRm, oControl, oLandmarkInfo);
+			FCLRenderer.renderMidColumn(oRm, oControl, oLandmarkInfo);
+			FCLRenderer.renderEndColumn(oRm, oControl, oLandmarkInfo);
 
-			oRm.write("</div>");
+			oRm.close("div");
 		};
 
-		FCLRenderer.renderBeginColumn = function (oRm, oControl) {
+		FCLRenderer.renderBeginColumn = function (oRm, oControl, oLandmarkInfo) {
 			var oBeginColumnBackArrow = oControl.getAggregation("_beginColumnBackArrow");
 
 			// Begin column
-			oRm.write("<div");
-			oRm.writeAttribute("id", oControl.getId() + "-beginColumn");
-			oRm.writeAccessibilityState(oControl, {
-				role: "region",
-				labelledBy: InvisibleText.getStaticId("sap.f", "FCL_BEGIN_COLUMN_REGION_TEXT")
-			});
-			oRm.addClass("sapFFCLColumn").addClass("sapFFCLColumnBegin").addClass("sapFFCLColumnActive");
-			oRm.writeClasses();
-			oRm.writeStyles();
-			oRm.write(">");
+			oRm.openStart("div", oControl.getId() + "-beginColumn");
+			oRm.accessibilityState(oControl, oControl._formatColumnLandmarkInfo(oLandmarkInfo, "FirstColumn"));
+			oRm.class("sapFFCLColumn");
+			oRm.class("sapFFCLColumnBegin");
+			oRm.class("sapFFCLColumnActive");
+			oRm.openEnd();
 
 			// Begin column content
 			FCLRenderer.renderColumnContentWrapper(oRm);
 
-			// Arrow - collapse begin
-			FCLRenderer.renderArrow(oRm, oBeginColumnBackArrow);
+			oRm.close("div");
 
-			oRm.write("</div>");
+			// Arrow - collapse begin
+			FCLRenderer.renderArrow(oRm, oBeginColumnBackArrow, oLandmarkInfo, oControl);
 		};
 
-		FCLRenderer.renderMidColumn = function (oRm, oControl) {
+		FCLRenderer.renderMidColumn = function (oRm, oControl, oLandmarkInfo) {
 			var oMidColumnForwardArrow = oControl.getAggregation("_midColumnForwardArrow"),
 				oMidColumnBackArrow = oControl.getAggregation("_midColumnBackArrow");
 
-			// Mid column
-			oRm.write("<div");
-			oRm.writeAttribute("id", oControl.getId() + "-midColumn");
-			oRm.writeAccessibilityState(oControl, {
-				role: "region",
-				labelledBy: InvisibleText.getStaticId("sap.f", "FCL_MID_COLUMN_REGION_TEXT")
-			});
-			oRm.addClass("sapFFCLColumn").addClass("sapFFCLColumnMid");
-			oRm.writeClasses();
-			oRm.writeStyles();
-			oRm.write(">");
-
 			// Arrow - expand begin
-			FCLRenderer.renderArrow(oRm, oMidColumnForwardArrow);
+			FCLRenderer.renderArrow(oRm, oMidColumnForwardArrow, oLandmarkInfo, oControl);
+			// Mid column
+			oRm.openStart("div", oControl.getId() + "-midColumn");
+			oRm.accessibilityState(oControl, oControl._formatColumnLandmarkInfo(oLandmarkInfo, "MiddleColumn"));
+			oRm.class("sapFFCLColumn");
+			oRm.class("sapFFCLColumnMid");
+			oRm.openEnd();
 
 			// Mid column content
 			FCLRenderer.renderColumnContentWrapper(oRm);
-
+			oRm.close("div");
 			// Arrow - expand end
-			FCLRenderer.renderArrow(oRm, oMidColumnBackArrow);
+			FCLRenderer.renderArrow(oRm, oMidColumnBackArrow, oLandmarkInfo, oControl);
 
-			oRm.write("</div>");
 		};
 
-		FCLRenderer.renderEndColumn = function (oRm, oControl) {
+		FCLRenderer.renderEndColumn = function (oRm, oControl, oLandmarkInfo) {
 			var oEndColumnForwardArrow = oControl.getAggregation("_endColumnForwardArrow");
 
-			// End column
-			oRm.write("<div");
-			oRm.writeAttribute("id", oControl.getId() + "-endColumn");
-			oRm.writeAccessibilityState(oControl, {
-				role: "region",
-				labelledBy: InvisibleText.getStaticId("sap.f", "FCL_END_COLUMN_REGION_TEXT")
-			});
-			oRm.addClass("sapFFCLColumn").addClass("sapFFCLColumnEnd");
-			oRm.writeClasses();
-			oRm.writeStyles();
-			oRm.write(">");
-
 			// Arrow - right
-			FCLRenderer.renderArrow(oRm, oEndColumnForwardArrow);
+			FCLRenderer.renderArrow(oRm, oEndColumnForwardArrow, oLandmarkInfo, oControl);
+			// End column
+			oRm.openStart("div", oControl.getId() + "-endColumn");
+			oRm.accessibilityState(oControl, oControl._formatColumnLandmarkInfo(oLandmarkInfo, "LastColumn"));
+			oRm.class("sapFFCLColumn");
+			oRm.class("sapFFCLColumnEnd");
+			oRm.openEnd();
 
 			// End column content
 			FCLRenderer.renderColumnContentWrapper(oRm);
 
-			oRm.write("</div>");
+			oRm.close("div");
+
 		};
 
-		FCLRenderer.renderArrow = function (oRm, oArrow) {
+		FCLRenderer.renderArrow = function (oRm, oArrow, oLandmarkInfo, oFCL) {
 			if (!Device.system.phone) {
-				oArrow.addStyleClass("sapContrastPlus");
+				oRm.openStart("div");
+				oRm.accessibilityState(oArrow, oFCL._formatArrowLandmarkInfo(oLandmarkInfo, oArrow.sParentAggregationName));
+				oRm.class("sapFFCLArrow");
+				oRm.class("sapContrastPlus");
+				oRm.openEnd();
 				oRm.renderControl(oArrow);
+				oRm.close("div");
 			}
 		};
 
 		FCLRenderer.renderColumnContentWrapper = function (oRm) {
-			oRm.write("<div");
-			oRm.addClass("sapFFCLColumnContent");
-			oRm.writeClasses();
-			oRm.write("></div>");
+			oRm.openStart("div");
+			oRm.class("sapFFCLColumnContent");
+			oRm.openEnd();
+			oRm.close("div");
 		};
 
 		return FCLRenderer;

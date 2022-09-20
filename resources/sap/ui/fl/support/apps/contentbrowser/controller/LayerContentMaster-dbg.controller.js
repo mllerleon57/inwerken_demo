@@ -1,6 +1,6 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -11,7 +11,14 @@ sap.ui.define([
 	"sap/ui/model/FilterOperator",
 	"sap/ui/fl/support/apps/contentbrowser/lrepConnector/LRepConnector",
 	"sap/ui/fl/support/apps/contentbrowser/utils/DataUtils"
-], function (Controller, UIComponent, Filter, FilterOperator, LRepConnector, DataUtils) {
+], function (
+	Controller,
+	UIComponent,
+	Filter,
+	FilterOperator,
+	LRepConnector,
+	DataUtils
+) {
 	"use strict";
 
 	/**
@@ -20,14 +27,13 @@ sap.ui.define([
 	 * @constructor
 	 * @alias sap.ui.fl.support.apps.contentbrowser.controller.LayerContentMaster
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 * @experimental Since 1.45
 	 */
 	return Controller.extend("sap.ui.fl.support.apps.contentbrowser.controller.LayerContentMaster", {
-
 		sNamespace: "",
 		sLayer: "",
-		oDataUtils : DataUtils,
+		oDataUtils: DataUtils,
 
 		/**
 		 * Initialize function;
@@ -42,7 +48,7 @@ sap.ui.define([
 		/**
 		 * Handler if a route was matched;
 		 * Checks if the matched route is current route and then requests content from Layered Repository.
-		 * @param {Object} oRouteMatch - route object specified in the router which was matched via regexp
+		 * @param {object} oRouteMatch - Route object specified in the router which was matched via regexp
 		 * @private
 		 */
 		_onRouteMatched: function (oRouteMatch) {
@@ -57,18 +63,18 @@ sap.ui.define([
 
 			LRepConnector.getContent(that.sLayer, that.sNamespace).then(
 				that._onContentReceived.bind(that, oPage),
-				function(){
+				function() {
 					oPage.setBusy(false);
 				}).then(function () {
-					LRepConnector.requestPending = false;
-				});
+				LRepConnector.requestPending = false;
+			});
 		},
 
 		/**
 		 * Handler if content data was received;
 		 * Sets the received data to the current content model.
-		 * @param {Object} oPage
-		 * @param {Object} oData - data which is received from <code>LRepConnector</code> "getContent" promise
+		 * @param {object} oPage - Page instance
+		 * @param {object} oData - Data which is received from <code>LRepConnector</code> "getContent" promise
 		 * @private
 		 */
 		_onContentReceived: function (oPage, oData) {
@@ -81,7 +87,7 @@ sap.ui.define([
 
 		/**
 		 * Searches for a specific namespace inside layer.
-		 * @param {Object} oEvent - "liveChange" event of search field
+		 * @param {object} oEvent - <code>liveChange</code> event of search field
 		 * @public
 		 */
 		onSearch: function (oEvent) {
@@ -92,7 +98,7 @@ sap.ui.define([
 		/**
 		 * Filters the binding of the master list;
 		 * This function is also called once navigation to the page to clear the filters or input search entry.
-		 * @param {String} sQuery - entered string within the search field
+		 * @param {string} sQuery - Entered string within the search field
 		 * @public
 		 */
 		filterListByQuery: function (sQuery) {
@@ -117,7 +123,7 @@ sap.ui.define([
 		/**
 		 * Handles the selection of a layer entry in the master page;
 		 * Gathers the selected namespace and the current layer, then navigates to the target.
-		 * @param {Object} oEvent - press event of master components list
+		 * @param {object} oEvent - Press event of master components list
 		 * @public
 		 */
 		onContentSelected: function (oEvent) {
@@ -131,20 +137,20 @@ sap.ui.define([
 
 			this.sNamespace = (this.sNamespace ? this.sNamespace : '/');
 
-				if (sContentFileType) {
-					// show details to a file
-					var mRouteParameters = {
-						"layer": this.sLayer,
-						"namespace": encodeURIComponent(this.sNamespace),
-						"fileName": sContentName,
-						"fileType": sContentFileType
-					};
-					oRouter.navTo("ContentDetails", mRouteParameters);
-				} else {
-					// navigation to a namespace
-					this.sNamespace += sContentName + '/';
-					oRouter.navTo("LayerContentMaster", {"layer": this.sLayer, "namespace": encodeURIComponent(this.sNamespace)});
-				}
+			if (sContentFileType) {
+				// show details to a file
+				var mRouteParameters = {
+					layer: this.sLayer,
+					namespace: encodeURIComponent(this.sNamespace),
+					fileName: sContentName,
+					fileType: sContentFileType
+				};
+				oRouter.navTo("ContentDetails", mRouteParameters);
+			} else {
+				// navigation to a namespace
+				this.sNamespace += sContentName + '/';
+				oRouter.navTo("LayerContentMaster", {layer: this.sLayer, namespace: encodeURIComponent(this.sNamespace)});
+			}
 		},
 
 		/**
@@ -160,14 +166,14 @@ sap.ui.define([
 				var sSplittedNamespace = this.sNamespace.split("/");
 				sSplittedNamespace.splice(-2, 1);
 				var sTargetNamespace = sSplittedNamespace.join("/");
-				oRouter.navTo("LayerContentMaster", {"layer": this.sLayer, "namespace": encodeURIComponent(sTargetNamespace)}, true);
+				oRouter.navTo("LayerContentMaster", {layer: this.sLayer, namespace: encodeURIComponent(sTargetNamespace)}, true);
 			}
 		},
 
 		/**
 		 * Formatter to shorten namespaces with multiple hierarchies;
 		 * If the hierarchy has more than two levels only the first and last levels are shown.
-		 * @returns {String} - shortened namespace for display
+		 * @returns {string} - Shortened namespace for display
 		 * @private
 		 */
 		_shortenNamespace: function () {
@@ -187,7 +193,7 @@ sap.ui.define([
 		/**
 		 * Handler for displaying errors;
 		 * Calls the "ErrorUtils" helper class for error handling.
-		 * @param oEvent - press event on the error button
+		 * @param {object} oEvent - Press event on the error button
 		 * @public
 		 */
 		handleMessagePopoverPress: function (oEvent) {

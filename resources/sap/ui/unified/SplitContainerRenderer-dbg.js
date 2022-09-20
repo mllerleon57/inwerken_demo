@@ -1,6 +1,6 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -24,7 +24,7 @@ sap.ui.define(["sap/ui/core/library"],
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 * @param {sap.ui.core.RenderManager} rm the RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.ui.core.Control} oShell an object representation of the control that should be rendered
+	 * @param {sap.ui.unified.SplitContainer} oControl an object representation of the control that should be rendered
 	 */
 	SplitContainerRenderer.render = function(rm, oControl){
 		var sId = oControl.getId();
@@ -54,7 +54,11 @@ sap.ui.define(["sap/ui/core/library"],
 		var sSidePaneId = sId + "-pane";
 
 		var sWidth = oControl.getShowSecondaryContent() ? oControl.getSecondaryContentSize() : "0";
-		rm.write("<aside id='", sSidePaneId, "' style='width:", sWidth, "'");
+		rm.write("<aside id='", sSidePaneId);
+		rm.write("'");
+		rm.addStyle("width", sWidth);
+		rm.writeStyles();
+
 		rm.addClass("sapUiUfdSpltContPane");
 		if (!oControl.getShowSecondaryContent()) {
 			rm.addClass("sapUiUfdSplitContSecondClosed");

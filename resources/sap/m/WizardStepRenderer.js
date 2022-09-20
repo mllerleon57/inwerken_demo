@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(function(){"use strict";var W={};W.render=function(r,s){this.startWizardStep(r,s);this.renderWizardStepTitle(r,s);this.renderContent(r,s);this.endWizardStep(r);};W.startWizardStep=function(r,s){r.write("<article");r.writeAccessibilityState(s,{"labelledby":this.getTitleId(s),"role":"region"});r.writeControlData(s);r.addClass("sapMWizardStep");r.writeClasses();r.write(">");};W.renderWizardStepTitle=function(r,s){r.write("<h3 class='sapMWizardStepTitle' id='"+this.getTitleId(s)+"'>");r.writeEscaped(s.getTitle());r.write("</h3>");};W.getTitleId=function(s){return s.getId()+"-Title";};W.renderContent=function(r,s){s.getContent().forEach(r.renderControl);r.renderControl(s.getAggregation("_nextButton"));};W.endWizardStep=function(r){r.write("</article>");};return W;},true);
+sap.ui.define(function(){"use strict";var e={apiVersion:2};e.render=function(e,t){this.startWizardStep(e,t);this.renderWizardStepTitle(e,t);this.renderContent(e,t);this.endWizardStep(e)};e.startWizardStep=function(e,t){e.openStart("div",t).accessibilityState(t,{labelledby:t.getId()+"-Title",role:"region"}).class("sapMWizardStep").openEnd()};e.renderWizardStepTitle=function(e,t){e.openStart("h3",t.getId()+"-Title").class("sapMWizardStepTitle").openEnd().text(this._resolveOrder(t)).text(t.getTitle()).close("h3")};e.renderContent=function(e,t){t.getContent().forEach(e.renderControl,e);e.renderControl(t.getAggregation("_nextButton"))};e.endWizardStep=function(e){e.close("div")};e._resolveOrder=function(e){var t=e.getCustomData().filter(function(e){return e.getKey()==="stepIndex"})[0];return t?t.getValue()+". ":""};return e},true);
+//# sourceMappingURL=WizardStepRenderer.js.map

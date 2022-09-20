@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['./FlexBox','./library','./HBoxRenderer'],function(F,l,H){"use strict";var a=F.extend("sap.m.HBox",{metadata:{library:"sap.m",designtime:"sap/m/designtime/HBox.designtime"}});return a;});
+sap.ui.define(["./FlexBox","./library","./HBoxRenderer"],function(e,i,a){"use strict";var r=e.extend("sap.m.HBox",{metadata:{library:"sap.m",designtime:"sap/m/designtime/HBox.designtime"}});return r});
+//# sourceMappingURL=HBox.js.map

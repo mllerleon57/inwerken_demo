@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['./ListItemBaseRenderer','sap/ui/core/Renderer'],function(L,R){"use strict";var A=R.extend(L);A.renderLIAttributes=function(r,l){r.addClass("sapMALI");};A.renderLIContent=function(r,l){var i=l.getText();if(i){r.write("<div class='sapMALIText'>");r.writeEscaped(i);r.write("</div>");}};return A;},true);
+sap.ui.define(["./ListItemBaseRenderer","sap/ui/core/Renderer"],function(e,t){"use strict";var n=t.extend(e);n.apiVersion=2;n.renderLIAttributes=function(e,t){e.class("sapMALI")};n.renderLIContent=function(e,t){var n=t.getText();if(n){e.openStart("div").class("sapMALIText").openEnd();e.text(n);e.close("div")}};return n},true);
+//# sourceMappingURL=ActionListItemRenderer.js.map

@@ -1,6 +1,6 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -30,11 +30,12 @@ sap.ui.define(["./library", "./ListBase", "./ListRenderer"],
 	 * @extends sap.m.ListBase
 	 *
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.m.List
+	 * @see {@link fiori:/list-overview/ List}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var List = ListBase.extend("sap.m.List", /** @lends sap.m.List.prototype */ { metadata : {
@@ -49,6 +50,43 @@ sap.ui.define(["./library", "./ListBase", "./ListRenderer"],
 			backgroundDesign : {type : "sap.m.BackgroundDesign", group : "Appearance", defaultValue : BackgroundDesign.Solid}
 		}
 	}});
+
+	List.prototype.getAriaRole = function() {
+		return this._sAriaRole || "list";
+	};
+
+	/**
+	 * Applies the aria <code>role</code> attribute to the control.
+	 *
+	 * Supported values are:
+	 * <ul>
+	 * <li><code>list</code>: This is the default since version 1.105. The rendered items will have the <code>role="listitem"</code>.</li>
+	 * <li><code>listbox</code>: Legacy support. The rendererd items will have the <code>role="option"</code>.</li>
+	 * </ul>
+	 * <b>Note:</b> This method must be called before the control renders.
+	 * @param {string} sRole role attribute for the control
+	 * @protected
+	 * @ui5-restricted
+	 * @since 1.105
+	 */
+	List.prototype.applyAriaRole = function(sRole) {
+		this._sAriaRole = sRole;
+	};
+
+	List.prototype.enhanceAccessibilityState = function(oElement, mAriaProps) {
+		ListBase.prototype.enhanceAccessibilityState.apply(this, arguments);
+
+		// update listitem Accessibility state according to the list's role attribute
+		if (this.getAriaRole() === "listbox" && oElement.isA("sap.m.ListItemBase")) {
+			mAriaProps.roledescription = null;
+			mAriaProps.role = "option";
+			mAriaProps.owns = null;
+
+			if (oElement.isSelectable()) {
+				mAriaProps.selected = oElement.getSelected();
+			}
+		}
+	};
 
 	return List;
 

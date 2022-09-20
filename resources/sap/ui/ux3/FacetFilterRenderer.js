@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],function(q){"use strict";var F={};F.render=function(r,c){var a=r;var f=(c.getVisibleItemCountMode()===sap.ui.ux3.VisibleItemCountMode.Auto);a.write("<div");a.writeControlData(c);a.addClass("sapUiUx3FacetFilter");a.writeClasses();if(f){a.writeAttribute("style","height:100%");}a.write(">");var l=c.getLists();if(l){for(var i=0;i<l.length;i++){l[i].sWidth=100/l.length+"%";l[i].bFullHeight=f;a.renderControl(l[i]);}}a.write("</div>");};return F;},true);
+sap.ui.define(["./library"],function(t){"use strict";var e=t.VisibleItemCountMode;var i={};i.render=function(t,i){var r=i.getVisibleItemCountMode()===e.Auto;t.write("<div");t.writeControlData(i);t.addClass("sapUiUx3FacetFilter");t.writeClasses();if(r){t.writeAttribute("style","height:100%")}t.write(">");var s=i.getLists();if(s){for(var a=0;a<s.length;a++){s[a].sWidth=100/s.length+"%";s[a].bFullHeight=r;t.renderControl(s[a])}}t.write("</div>")};return i},true);
+//# sourceMappingURL=FacetFilterRenderer.js.map

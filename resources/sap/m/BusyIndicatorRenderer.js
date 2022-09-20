@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([],function(){"use strict";var B={};B.render=function(r,b){this.startBusyIndicator(r,b);this.renderBusyIndication(r,b);this.renderLabel(r,b);this.endBusyIndicator(r);};B.startBusyIndicator=function(r,b){var a={role:"progressbar",valuemin:"0",valuemax:"100"};r.write("<div tabindex='0' ");r.writeControlData(b);r.addClass("sapMBusyIndicator");r.writeClasses();r.addStyle("font-size",b.getSize());r.writeStyles();r.writeAccessibilityState(b,a);this.renderTooltip(r,b.getTooltip_AsString());r.write(">");};B.renderTooltip=function(r,t){if(t){r.writeAttributeEscaped("title",t);}};B.renderBusyIndication=function(r,b){if(b.getCustomIcon()){r.renderControl(b._iconImage);}else{r.write("<div class='sapMBusyIndicatorBusyArea'");r.writeAttribute("id",b.getId()+"-busy-area");r.write("></div>");}};B.renderLabel=function(r,b){if(b.getText()){r.renderControl(b._busyLabel);}};B.endBusyIndicator=function(r){r.write("</div>");};return B;},true);
+sap.ui.define([],function(){"use strict";var e={apiVersion:2};e.render=function(e,t){var i=t.getTooltip_AsString();e.openStart("div",t).class("sapMBusyIndicator");e.style("font-size",t.getSize());e.accessibilityState(t);if(i){e.attr("title",i)}e.openEnd();if(t.getCustomIcon()){e.renderControl(t._iconImage)}else{e.openStart("div",t.getId()+"-busy-area");e.class("sapMBusyIndicatorBusyArea").openEnd().close("div")}if(t._busyLabel){e.renderControl(t._busyLabel)}e.close("div")};return e},true);
+//# sourceMappingURL=BusyIndicatorRenderer.js.map

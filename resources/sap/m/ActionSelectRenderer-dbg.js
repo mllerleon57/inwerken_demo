@@ -1,6 +1,6 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define(['sap/ui/core/Renderer', './SelectRenderer'],
@@ -15,15 +15,16 @@ sap.ui.define(['sap/ui/core/Renderer', './SelectRenderer'],
 		 * @type {string}
 		 */
 		ActionSelectRenderer.ACTION_SELECT_CSS_CLASS = "sapMActionSelect";
+		ActionSelectRenderer.apiVersion = 2;
 
 		/**
 		 * Apply a CSS class to the HTML root element of the ActionSelect control.
 		 *
 		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
-		 * @param {sap.ui.core.Control} oActionSelect An object representation of the control that should be rendered.
+		 * @param {sap.m.ActionSelect} oActionSelect An object representation of the control that should be rendered.
 		 */
 		ActionSelectRenderer.addClass = function(oRm, oActionSelect) {
-			oRm.addClass(ActionSelectRenderer.ACTION_SELECT_CSS_CLASS);
+			oRm.class(ActionSelectRenderer.ACTION_SELECT_CSS_CLASS);
 		};
 
 		return ActionSelectRenderer;

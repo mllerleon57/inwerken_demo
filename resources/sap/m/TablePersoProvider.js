@@ -1,6 +1,7 @@
 /*
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','sap/ui/base/ManagedObject'],function(q,M){"use strict";var T=M.extend("sap.m.TablePersoProvider",{constructor:function(i,s){M.apply(this,arguments);},metadata:{"abstract":true,library:"sap.m"}});T.prototype.init=function(){q.sap.log.warning("This is the abstract base class for a TablePersoProvider. Do not create instances of this class, but use a concrete sub class instead.");q.sap.log.debug("TablePersoProvider init");};T.prototype.getPersData=function(){q.sap.log.debug("TablePersoProvider getPersData");};T.prototype.setPersData=function(b){q.sap.log.debug("TablePersoProvider setPersData");};T.prototype.delPersData=function(){q.sap.log.debug("TablePersoProvider delPersData");};T.prototype.getCaption=function(c){return null;};T.prototype.getGroup=function(c){return null;};T.prototype.resetPersData=function(){q.sap.log.debug("TablePersoProvider resetPersData");};return T;});
+sap.ui.define(["sap/ui/base/ManagedObject","sap/base/Log"],function(e,t){"use strict";var r=e.extend("sap.m.TablePersoProvider",{constructor:function(t,r){e.apply(this,arguments)},metadata:{abstract:true,library:"sap.m"}});r.prototype.init=function(){t.warning("This is the abstract base class for a TablePersoProvider. Do not create instances of this class, but use a concrete sub class instead.");t.debug("TablePersoProvider init")};r.prototype.getPersData=function(){t.debug("TablePersoProvider getPersData")};r.prototype.setPersData=function(e){t.debug("TablePersoProvider setPersData")};r.prototype.delPersData=function(){t.debug("TablePersoProvider delPersData")};r.prototype.getCaption=function(e){return null};r.prototype.getGroup=function(e){return null};r.prototype.resetPersData=function(){t.debug("TablePersoProvider resetPersData")};r.prototype.getResetPersData=function(){t.debug("TablePersoProvider getPersData")};return r});
+//# sourceMappingURL=TablePersoProvider.js.map

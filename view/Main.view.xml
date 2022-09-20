@@ -3,15 +3,46 @@
 	xmlns:mvc="sap.ui.core.mvc"
     xmlns:l="sap.ui.layout"
 	displayBlock="true"
-	xmlns="sap.m">
-    <page id="mainPage"
-            title="Wilkommen"
+	xmlns="sap.m"
+    xmlns:semantic="sap.f.semantic">
+    <semantic:SemanticPage id="mainPage"
             class="detailPage">
-        <content>
-            <Image src="images/inwerken_logo_white.jpg"
-                width="100%"/>
-             <Image src="images/01.jpg"
-                width="100%"/>
-        </content>
-    </page>
+        <semantic:titleHeading>
+            <Title text="Herzlich Willkommen bei Inwerken!" />
+        </semantic:titleHeading>
+        <semantic:content>
+         <FlexBox justifyContent="Center" direction="Column" class="sapUiResponsivePadding" height="80%">
+            <Image src="../images/Header_Herbst_Inwerken_Zentrale_2022-4.webp"
+            width="100%"/>
+            <l:BlockLayout id="BlockLayout" background="Light">
+                <l:BlockLayoutRow>
+                    <l:BlockLayoutCell title="Was macht Inwerken?">
+                        <Text
+                            id="text1"
+                            wrappingType="Hyphenated"
+                            text="Wir sind eine professionelle und unternehmensnahe IT-Beratung und wollen anderen Menschen die Arbeit einfacher machen." />
+                    </l:BlockLayoutCell>
+                    <l:BlockLayoutCell title="Was kannst Du bei Inwerken machen?">
+                        <Text
+                            id="text2"
+                            wrappingType="Hyphenated"
+                            text="Du kannst bei uns als Werkstudent, Auszubildender oder dualer Student einen ganz besonderen Arbeitsplatz kennenlernen und dich in den Bereichen IT und SAP etablieren um später richtig Karriere zu machen." />
+                    </l:BlockLayoutCell>
+                    <l:BlockLayoutCell title="Warum Inwerken und nicht woanders?">
+                        <Text
+                            id="text3"
+                            wrappingType="Hyphenated"
+                            text="Inwerken ist ein sehr attraktiver Arbeitgeber und bietet ganz besondere Vorteile, sprich uns einfach an." />
+                    </l:BlockLayoutCell>
+                    <l:BlockLayoutCell title="Wie kann ich mich bewerben?">
+                        <Text
+                            id="text4"
+                            wrappingType="Hyphenated"
+                            text="Du kannst uns einfach ansprechen und wir werden Dir alles erzählen, was du dafür benötigst. Keine Sorge, es ist ganz einfach!" />
+                    </l:BlockLayoutCell>
+                </l:BlockLayoutRow>
+            </l:BlockLayout>
+         </FlexBox>
+        </semantic:content>
+    </semantic:SemanticPage>
 </mvc:View>

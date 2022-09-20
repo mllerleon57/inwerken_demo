@@ -2,51 +2,56 @@
 	"_version": "1.1.0",
 	"resources": [
 		{
-			"name": ".library"
+			"name": ".library",
+			"size": 1255
 		},
 		{
-			"name": ".theming"
+			"name": ".theming",
+			"size": 76
 		},
 		{
 			"name": "QuickViewUtils-dbg.js",
 			"module": "sap/ui/suite/QuickViewUtils.js",
+			"size": 6287,
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/Element.js"
+				"sap/ui/core/Element.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "QuickViewUtils.js",
 			"module": "sap/ui/suite/QuickViewUtils.js",
+			"size": 3907,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/Element.js"
+				"sap/ui/core/Element.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
+		},
+		{
+			"name": "QuickViewUtils.js.map",
+			"size": 5321,
+			"isDebug": true
 		},
 		{
 			"name": "TaskCircle-dbg.js",
 			"module": "sap/ui/suite/TaskCircle.js",
+			"size": 3343,
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/EnabledPropagator.js",
 				"sap/ui/suite/TaskCircleRenderer.js",
 				"sap/ui/suite/library.js"
 			]
-		},
-		{
-			"name": "TaskCircle.control",
-			"designtime": true
 		},
 		{
 			"name": "TaskCircle.js",
 			"module": "sap/ui/suite/TaskCircle.js",
+			"size": 1100,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/EnabledPropagator.js",
 				"sap/ui/suite/TaskCircleRenderer.js",
@@ -54,15 +59,16 @@
 			]
 		},
 		{
-			"name": "TaskCircleColor.type",
-			"designtime": true
+			"name": "TaskCircle.js.map",
+			"size": 1295,
+			"isDebug": true
 		},
 		{
 			"name": "TaskCircleRenderer-dbg.js",
 			"module": "sap/ui/suite/TaskCircleRenderer.js",
+			"size": 3485,
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Core.js",
 				"sap/ui/suite/library.js"
 			]
@@ -70,118 +76,85 @@
 		{
 			"name": "TaskCircleRenderer.js",
 			"module": "sap/ui/suite/TaskCircleRenderer.js",
+			"size": 1651,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Core.js",
 				"sap/ui/suite/library.js"
 			]
+		},
+		{
+			"name": "TaskCircleRenderer.js.map",
+			"size": 2377,
+			"isDebug": true
 		},
 		{
 			"name": "VerticalProgressIndicator-dbg.js",
 			"module": "sap/ui/suite/VerticalProgressIndicator.js",
+			"size": 4359,
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/EnabledPropagator.js",
 				"sap/ui/suite/VerticalProgressIndicatorRenderer.js",
-				"sap/ui/suite/library.js"
+				"sap/ui/suite/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
-		},
-		{
-			"name": "VerticalProgressIndicator.control",
-			"designtime": true
 		},
 		{
 			"name": "VerticalProgressIndicator.js",
 			"module": "sap/ui/suite/VerticalProgressIndicator.js",
+			"size": 1333,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/EnabledPropagator.js",
 				"sap/ui/suite/VerticalProgressIndicatorRenderer.js",
-				"sap/ui/suite/library.js"
+				"sap/ui/suite/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
+		},
+		{
+			"name": "VerticalProgressIndicator.js.map",
+			"size": 1771,
+			"isDebug": true
 		},
 		{
 			"name": "VerticalProgressIndicatorRenderer-dbg.js",
 			"module": "sap/ui/suite/VerticalProgressIndicatorRenderer.js",
+			"size": 2474,
 			"isDebug": true
 		},
 		{
 			"name": "VerticalProgressIndicatorRenderer.js",
-			"module": "sap/ui/suite/VerticalProgressIndicatorRenderer.js"
+			"module": "sap/ui/suite/VerticalProgressIndicatorRenderer.js",
+			"size": 1181
+		},
+		{
+			"name": "VerticalProgressIndicatorRenderer.js.map",
+			"size": 1536,
+			"isDebug": true
 		},
 		{
 			"name": "library-dbg.js",
 			"module": "sap/ui/suite/library.js",
+			"size": 1313,
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Core.js",
 				"sap/ui/core/library.js"
 			]
-		},
-		{
-			"name": "library-h2-preload-dbg.js",
-			"module": "sap/ui/suite/library-h2-preload.js",
-			"isDebug": true,
-			"merged": true,
-			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/Control.js",
-				"sap/ui/core/Core.js",
-				"sap/ui/core/Element.js",
-				"sap/ui/core/EnabledPropagator.js",
-				"sap/ui/core/library.js"
-			],
-			"included": [
-				"sap/ui/suite/library.js",
-				"sap/ui/suite/manifest.json",
-				"sap/ui/suite/QuickViewUtils.js",
-				"sap/ui/suite/TaskCircle.js",
-				"sap/ui/suite/TaskCircleRenderer.js",
-				"sap/ui/suite/VerticalProgressIndicator.js",
-				"sap/ui/suite/VerticalProgressIndicatorRenderer.js"
-			]
-		},
-		{
-			"name": "library-h2-preload.js",
-			"module": "sap/ui/suite/library-h2-preload.js",
-			"merged": true,
-			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/Control.js",
-				"sap/ui/core/Core.js",
-				"sap/ui/core/Element.js",
-				"sap/ui/core/EnabledPropagator.js",
-				"sap/ui/core/library.js"
-			],
-			"included": [
-				"sap/ui/suite/library.js",
-				"sap/ui/suite/manifest.json",
-				"sap/ui/suite/QuickViewUtils.js",
-				"sap/ui/suite/TaskCircle.js",
-				"sap/ui/suite/TaskCircleRenderer.js",
-				"sap/ui/suite/VerticalProgressIndicator.js",
-				"sap/ui/suite/VerticalProgressIndicatorRenderer.js"
-			]
-		},
-		{
-			"name": "library-h2-preload.js.map",
-			"isDebug": true
 		},
 		{
 			"name": "library-preload.js",
 			"module": "sap/ui/suite/library-preload.js",
+			"size": 10538,
 			"merged": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Core.js",
 				"sap/ui/core/Element.js",
 				"sap/ui/core/EnabledPropagator.js",
-				"sap/ui/core/library.js"
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			],
 			"included": [
 				"sap/ui/suite/QuickViewUtils.js",
@@ -195,158 +168,185 @@
 		},
 		{
 			"name": "library-preload.js.map",
+			"size": 13280,
 			"isDebug": true
-		},
-		{
-			"name": "library-preload.json",
-			"module": "sap/ui/suite/library-preload.json",
-			"merged": true,
-			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/Control.js",
-				"sap/ui/core/Core.js",
-				"sap/ui/core/Element.js",
-				"sap/ui/core/EnabledPropagator.js",
-				"sap/ui/core/library-preload.json",
-				"sap/ui/core/library.js"
-			],
-			"included": [
-				"sap/ui/suite/QuickViewUtils.js",
-				"sap/ui/suite/TaskCircle.js",
-				"sap/ui/suite/TaskCircleRenderer.js",
-				"sap/ui/suite/VerticalProgressIndicator.js",
-				"sap/ui/suite/VerticalProgressIndicatorRenderer.js",
-				"sap/ui/suite/library.js",
-				"sap/ui/suite/manifest.json"
-			]
-		},
-		{
-			"name": "library.dependencies.json",
-			"designtime": true
-		},
-		{
-			"name": "library.dependencies.xml",
-			"designtime": true
 		},
 		{
 			"name": "library.js",
 			"module": "sap/ui/suite/library.js",
+			"size": 600,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Core.js",
 				"sap/ui/core/library.js"
 			]
 		},
 		{
-			"name": "library.templates.xml",
-			"designtime": true
+			"name": "library.js.map",
+			"size": 553,
+			"isDebug": true
 		},
 		{
 			"name": "manifest.json",
-			"module": "sap/ui/suite/manifest.json"
+			"module": "sap/ui/suite/manifest.json",
+			"size": 976
 		},
 		{
-			"name": "resources.json"
+			"name": "resources.json",
+			"size": 7348
 		},
 		{
 			"name": "themes/base/.theming",
+			"size": 64,
 			"theme": "base"
 		},
 		{
 			"name": "themes/base/TaskCircle.less",
+			"size": 355,
 			"designtime": true,
 			"theme": "base"
 		},
 		{
 			"name": "themes/base/VerticalProgressIndicator.less",
+			"size": 457,
 			"designtime": true,
 			"theme": "base"
 		},
 		{
-			"name": "themes/base/library-RTL-dbg.css",
-			"isDebug": true,
+			"name": "themes/base/css_variables.css",
+			"size": 116,
+			"theme": "base"
+		},
+		{
+			"name": "themes/base/css_variables.less",
+			"size": 240,
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "themes/base/css_variables.source.less",
+			"size": 113742,
+			"designtime": true,
 			"theme": "base"
 		},
 		{
 			"name": "themes/base/library-RTL.css",
-			"theme": "base"
-		},
-		{
-			"name": "themes/base/library-dbg.css",
-			"isDebug": true,
+			"size": 708,
 			"theme": "base"
 		},
 		{
 			"name": "themes/base/library-parameters.json",
+			"module": "sap/ui/suite/themes/base/library-parameters.json",
+			"size": 2,
 			"theme": "base"
 		},
 		{
 			"name": "themes/base/library.css",
+			"size": 708,
 			"theme": "base"
 		},
 		{
 			"name": "themes/base/library.less",
+			"size": 1546,
 			"designtime": true,
 			"theme": "base"
 		},
 		{
 			"name": "themes/base/library.source.less",
+			"size": 367,
 			"designtime": true,
 			"theme": "base"
 		},
 		{
+			"name": "themes/base/library_skeleton-RTL.css",
+			"size": 678,
+			"theme": "base"
+		},
+		{
+			"name": "themes/base/library_skeleton.css",
+			"size": 678,
+			"theme": "base"
+		},
+		{
 			"name": "themes/base/shared.less",
+			"size": 65,
 			"designtime": true,
 			"theme": "base"
 		},
 		{
 			"name": "themes/sap_hcb/.theming",
+			"size": 128,
 			"theme": "sap_hcb"
 		},
 		{
 			"name": "themes/sap_hcb/TaskCircle.less",
+			"size": 218,
 			"designtime": true,
 			"theme": "sap_hcb"
 		},
 		{
 			"name": "themes/sap_hcb/VerticalProgressIndicator.less",
+			"size": 361,
 			"designtime": true,
 			"theme": "sap_hcb"
 		},
 		{
-			"name": "themes/sap_hcb/library-RTL-dbg.css",
-			"isDebug": true,
+			"name": "themes/sap_hcb/css_variables.css",
+			"size": 116,
+			"theme": "sap_hcb"
+		},
+		{
+			"name": "themes/sap_hcb/css_variables.less",
+			"size": 99692,
+			"designtime": true,
+			"theme": "sap_hcb"
+		},
+		{
+			"name": "themes/sap_hcb/css_variables.source.less",
+			"size": 99392,
+			"designtime": true,
 			"theme": "sap_hcb"
 		},
 		{
 			"name": "themes/sap_hcb/library-RTL.css",
-			"theme": "sap_hcb"
-		},
-		{
-			"name": "themes/sap_hcb/library-dbg.css",
-			"isDebug": true,
+			"size": 1031,
 			"theme": "sap_hcb"
 		},
 		{
 			"name": "themes/sap_hcb/library-parameters.json",
+			"module": "sap/ui/suite/themes/sap_hcb/library-parameters.json",
+			"size": 2,
 			"theme": "sap_hcb"
 		},
 		{
 			"name": "themes/sap_hcb/library.css",
+			"size": 1031,
 			"theme": "sap_hcb"
 		},
 		{
 			"name": "themes/sap_hcb/library.less",
+			"size": 1194,
 			"designtime": true,
 			"theme": "sap_hcb"
 		},
 		{
 			"name": "themes/sap_hcb/library.source.less",
+			"size": 349,
 			"designtime": true,
 			"theme": "sap_hcb"
 		},
 		{
+			"name": "themes/sap_hcb/library_skeleton-RTL.css",
+			"size": 1063,
+			"theme": "sap_hcb"
+		},
+		{
+			"name": "themes/sap_hcb/library_skeleton.css",
+			"size": 1063,
+			"theme": "sap_hcb"
+		},
+		{
 			"name": "themes/sap_hcb/shared.less",
+			"size": 53,
 			"designtime": true,
 			"theme": "sap_hcb"
 		}

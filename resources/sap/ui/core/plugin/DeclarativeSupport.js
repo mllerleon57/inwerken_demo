@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','sap/ui/core/Core','sap/ui/core/DeclarativeSupport'],function(q,C,D){"use strict";var a=function(){};a.prototype.startPlugin=function(c,o){q.sap.log.info("Starting DeclarativeSupport plugin.");this.oCore=c;this.oWindow=window;D.compile(document.body);};a.prototype.stopPlugin=function(){q.sap.log.info("Stopping DeclarativeSupport plugin.");this.oCore=null;};(function(){var t=new a();sap.ui.getCore().registerPlugin(t);}());return a;},true);
+sap.ui.define(["sap/base/Log","sap/ui/core/DeclarativeSupport","sap/ui/core/Core"],function(o,t){"use strict";var i=function(){};i.prototype.startPlugin=function(i,e){o.info("Starting DeclarativeSupport plugin.");this.oCore=i;this.oWindow=window;t.compile(document.body)};i.prototype.stopPlugin=function(){o.info("Stopping DeclarativeSupport plugin.");this.oCore=null};sap.ui.getCore().registerPlugin(new i);return i},true);
+//# sourceMappingURL=DeclarativeSupport.js.map

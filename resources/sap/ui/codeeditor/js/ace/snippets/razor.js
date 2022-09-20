@@ -1,1 +1,2 @@
-ace.define("ace/snippets/razor",["require","exports","module"],function(r,e,m){"use strict";e.snippetText="snippet if\n(${1} == ${2}) {\n	${3}\n}";e.scope="razor";});
+ace.define("ace/snippets/razor",[],function(e,t,o){"use strict";t.snippetText="snippet if\n(${1} == ${2}) {\n\t${3}\n}";t.scope="razor"});(function(){ace.require(["ace/snippets/razor"],function(e){if(typeof module=="object"&&typeof exports=="object"&&module){module.exports=e}})})();
+//# sourceMappingURL=razor.js.map

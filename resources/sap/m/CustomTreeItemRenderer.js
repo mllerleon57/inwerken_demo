@@ -1,6 +1,7 @@
-/*
- * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+/*!
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['./TreeItemBaseRenderer','sap/ui/core/Renderer'],function(T,R){"use strict";var C=R.extend(T);C.renderLIAttributes=function(r,l){r.addClass("sapMCTI");T.renderLIAttributes.apply(this,arguments);};C.renderLIContent=function(r,l){l.getContent().forEach(function(c){r.renderControl(c);});};return C;},true);
+sap.ui.define(["./TreeItemBaseRenderer","sap/ui/core/Renderer"],function(e,r){"use strict";var n=r.extend(e);n.apiVersion=2;n.renderLIAttributes=function(r,n){r.class("sapMCTI");e.renderLIAttributes.apply(this,arguments)};n.renderLIContent=function(e,r){r.getContent().forEach(function(r){e.renderControl(r)})};return n},true);
+//# sourceMappingURL=CustomTreeItemRenderer.js.map

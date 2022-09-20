@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([],function(){"use strict";var S={};S.render=function(r,c){r.write("<div");r.writeControlData(c);var w=c.getWidth(),h=c.getHeight();if(w){r.addStyle("width",w);}if(h){r.addStyle("height",h);}r.writeStyles();if(c.getVertical()){if(!c.getHorizontal()){r.addClass("sapMScrollContV");}else{r.addClass("sapMScrollContVH");}}else if(c.getHorizontal()){r.addClass("sapMScrollContH");}r.addClass("sapMScrollCont");r.writeClasses();var t=c.getTooltip_AsString();if(t){r.writeAttributeEscaped("title",t);}if(c.getFocusable()){r.writeAttributeEscaped("tabindex","0");}r.write("><div id='"+c.getId()+"-scroll' class='sapMScrollContScroll'>");var C=c.getContent(),l=C.length;for(var i=0;i<l;i++){r.renderControl(C[i]);}r.write("</div></div>");};return S;},true);
+sap.ui.define([],function(){"use strict";var t={apiVersion:2};t.render=function(t,e){t.openStart("div",e).style("width",e.getWidth()).style("height",e.getHeight());if(e.getVertical()){if(!e.getHorizontal()){t.class("sapMScrollContV")}else{t.class("sapMScrollContVH")}}else{t.class("sapMScrollContH")}t.class("sapMScrollCont");var l=e.getTooltip_AsString();if(l){t.attr("title",l)}if(e.getFocusable()){t.attr("tabindex","0")}t.openEnd();t.openStart("div",e.getId()+"-scroll").class("sapMScrollContScroll").openEnd();var o=e.getContent(),r=o.length;for(var s=0;s<r;s++){t.renderControl(o[s])}t.close("div");t.close("div")};return t},true);
+//# sourceMappingURL=ScrollContainerRenderer.js.map

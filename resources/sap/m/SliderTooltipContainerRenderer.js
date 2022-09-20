@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','sap/ui/core/Renderer'],function(q,R){"use strict";var S={},C={MAIN_CLASS:"sapMSliderTooltipContainer"};S.render=function(r,c){var t=c.getAssociatedTooltipsAsControls();r.write("<div");r.writeControlData(c);r.addStyle("width",c.getWidth());r.writeStyles();r.writeClasses();r.write(">");r.write("<div");r.writeAttribute("id",c.getId()+"-container");r.addStyle("left","0%");r.addStyle("right","0%");r.addClass(C.MAIN_CLASS);if(!c.getEnabled()){r.addClass(C.MAIN_CLASS+"Disabled");}r.writeClasses();r.writeStyles();r.write(">");if(t&&t.length){t.forEach(function(T){r.renderControl(T);});}r.write("</div>");r.write("</div>");};return S;},true);
+sap.ui.define([],function(){"use strict";var e={apiVersion:2},t={MAIN_CLASS:"sapMSliderTooltipContainer"};e.render=function(e,n){var i=n.getAssociatedTooltipsAsControls();e.openStart("div",n).style("width",n.getWidth()).openEnd();e.openStart("div",n.getId()+"-container").style("left","0%").style("right","0%").class(t.MAIN_CLASS);if(!n.getEnabled()){e.class(t.MAIN_CLASS+"Disabled")}e.openEnd();if(i&&i.length){i.forEach(function(t){e.renderControl(t)})}e.close("div").close("div")};return e},true);
+//# sourceMappingURL=SliderTooltipContainerRenderer.js.map

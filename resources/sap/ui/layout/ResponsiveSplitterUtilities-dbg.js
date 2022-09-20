@@ -1,6 +1,6 @@
 /*!
-* UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+* OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
 */
 sap.ui.define([], function() {
@@ -20,7 +20,7 @@ sap.ui.define([], function() {
 		aPanes = oPaneContainer.getPanes();
 		for (var i = 0; i < aPanes.length; i++) {
 			oPane = aPanes[i];
-			if (oPane instanceof sap.ui.layout.SplitPane) {
+			if (oPane && oPane.isA("sap.ui.layout.SplitPane")) {
 				fnCallback(oPane);
 			} else {
 				RSUtil.visitPanes(oPane, fnCallback);

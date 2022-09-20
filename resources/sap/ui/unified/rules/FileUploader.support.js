@@ -1,13 +1,13 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 /**
  * Defines support rules for the FileUploader control of sap.ui.unified library.
  */
-sap.ui.define(["jquery.sap.global", "sap/ui/support/library"],
-	function(jQuery, SupportLib) {
+sap.ui.define(["sap/ui/support/library"],
+	function(SupportLib) {
 	"use strict";
 
 	// shortcuts
@@ -33,7 +33,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/support/library"],
 		resolution: "Either enable the 'sendXHR' property of the FileUploader or set the 'useMultipart' property to true",
 		resolutionurls: [{
 			text: "API Reference: FileUploader",
-			href: "https://sapui5.hana.ondemand.com/#/api/sap.ui.unified.FileUploader"
+			href: "https://sdk.openui5.org/api/sap.ui.unified.FileUploader"
 		}],
 		check: function (oIssueManager, oCoreFacade, oScope) {
 			oScope.getElementsByClassName("sap.ui.unified.FileUploader")
@@ -70,12 +70,13 @@ sap.ui.define(["jquery.sap.global", "sap/ui/support/library"],
 		resolution: "Either disable the 'sendXHR' property of the FileUploader, or use the 'headerParameters' aggregation to specify parameters for XHR upload",
 		resolutionurls: [{
 			text: "API Reference: FileUploader",
-			href: "https://sapui5.hana.ondemand.com/#/api/sap.ui.unified.FileUploader"
+			href: "https://sdk.openui5.org/api/sap.ui.unified.FileUploader"
 		}],
 		check: function (oIssueManager, oCoreFacade, oScope) {
 			oScope.getElementsByClassName("sap.ui.unified.FileUploader")
 				.forEach(function(oElement) {
-					if (oElement.getParameters()
+					if (oElement.getParameters().length
+						&& !oElement.getHeaderParameters().length
 						&& oElement.getSendXHR()) {
 
 						var sElementId = oElement.getId(),
@@ -107,12 +108,13 @@ sap.ui.define(["jquery.sap.global", "sap/ui/support/library"],
 		resolution: "Either enable the 'sendXHR' property of the FileUploader, or use the 'parameters' aggregation to specify parameters for form-based upload",
 		resolutionurls: [{
 			text: "API Reference: FileUploader",
-			href: "https://sapui5.hana.ondemand.com/#/api/sap.ui.unified.FileUploader"
+			href: "https://sdk.openui5.org/api/sap.ui.unified.FileUploader"
 		}],
 		check: function (oIssueManager, oCoreFacade, oScope) {
 			oScope.getElementsByClassName("sap.ui.unified.FileUploader")
 				.forEach(function(oElement) {
-					if (oElement.getHeaderParameters()
+					if (oElement.getHeaderParameters().length
+						&& !oElement.getParameters().length
 						&& !oElement.getSendXHR()) {
 
 						var sElementId = oElement.getId(),

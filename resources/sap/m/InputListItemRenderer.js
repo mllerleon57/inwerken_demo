@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(["sap/ui/core/library","sap/ui/core/Renderer","./ListItemBaseRenderer"],function(c,R,L){"use strict";var T=c.TextDirection;var I=R.extend(L);I.renderLIAttributes=function(r,l){r.addClass("sapMILI");};I.renderLIContent=function(r,l){var s=l.getLabel();if(s){var a=l.getId()+"-label",b=l.getLabelTextDirection();r.write('<span id="'+a+'" class="sapMILILabel"');if(b!==T.Inherit){r.writeAttribute("dir",b.toLowerCase());}r.write('>');r.writeEscaped(s);r.write('</span>');}r.write('<div class="sapMILIDiv sapMILI-CTX">');l.getContent().forEach(function(C){if(a&&C.addAriaLabelledBy&&C.getAriaLabelledBy().indexOf(a)==-1){C.addAssociation("ariaLabelledBy",a,true);}r.renderControl(C);});r.write('</div>');};return I;},true);
+sap.ui.define(["sap/ui/core/library","sap/ui/core/Renderer","./ListItemBaseRenderer"],function(e,a,r){"use strict";var t=e.TextDirection;var n=a.extend(r);n.apiVersion=2;n.renderLIAttributes=function(e,a){e.class("sapMILI")};n.renderLIContent=function(e,a){var r=a.getLabel();var n=a.getId()+"-label";if(r){e.openStart("span",n);e.class("sapMILILabel");var i=a.getLabelTextDirection();if(i!==t.Inherit){e.attr("dir",i.toLowerCase())}e.openEnd();e.text(r);e.close("span")}e.openStart("div").class("sapMILIDiv").class("sapMILI-CTX").openEnd();a.getContent().forEach(function(a){if(a.addAriaLabelledBy&&a.getAriaLabelledBy().indexOf(n)===-1){a.addAriaLabelledBy(n)}e.renderControl(a)});e.close("div")};return n},true);
+//# sourceMappingURL=InputListItemRenderer.js.map

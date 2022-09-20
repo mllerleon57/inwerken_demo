@@ -1,33 +1,39 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Link.
 sap.ui.define([
-	'jquery.sap.global',
-	'./library',
-	'sap/ui/core/Control',
-	'sap/ui/core/InvisibleText',
-	'sap/ui/core/EnabledPropagator',
-	'sap/ui/core/library',
-	'sap/ui/Device',
-	'./LinkRenderer'
+	"./library",
+	"sap/ui/core/Core",
+	"sap/ui/core/Control",
+	"sap/ui/core/InvisibleText",
+	"sap/ui/core/EnabledPropagator",
+	"sap/ui/core/AccessKeysEnablement",
+	"sap/ui/core/LabelEnablement",
+	"sap/ui/core/library",
+	"sap/ui/Device",
+	"./LinkRenderer",
+	"sap/ui/events/KeyCodes",
+	"sap/base/security/URLListValidator"
 ],
 function(
-	jQuery,
 	library,
+	Core,
 	Control,
 	InvisibleText,
 	EnabledPropagator,
+	AccessKeysEnablement,
+	LabelEnablement,
 	coreLibrary,
 	Device,
-	LinkRenderer
-	) {
+	LinkRenderer,
+	KeyCodes,
+	URLListValidator
+) {
 	"use strict";
-
-
 
 	// shortcut for sap.ui.core.TextDirection
 	var TextDirection = coreLibrary.TextDirection;
@@ -35,7 +41,14 @@ function(
 	// shortcut for sap.ui.core.TextAlign
 	var TextAlign = coreLibrary.TextAlign;
 
+	// shortcut for sap.ui.core.aria.HasPopup
+	var AriaHasPopup = coreLibrary.aria.HasPopup;
 
+	// shortcut for sap.m.LinkAccessibleRole
+	var LinkAccessibleRole = library.LinkAccessibleRole;
+
+	// shortcut for sap.m.EmptyIndicator
+	var EmptyIndicatorMode = library.EmptyIndicatorMode;
 
 	/**
 	 * Constructor for a new <code>Link</code>.
@@ -70,10 +83,10 @@ function(
 	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/link/ Link}
 	 *
 	 * @extends sap.ui.core.Control
-	 * @implements sap.ui.core.IShrinkable, sap.ui.core.IFormContent
+	 * @implements sap.ui.core.IShrinkable, sap.ui.core.IFormContent, sap.ui.core.ITitleContent, sap.ui.core.IAccessKeySupport
 	 *
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 *
 	 * @constructor
 	 * @public
@@ -85,7 +98,9 @@ function(
 
 		interfaces : [
 			"sap.ui.core.IShrinkable",
-			"sap.ui.core.IFormContent"
+			"sap.ui.core.IFormContent",
+			"sap.ui.core.ITitleContent",
+			"sap.ui.core.IAccessKeySupport"
 		],
 		library : "sap.m",
 		designtime: "sap/m/designtime/Link.designtime",
@@ -111,14 +126,24 @@ function(
 			target : {type : "string", group : "Behavior", defaultValue : null},
 
 			/**
+			 * Specifies the value of the HTML <code>rel</code> attribute.
+			 *
+			 * <b>Note:</b> A default value of <code>noopener noreferrer</code> is set only to links that have a cross-origin URL
+			 * and a specified <code>target</code> with value other than <code>_self</code>.
+			 * @since 1.84
+			 */
+			rel : {type : "string", group : "Behavior", defaultValue : null},
+
+			/**
 			 * Determines the width of the link (CSS-size such as % or px). When it is set, this is the exact size.
 			 * When left blank, the text defines the size.
 			 */
 			width : {type : "sap.ui.core.CSSSize", group : "Dimension", defaultValue : null},
 
 			/**
-			 * Defines the link target URI. Supports standard hyperlink behavior. If a JavaScript action should be triggered,
-			 * this should not be set, but instead an event handler for the <code>press</code> event should be registered.
+			 * Defines the link target URI. Supports standard hyperlink behavior.
+			 * <b>Note:</b> Don't set <code>href</code> property if an action should be triggered by the link. Instead set <code>accessibleRole</code>
+			 * property to <code>LinkAccessibleRole.Button</code> and register a <code>press</code> event handler.
 			 */
 			href : {type : "sap.ui.core.URI", group : "Data", defaultValue : null},
 
@@ -127,8 +152,8 @@ function(
 			 *
 			 * If validation fails, the value of the <code>href</code> property will still be set, but will not be applied to the DOM.
 			 *
-			 * <b>Note:</b> Additional whitelisting of URLs is allowed through
-			 * {@link jQuery.sap.addUrlWhitelist}.
+			 * <b>Note:</b> Additional URLs are allowed through
+			 * {@link module:sap/base/security/URLListValidator URLListValidator}.
 			 *
 			 * @since 1.54.0
 			 */
@@ -161,7 +186,53 @@ function(
 			 * Emphasized links look visually more important than regular links.
 			 * @since 1.22
 			 */
-			emphasized : {type : "boolean", group : "Behavior", defaultValue : false}
+			emphasized : {type : "boolean", group : "Behavior", defaultValue : false},
+
+			/**
+			 * Specifies the value of the <code>aria-haspopup</code> attribute
+			 *
+			 * If the value is <code>None</code>, the attribute will not be rendered. Otherwise it will be rendered according to the selected value.
+			 *
+			 * NOTE: Use this property only when a link is related to a popover/popup. The value needs to be equal to the main/root role of the popup - e.g. dialog,
+			 * menu or list (examples: if you have dialog -> dialog, if you have menu -> menu; if you have list -> list; if you have dialog containing a list -> dialog).
+			 * Do not use it, if you open a standard sap.m.Dialog, MessageBox or other type of dialogs displayed as on overlay over the application.
+			 *
+			 * @since 1.86.0
+			 */
+			ariaHasPopup : {type : "sap.ui.core.aria.HasPopup", group : "Accessibility", defaultValue : AriaHasPopup.None},
+
+			/**
+			 * Describes the accessibility role of the link:<ul>
+			 * <li><code>LinkAccessibleRole.Default</code> - a navagation is expected to the location given in <code>href</code> property</li>
+			 * <li><code>LinkAccessibleRole.Button</code> - there will be <code>role</code> attribute with value "Button" rendered. In this scenario the <code>href</code>
+			 * property value shouldn't be set as navigation isn't expected to occur.</li></ul>
+			 *
+			 * @since 1.104.0
+			 */
+			accessibleRole : {type : "sap.m.LinkAccessibleRole", group : "Accessibility", defaultValue : LinkAccessibleRole.Default},
+
+			/**
+			 * Specifies if an empty indicator should be displayed when there is no text.
+			 *
+			 * @since 1.89
+			 */
+			emptyIndicatorMode: { type: "sap.m.EmptyIndicatorMode", group: "Appearance", defaultValue: EmptyIndicatorMode.Off },
+
+			/**
+			 * Indicates whether the access keys ref of the control should be highlighted.
+			 * NOTE: this property is used only when access keys feature is turned on.
+			 *
+			 * @private
+			 */
+			highlightAccKeysRef: { type: "boolean", defaultValue: false, visibility: "hidden" },
+
+			/**
+			 * Indicates which keyboard key should be pressed to focus the access key ref
+			 * NOTE: this property is used only when access keys feature is turned on.
+			 *
+			 * @private
+			 */
+			accesskey: { type: "string", defaultValue: "", visibility: "hidden" }
 		},
 		associations : {
 
@@ -180,13 +251,36 @@ function(
 			/**
 			 * Event is fired when the user triggers the link control.
 			 */
-			press : {allowPreventDefault : true}
-		}
+			press : {
+				allowPreventDefault : true,
+				parameters: {
+					/**
+					 * Indicates whether the CTRL key was pressed when the link was selected.
+					 * @since 1.58
+					 */
+					ctrlKey: { type: "boolean" },
+					/**
+					 * Indicates whether the "meta" key was pressed when the link was selected.
+					 *
+					 * On Macintosh keyboards, this is the command key (⌘).
+					 * On Windows keyboards, this is the windows key (⊞).
+					 *
+					 * @since 1.58
+					 */
+					metaKey: { type: "boolean" }
+				}
+			}
+		},
+		dnd: { draggable: true, droppable: false }
 	}});
 
 
 
 	EnabledPropagator.call(Link.prototype); // inherit "disabled" state from parent controls
+
+	Link.prototype.init = function () {
+		AccessKeysEnablement.registerControl(this);
+	};
 
 	/**
 	 * Required adaptations before rendering.
@@ -195,36 +289,73 @@ function(
 	 */
 	Link.prototype.onBeforeRendering = function() {};
 
+	Link.prototype.getAccessKeysFocusTarget = function () {
+		return this.getFocusDomRef();
+	};
+
+	Link.prototype.onAccKeysHighlightStart = function () {
+		setRefLabelsHighlightAccKeysRef.call(this, true);
+	};
+
+	Link.prototype.onAccKeysHighlightEnd = function () {
+		setRefLabelsHighlightAccKeysRef.call(this, false);
+	};
+
 	/**
-	 * Triggers link activation when space key is pressed on the focused control.
+	 * Handle the key down event for SPACE
+	 * SHIFT or ESCAPE on pressed SPACE cancels the action
 	 *
 	 * @param {jQuery.Event} oEvent The SPACE keyboard key event object
 	 */
-	Link.prototype.onsapspace = function(oEvent) {
-		if (this.getEnabled() || this.getHref()) {
-			// mark the event for components that needs to know if the event was handled by the link
-			oEvent.setMarked();
-			oEvent.preventDefault();
+	Link.prototype.onkeydown = function(oEvent) {
+		if (oEvent.which === KeyCodes.SPACE || oEvent.which === KeyCodes.SHIFT || oEvent.which === KeyCodes.ESCAPE) {
+			// set inactive state of the button and marked ESCAPE or SHIFT as pressed only if SPACE was pressed before it
+			if (oEvent.which === KeyCodes.SPACE) {
+				if (this.getEnabled() || this.getHref()) {
+					// mark the event for components that needs to know if the event was handled by the link
+					oEvent.setMarked();
+					oEvent.preventDefault();
+					this._bPressedSpace = true;
+				}
+			}
+
+			if (this._bPressedSpace && (oEvent.which === KeyCodes.ESCAPE || oEvent.which === KeyCodes.SHIFT)) {
+				this._bPressedEscapeOrShift = true;
+			}
+		} else {
+			if (this._bPressedSpace) {
+				oEvent.preventDefault();
+			}
 		}
 	};
 
+	/**
+	 * Handle the key up event for SPACE.
+	 *
+	 * @param {jQuery.Event} oEvent - the keyboard event.
+	 */
 	Link.prototype.onkeyup = function (oEvent) {
-		if (oEvent.which === jQuery.sap.KeyCodes.SPACE) {
-			this._handlePress(oEvent);
+		if (oEvent.which === KeyCodes.SPACE) {
+			if (!this._bPressedEscapeOrShift) {
+				this._handlePress(oEvent);
 
-			if (this.getHref() && !oEvent.isDefaultPrevented()) {
-				// Normal browser link, the browser does the job. According to the keyboard spec, space should fire press event on keyup.
-				// To make the browser REALLY do the same (history, referrer, frames, target,...), create a new "click" event and let the browser "do the needful".
+				if (this.getHref() && !oEvent.isDefaultPrevented()) {
+					// Normal browser link, the browser does the job. According to the keyboard spec, space should fire press event on keyup.
+					// To make the browser REALLY do the same (history, referrer, frames, target,...), create a new "click" event and let the browser "do the needful".
 
-				// first disarm the Space key event
-				oEvent.preventDefault(); // prevent any scrolling which the browser might do because from its perspective the Link does not handle the "space" key
-				oEvent.setMarked();
+					// first disarm the Space key event
+					oEvent.preventDefault(); // prevent any scrolling which the browser might do because from its perspective the Link does not handle the "space" key
+					oEvent.setMarked();
 
-				// then create the click event
-				var oClickEvent = document.createEvent('MouseEvents');
-				oClickEvent.initEvent('click' /* event type */, false, true); // non-bubbling, cancelable
-				this.getDomRef().dispatchEvent(oClickEvent);
+					// then create the click event
+					var oClickEvent = document.createEvent('MouseEvents');
+					oClickEvent.initEvent('click' /* event type */, false, true); // non-bubbling, cancelable
+					this.getDomRef().dispatchEvent(oClickEvent);
+				}
+			} else {
+				this._bPressedEscapeOrShift = false;
 			}
+			this._bPressedSpace = false;
 		}
 	};
 
@@ -241,7 +372,7 @@ function(
 			// mark the event for components that needs to know if the event was handled by the link
 			oEvent.setMarked();
 
-			if (!this.firePress() || !this.getHref()) { // fire event and check return value whether default action should be prevented
+			if (!this.firePress({ctrlKey: !!oEvent.ctrlKey, metaKey: !!oEvent.metaKey}) || !this.getHref()) { // fire event and check return value whether default action should be prevented
 				oEvent.preventDefault();
 			}
 		} else { // disabled
@@ -276,61 +407,10 @@ function(
 	};
 
 
-	/* override standard setters with direct DOM manipulation */
-
-	Link.prototype.setText = function(sText){
-		var $this = this.$();
-		this.setProperty("text", sText, true);
-		sText = this.getProperty("text");
-		if (this.writeText) {
-			this.writeText(sText);
-		} else {
-			$this.text(sText);
-		}
-		if (sText) {
-			$this.attr("tabindex", "0");
-		} else {
-			$this.attr("tabindex", "-1");
-		}
-		return this;
-	};
-
-	Link.prototype.setHref = function(sUri){
-		var bIsValid = this._isHrefValid(sUri);
-
-		this.setProperty("href", sUri, true);
-
-		if (!bIsValid) {
-			this.$().removeAttr("href");
-			jQuery.sap.log.warning(this + ": The href tag of the link was not set since it's not valid.");
-			return this;
-		}
-
-		if (this.getEnabled()) {
-			sUri = this.getProperty("href");
-			if (!sUri) {
-				this.$().removeAttr("href");
-			} else {
-				this.$().attr("href", sUri);
-			}
-		}
-
-		return this;
-	};
+	/* override standard setters */
 
 	Link.prototype.setSubtle = function(bSubtle){
-		this.setProperty("subtle", bSubtle, true);
-
-		var $this = this.$();
-		if ($this.length) { // only when actually rendered
-			$this.toggleClass("sapMLnkSubtle", bSubtle);
-
-			if (bSubtle) {
-				Link._addToDescribedBy($this, this._sAriaLinkSubtleId);
-			} else {
-				Link._removeFromDescribedBy($this, this._sAriaLinkSubtleId);
-			}
-		}
+		this.setProperty("subtle", bSubtle);
 
 		if (bSubtle && !Link.prototype._sAriaLinkSubtleId) {
 			Link.prototype._sAriaLinkSubtleId = InvisibleText.getStaticId("sap.m", "LINK_SUBTLE");
@@ -340,18 +420,7 @@ function(
 	};
 
 	Link.prototype.setEmphasized = function(bEmphasized){
-		this.setProperty("emphasized", bEmphasized, true);
-
-		var $this = this.$();
-		if ($this.length) { // only when actually rendered
-			$this.toggleClass("sapMLnkEmphasized", bEmphasized);
-
-			if (bEmphasized) {
-				Link._addToDescribedBy($this, this._sAriaLinkEmphasizedId);
-			} else {
-				Link._removeFromDescribedBy($this, this._sAriaLinkEmphasizedId);
-			}
-		}
+		this.setProperty("emphasized", bEmphasized);
 
 		if (bEmphasized && !Link.prototype._sAriaLinkEmphasizedId) {
 			Link.prototype._sAriaLinkEmphasizedId = InvisibleText.getStaticId("sap.m", "LINK_EMPHASIZED");
@@ -360,104 +429,17 @@ function(
 		return this;
 	};
 
-	Link.prototype.setWrapping = function(bWrapping){
-		this.setProperty("wrapping", bWrapping, true);
-		this.$().toggleClass("sapMLnkWrapping", bWrapping);
-		return this;
-	};
-
-	Link.prototype.setEnabled = function(bEnabled){
-		bEnabled = this.validateProperty("enabled", bEnabled);
-
-		if (bEnabled !== this.getProperty("enabled")) { // do nothing when the same value is set again (virtual table scrolling!) - don't use this.getEnabled() because of EnabledPropagator
-			this.setProperty("enabled", bEnabled, true);
-			var $this = this.$();
-			$this.toggleClass("sapMLnkDsbl", !bEnabled);
-			if (bEnabled) {
-				$this.attr("disabled", false);
-				if (this.getText()) {
-					$this.attr("tabindex", "0");
-				} else {
-					$this.attr("tabindex", "-1");
-				}
-				$this.removeAttr("aria-disabled");
-				if (this.getHref()) {
-					$this.attr("href", this.getHref());
-				}
-			} else {
-				$this.attr("disabled", true);
-				$this.attr("tabindex", "-1");
-				$this.attr("aria-disabled", true);
-				$this.removeAttr("href");
-			}
-		}
-		return this;
-	};
-
-	Link.prototype.setWidth = function(sWidth){
-		this.setProperty("width", sWidth, true);
-		this.$().toggleClass("sapMLnkMaxWidth", !sWidth);
-		this.$().css("width", sWidth);
-		return this;
-	};
-
-	Link.prototype.setTarget = function(sTarget){
-		this.setProperty("target", sTarget, true);
-		if (!sTarget) {
-			this.$().removeAttr("target");
-		} else {
-			this.$().attr("target", sTarget);
-		}
-		return this;
-	};
-
 	/*************************************** Static members ******************************************/
 
 	/**
 	 * Checks if the given sUri is valid depending on the validateUrl property
 	 *
-	 * @param {String} sUri
-	 * @returns {Boolean}
+	 * @param {string} sUri
+	 * @returns {boolean}
 	 * @private
 	 */
 	Link.prototype._isHrefValid = function (sUri) {
-		return this.getValidateUrl() ? jQuery.sap.validateUrl(sUri) : true;
-	};
-
-	/**
-	 * Adds ARIA InvisibleText ID to aria-secribedby
-	 *
-	 * @param {Object} $oLink control DOM reference
-	 * @param {String} sInvisibleTextId  static Invisible Text ID to be added
-	 */
-	Link._addToDescribedBy = function ($oLink, sInvisibleTextId) {
-		var sAriaDescribedBy = $oLink.attr("aria-describedby");
-
-		if (sAriaDescribedBy) {
-			$oLink.attr("aria-describedby",  sAriaDescribedBy + " " +  sInvisibleTextId); // Add the ID at the end, separated with space
-		} else {
-			$oLink.attr("aria-describedby",  sInvisibleTextId);
-		}
-	};
-
-	/**
-	 * Removes ARIA InvisibleText ID from aria-secribedby or the attribute itself
-	 *
-	 * @param {Object} $oLink control DOM reference
-	 * @param {String} sInvisibleTextId  static Invisible Text ID to be removed
-	 */
-	Link._removeFromDescribedBy = function ($oLink, sInvisibleTextId) {
-		var sAriaDescribedBy = $oLink.attr("aria-describedby");
-
-		if (sAriaDescribedBy && sAriaDescribedBy.indexOf(sInvisibleTextId) !== -1) { // Remove only the static InvisibleText ID for Emphasized link
-			sAriaDescribedBy = sAriaDescribedBy.replace(sInvisibleTextId, '');
-
-			if (sAriaDescribedBy.length > 1) {
-				$oLink.attr("aria-describedby",  sAriaDescribedBy);
-			} else {
-				$oLink.removeAttr("aria-describedby"); //  Remove the aria-describedby attribute, as it`s not needed
-			}
-		}
+		return this.getValidateUrl() ? URLListValidator.validate(sUri) : true;
 	};
 
 	/**
@@ -465,13 +447,25 @@ function(
 	 *
 	 * @see sap.ui.core.Control#getAccessibilityInfo
 	 * @protected
-	 * @returns {Object} The <code>sap.m.Link</code>  accessibility information
+	 * @returns {object} The <code>sap.m.Link</code>  accessibility information
 	 */
 	Link.prototype.getAccessibilityInfo = function() {
+		var oResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m"),
+			sEmphasizedInfo = this.getEmphasized() ? oResourceBundle.getText("LINK_EMPHASIZED") : "",
+			sSubtleInfo = this.getSubtle() ? oResourceBundle.getText("LINK_SUBTLE") : "",
+			sText = this.getText(),
+			sDescription = sText,
+			sAccessibleRole = this.getAccessibleRole();
+
+		if (sText) {
+			sEmphasizedInfo && (sDescription += " " + sEmphasizedInfo);
+			sSubtleInfo && (sDescription += " " + sSubtleInfo);
+		}
+
 		return {
-			role: "link",
-			type: sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("ACC_CTR_TYPE_LINK"),
-			description: this.getText() || this.getHref() || "",
+			role: sAccessibleRole === LinkAccessibleRole.Default ? "link" : sAccessibleRole,
+			type: sText ? oResourceBundle.getText("ACC_CTR_TYPE_LINK") : undefined,
+			description: sDescription,
 			focusable: this.getEnabled(),
 			enabled: this.getEnabled()
 		};
@@ -482,6 +476,46 @@ function(
 	 */
 	Link.prototype.getFormDoNotAdjustWidth = function() {
 		return true;
+	};
+
+	/*
+	 * Provides hook for overriding the tabindex in case the link is used in a composite control
+	 * for example inside ObjectAttribute
+	 */
+	Link.prototype._getTabindex = function() {
+		return (this.getText() && this.getEnabled()) ? "0" : "-1";
+	};
+
+	/*
+	 * Determines whether self-reference should be added.
+	 *
+	 * @returns {boolean}
+	 * @private
+	 */
+	Link.prototype._determineSelfReferencePresence = function () {
+		var aAriaLabelledBy = this.getAriaLabelledBy(),
+			bAlreadyHasSelfReference = aAriaLabelledBy.indexOf(this.getId()) !== -1,
+			bHasReferencingLabels = LabelEnablement.getReferencingLabels(this).length > 0,
+			oParent = this.getParent(),
+			bAllowEnhancingByParent = !!(oParent && oParent.enhanceAccessibilityState);
+
+		// When the link has aria-labelledby attribute, screen readers will read the references inside, rather
+		// than the link's text. For this reason a self-reference should be added in such cases.
+		return !bAlreadyHasSelfReference && (aAriaLabelledBy.length > 0 || bHasReferencingLabels || bAllowEnhancingByParent);
+	};
+
+	var setRefLabelsHighlightAccKeysRef = function (bHighlightAccKeysRef) {
+		var aLabels = this.getAriaLabelledBy();
+
+		if (aLabels.length) {
+			var oLabel = Core.byId(aLabels[0]);
+
+			oLabel.setProperty("highlightAccKeysRef", bHighlightAccKeysRef);
+
+			if (oLabel.getText && oLabel.getText()) {
+				this.setProperty("accesskey", oLabel.getText()[0].toLowerCase());
+			}
+		}
 	};
 
 	return Link;

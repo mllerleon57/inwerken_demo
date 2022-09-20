@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(function(){"use strict";var C={};C.render=function(r,c){var R=r;var o=c.getComponentInstance();var w=c.getWidth();var h=c.getHeight();R.write("<div");R.writeControlData(c);if(w){R.addStyle("width",w);}if(h){R.addStyle("height",h);}R.writeStyles();R.addClass("sapUiComponentContainer");R.writeClasses();R.write(">");R.write("<div id=\""+c.getId()+"-uiarea\"");if(w&&w!=="auto"){R.addStyle("width","100%");}if(h&&h!=="auto"){R.addStyle("height","100%");}R.writeStyles();R.write(">");if(o){o.render(R);}R.write("</div></div>");};return C;},true);
+sap.ui.define(function(){"use strict";var e={apiVersion:2};e.render=function(e,t){var i=t.getComponentInstance();var n=t.getWidth();var r=t.getHeight();e.openStart("div",t);e.style("width",n);e.style("height",r);e.class("sapUiComponentContainer");e.openEnd();e.openStart("div",t.getId()+"-uiarea");if(n&&n!=="auto"){e.style("width","100%")}if(r&&r!=="auto"){e.style("height","100%")}e.openEnd();if(i){i.render(e)}e.close("div");e.close("div")};return e},true);
+//# sourceMappingURL=ComponentContainerRenderer.js.map

@@ -1,18 +1,16 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-
-/*global performance */
 
 /**
  * Creates an Analyzer that asynchronously runs tasks added by addTask function. Analysis can be started, stopped, restarted, paused and continued.
  * runs tasks added by addTask function. Analysis can be started, stopped, restarted, paused and continued.
  * The analyzer can be used to update the UI with the current progress of a task while it's running.
  */
-sap.ui.define(["jquery.sap.global", "sap/ui/support/supportRules/IssueManager","sap/ui/support/supportRules/Constants"],
-	function (jQuery, IssueManager, Constants) {
+sap.ui.define(["sap/base/Log", "sap/ui/support/supportRules/IssueManager","sap/ui/support/supportRules/Constants"],
+	function (Log, IssueManager, Constants) {
 		"use strict";
 
 		/**
@@ -112,7 +110,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/support/supportRules/IssueManager","
 			var sText = eRuleException.message || eRuleException;
 			var sMessage = "[" + Constants.SUPPORT_ASSISTANT_NAME + "] Error while execution rule \"" + sRuleId +
 				"\": " + sText;
-			jQuery.sap.log.error(sMessage);
+			Log.error(sMessage);
 			fnResolve();
 			this._updateProgress();
 		};
@@ -191,4 +189,4 @@ sap.ui.define(["jquery.sap.global", "sap/ui/support/supportRules/IssueManager","
 		};
 
 		return Analyzer;
-	}, false);
+	});

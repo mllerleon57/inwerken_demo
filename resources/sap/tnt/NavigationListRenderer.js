@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','sap/ui/core/Renderer'],function(q,R){"use strict";var N={};N.render=function(r,c){var a,v,g=c.getItems(),e=c.getExpanded(),b=[];r.write("<ul");r.writeControlData(c);var w=c.getWidth();if(w&&e){r.addStyle("width",w);}r.writeStyles();r.addClass("sapTntNavLI");if(!e){r.addClass("sapTntNavLICollapsed");}r.writeClasses();a=e?'tree':'toolbar';r.writeAttribute("role",a);r.write(">");g.forEach(function(d){if(d.getVisible()){b.push(d);}});b.forEach(function(d,i){d.render(r,c,i,v);});r.write("</ul>");};return N;},true);
+sap.ui.define(["sap/ui/core/Core"],function(e){"use strict";var t={apiVersion:2};var a=e.getLibraryResourceBundle("sap.tnt");t.render=function(e,t){var r,i=t.getItems(),n=t.getExpanded(),s=[],o=false;i.forEach(function(e){if(e.getVisible()){s.push(e);if(e.getIcon()){o=true}}});e.openStart("ul",t);var l=t.getWidth();if(l&&n){e.style("width",l)}e.class("sapTntNavLI");if(!n){e.class("sapTntNavLICollapsed")}if(!o){e.class("sapTntNavLINoIcons")}r=!n&&!t.hasStyleClass("sapTntNavLIPopup")?"menubar":"tree";e.attr("role",r);if(r==="menubar"){e.attr("aria-orientation","vertical");e.attr("aria-roledescription",a.getText("NAVIGATION_LIST_ITEM_ROLE_DESCRIPTION_MENUBAR"))}else{e.attr("aria-roledescription",a.getText("NAVIGATION_LIST_ITEM_ROLE_DESCRIPTION_TREE"))}e.openEnd();s.forEach(function(a){a.render(e,t)});e.close("ul")};return t},true);
+//# sourceMappingURL=NavigationListRenderer.js.map

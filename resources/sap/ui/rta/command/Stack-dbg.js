@@ -1,24 +1,57 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define([
-	'sap/ui/base/ManagedObject',
-	'sap/ui/fl/ChangePersistenceFactory',
-	'sap/ui/fl/Utils',
-	'sap/ui/rta/command/Settings',
-	'sap/ui/rta/command/CompositeCommand',
-	'sap/ui/rta/ControlTreeModifier'
+	"sap/ui/base/ManagedObject",
+	"sap/ui/fl/write/api/PersistenceWriteAPI",
+	"sap/ui/fl/Utils",
+	"sap/ui/rta/command/Settings",
+	"sap/ui/rta/command/CompositeCommand",
+	"sap/ui/core/util/reflection/JsControlTreeModifier",
+	"sap/ui/rta/util/showMessageBox",
+	"sap/ui/core/Core"
 ], function(
 	ManagedObject,
-	ChangePersistenceFactory,
+	PersistenceWriteAPI,
 	FlUtils,
 	Settings,
 	CompositeCommand,
-	ControlTreeModifier
+	JsControlTreeModifier,
+	showMessageBox,
+	Core
 ) {
 	"use strict";
+
+	function toAvailableChanges(mChanges, aChanges, sFileName) {
+		var oChange = mChanges[sFileName];
+		if (oChange) {
+			aChanges.push(oChange);
+		}
+		return aChanges;
+	}
+
+	function pushToStack(oComponent, mComposite, oStack, oChange) {
+		var oSelector = oChange.getSelector && oChange.getSelector();
+		var oCommand = new Settings({
+			selector: oSelector,
+			changeType: oChange.getChangeType(),
+			element: JsControlTreeModifier.bySelector(oSelector, oComponent)
+		});
+		oCommand._oPreparedChange = oChange;
+		// check if change belongs to a composite command
+		var sCompositeId = oChange.getSupportInformation().compositeCommand;
+		if (sCompositeId) {
+			if (!mComposite[sCompositeId]) {
+				mComposite[sCompositeId] = new CompositeCommand();
+				oStack.pushExecutedCommand(mComposite[sCompositeId]);
+			}
+			mComposite[sCompositeId].addCommand(oCommand);
+		} else {
+			oStack.pushExecutedCommand(oCommand);
+		}
+	}
 
 	/**
 	 * Basic implementation for the command stack pattern.
@@ -26,7 +59,7 @@ sap.ui.define([
 	 * @class
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -35,20 +68,20 @@ sap.ui.define([
 	 *               changed in future.
 	 */
 	var Stack = ManagedObject.extend("sap.ui.rta.command.Stack", {
-		metadata : {
-			library : "sap.ui.rta",
-			properties : {},
-			aggregations : {
-				commands : {
-					type : "sap.ui.rta.command.BaseCommand",
-					multiple : true
+		metadata: {
+			library: "sap.ui.rta",
+			properties: {},
+			aggregations: {
+				commands: {
+					type: "sap.ui.rta.command.BaseCommand",
+					multiple: true
 				}
 			},
-			events : {
-				modified : {},
-				commandExecuted : {
+			events: {
+				modified: {},
+				commandExecuted: {
 					parameters: {
-						command : {type: "object"},
+						command: {type: "object"},
 						undo: {type: "boolean"}
 					}
 				}
@@ -59,58 +92,34 @@ sap.ui.define([
 	/**
 	 * Creates a stack prefilled with Settings commands. Every command contains a change from the given file name list
 	 *
-	 * @param {sap.ui.base.ManagedObject} oControl used to get the component
-	 * @param {string[]} aFileNames array of file names of changes the stack should be initialized with
-	 * @returns {Promise} Returns a promise with a stack as parameter
+	 * @param {sap.ui.base.ManagedObject} oControl - Used to get the component
+	 * @param {string[]} aFileNames - Array of file names of changes the stack should be initialized with
+	 * @returns {Promise} Resolves with a stack as parameter
 	 */
 	Stack.initializeWithChanges = function(oControl, aFileNames) {
 		var oStack = new Stack();
 		oStack._aPersistedChanges = aFileNames;
-		var mComposite = {};
 		if (aFileNames && aFileNames.length > 0) {
-			var oChangePersistence = ChangePersistenceFactory.getChangePersistenceForControl(oControl);
-			var oComponent = FlUtils.getComponentForControl(oControl);
-			var sAppName = sap.ui.fl.Utils.getAppDescriptor(oComponent)["sap.app"].id;
+			var oComponent = FlUtils.getAppComponentForControl(oControl);
 			var mPropertyBag = {
-				oComponent : oComponent,
-				appName : sAppName
+				selector: oComponent,
+				invalidateCache: false
 			};
-			return oChangePersistence.getChangesForComponent(mPropertyBag)
+			return PersistenceWriteAPI._getUIChanges(mPropertyBag)
+
 			.then(function(aChanges) {
+				var mComposite = {};
 				var mChanges = {};
 				aChanges.forEach(function(oChange) {
-					mChanges[oChange.getDefinition().fileName] = oChange;
+					mChanges[oChange.getId()] = oChange;
 				});
-				aFileNames.forEach(function(sFileName) {
-					var oChange = mChanges[sFileName];
-					var oSelector = oChange.getSelector();
-					var oCommand = new Settings({
-						selector : oSelector,
-						changeType : oChange.getDefinition().changeType,
-						element : ControlTreeModifier.bySelector(oSelector, oComponent)
-					});
-					oCommand._oPreparedChange = oChange;
-					if (oChange.getUndoOperations()) {
-						oCommand._aRecordedUndo = oChange.getUndoOperations();
-						oChange.resetUndoOperations();
-					}
-					// check if change belongs to a composite command
-					var sCompositeId = oChange.getDefinition().support.compositeCommand;
-					if (sCompositeId) {
-						if (!mComposite[sCompositeId]) {
-							mComposite[sCompositeId] = new CompositeCommand();
-							oStack.pushExecutedCommand(mComposite[sCompositeId]);
-						}
-						mComposite[sCompositeId].addCommand(oCommand);
-					} else {
-						oStack.pushExecutedCommand(oCommand);
-					}
-				});
+				aFileNames
+					.reduce(toAvailableChanges.bind(null, mChanges), [])
+					.forEach(pushToStack.bind(null, oComponent, mComposite, oStack));
 				return oStack;
 			});
-		} else {
-			return Promise.resolve(oStack);
 		}
+		return Promise.resolve(oStack);
 	};
 
 	/**
@@ -127,14 +136,14 @@ sap.ui.define([
 			this._aCommandExecutionHandler.splice(i, 1);
 		}
 	};
-	Stack.prototype.init = function(){
+	Stack.prototype.init = function() {
 		this._aCommandExecutionHandler = [];
 		this._toBeExecuted = -1;
 		this._oLastCommand = Promise.resolve();
 	};
 
-	Stack.prototype._waitForCommandExecutionHandler = function(mParam){
-		return Promise.all(this._aCommandExecutionHandler.map(function(fnHandler){
+	Stack.prototype._waitForCommandExecutionHandler = function(mParam) {
+		return Promise.all(this._aCommandExecutionHandler.map(function(fnHandler) {
 			return fnHandler(mParam);
 		}));
 	};
@@ -197,22 +206,23 @@ sap.ui.define([
 	};
 
 	Stack.prototype.execute = function() {
-		this._oLastCommand = this._oLastCommand.catch(function(){
+		this._oLastCommand = this._oLastCommand.catch(function() {
 			//continue also if previous command failed
-		}).then(function(){
+		}).then(function() {
 			var oCommand = this._getCommandToBeExecuted();
 			if (oCommand) {
+				var mParam = {
+					command: oCommand,
+					undo: false
+				};
 				return oCommand.execute()
 
-				.then(function(){
+				.then(this._waitForCommandExecutionHandler.bind(this, mParam))
+
+				.then(function() {
 					this._toBeExecuted--;
-					var mParam = {
-						command: oCommand,
-						undo: false
-					};
 					this.fireCommandExecuted(mParam);
 					this.fireModified();
-					return this._waitForCommandExecutionHandler(mParam);
 				}.bind(this))
 
 				.catch(function(oError) {
@@ -220,9 +230,16 @@ sap.ui.define([
 					oError.index = this._toBeExecuted;
 					oError.command = this.removeCommand(this._toBeExecuted); // remove failing command
 					this._toBeExecuted--;
+					var oRtaResourceBundle = Core.getLibraryResourceBundle("sap.ui.rta");
+					showMessageBox(
+						oRtaResourceBundle.getText("MSG_GENERIC_ERROR_MESSAGE", oError.message),
+						{title: oRtaResourceBundle.getText("HEADER_ERROR")},
+						"error"
+					);
 					return Promise.reject(oError);
 				}.bind(this));
 			}
+			return undefined;
 		}.bind(this));
 		return this._oLastCommand;
 	};
@@ -233,23 +250,22 @@ sap.ui.define([
 			this._toBeExecuted++;
 			var oCommand = this._getCommandToBeExecuted();
 			if (oCommand) {
+				var mParam = {
+					command: oCommand,
+					undo: true
+				};
 				return oCommand.undo()
 
+				.then(this._waitForCommandExecutionHandler.bind(this, mParam))
+
 				.then(function() {
-					var mParam = {
-						command: oCommand,
-						undo: true
-					};
 					this.fireCommandExecuted(mParam);
 					this.fireModified();
-					return this._waitForCommandExecutionHandler(mParam);
 				}.bind(this));
-			} else {
-				return Promise.resolve();
 			}
-		} else {
 			return Promise.resolve();
 		}
+		return Promise.resolve();
 	};
 
 	Stack.prototype.canUndo = function() {
@@ -311,5 +327,4 @@ sap.ui.define([
 	};
 
 	return Stack;
-
-}, /* bExport= */true);
+});

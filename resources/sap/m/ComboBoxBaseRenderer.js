@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['./ComboBoxTextFieldRenderer','sap/ui/core/Renderer'],function(C,R){"use strict";var a=R.extend(C);a.CSS_CLASS_COMBOBOXBASE="sapMComboBoxBase";a.getAccessibilityState=function(c){var A=C.getAccessibilityState.call(this,c);A.expanded=c.isOpen();return A;};a.addOuterClasses=function(r,c){C.addOuterClasses.apply(this,arguments);var b=a.CSS_CLASS_COMBOBOXBASE;r.addClass(b);if(!c.getEnabled()){r.addClass(b+"Disabled");}if(!c.getEditable()){r.addClass(b+"Readonly");}};a.addButtonClasses=function(r,c){C.addButtonClasses.apply(this,arguments);r.addClass(a.CSS_CLASS_COMBOBOXBASE+"Arrow");};return a;},true);
+sap.ui.define(["./ComboBoxTextFieldRenderer","sap/ui/core/Renderer"],function(e,s){"use strict";var t=s.extend(e);t.apiVersion=2;t.CSS_CLASS_COMBOBOXBASE="sapMComboBoxBase";t.getAccessibilityState=function(s){var t=e.getAccessibilityState.call(this,s),a=s._getList();if(a){t.controls=a.getId()}return t};t.addOuterClasses=function(s,a){e.addOuterClasses.apply(this,arguments);var i=t.CSS_CLASS_COMBOBOXBASE;s.class(i);if(!a.getEnabled()){s.class(i+"Disabled")}if(!a.getEditable()){s.class(i+"Readonly")}};t.addButtonClasses=function(s,a){e.addButtonClasses.apply(this,arguments);s.class(t.CSS_CLASS_COMBOBOXBASE+"Arrow")};return t},true);
+//# sourceMappingURL=ComboBoxBaseRenderer.js.map

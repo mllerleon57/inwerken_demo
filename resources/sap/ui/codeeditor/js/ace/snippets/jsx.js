@@ -1,1 +1,2 @@
-ace.define("ace/snippets/jsx",["require","exports","module"],function(r,e,m){"use strict";e.snippetText=undefined;e.scope="jsx";});
+(function(){ace.require(["ace/snippets/jsx"],function(e){if(typeof module=="object"&&typeof exports=="object"&&module){module.exports=e}})})();
+//# sourceMappingURL=jsx.js.map

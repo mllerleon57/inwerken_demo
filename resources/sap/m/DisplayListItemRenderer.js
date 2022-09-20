@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(["sap/ui/core/library","sap/ui/core/Renderer","./ListItemBaseRenderer"],function(c,R,L){"use strict";var T=c.TextDirection;var D=R.extend(L);D.renderLIAttributes=function(r,l){r.addClass("sapMDLI");};D.renderLIContent=function(r,l){var i=l.getLabel();if(i){r.write("<label for='"+l.getId()+"-value' class='sapMDLILabel'>");r.writeEscaped(l.getLabel());r.write("</label>");}var a=l.getValue();var v=l.getValueTextDirection();if(a){r.write("<div id='"+l.getId()+"-value' class='sapMDLIValue'");if(v!=T.Inherit){r.writeAttribute("dir",v.toLowerCase());}r.write(">");r.writeEscaped(l.getValue());r.write("</div>");}};return D;},true);
+sap.ui.define(["sap/ui/core/library","sap/ui/core/Renderer","./ListItemBaseRenderer"],function(e,t,r){"use strict";var a=e.TextDirection;var n=t.extend(r);n.apiVersion=2;n.renderLIAttributes=function(e,t){e.class("sapMDLI")};n.renderLIContent=function(e,t){var r=t.getLabel();if(r){e.openStart("label");e.attr("for",t.getId()+"-value");e.class("sapMDLILabel");e.openEnd();e.text(r);e.close("label")}var n=t.getValue();if(n){e.openStart("div",t.getId()+"-value");e.class("sapMDLIValue");var i=t.getValueTextDirection();if(i!=a.Inherit){e.attr("dir",i.toLowerCase())}e.openEnd();e.text(n);e.close("div")}};return n},true);
+//# sourceMappingURL=DisplayListItemRenderer.js.map

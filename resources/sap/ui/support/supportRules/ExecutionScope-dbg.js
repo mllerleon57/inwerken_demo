@@ -1,6 +1,6 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -28,25 +28,22 @@
  * @class sap.ui.support.ExecutionScope
  */
 sap.ui.define(
-	["jquery.sap.global"],
-	function (jQuery) {
+	["sap/base/Log", "sap/ui/core/Component", "sap/ui/core/Element"],
+	function (Log, Component, Element) {
 		"use strict";
 
-		var coreInstance = null,
-			_context = null,
+		var _context = null,
 			elements = [];
 
 		var globalContext = {
 			setScope: function () {
-				for (var i in coreInstance.mElements) {
-					elements.push(coreInstance.mElements[i]);
-				}
+				elements = Element.registry.filter(function() { return true;});
 			}
 		};
 
 		var subtreeContext = {
 			setScope: function () {
-				var parent = sap.ui.getCore().byId(_context.parentId);
+				var parent = Element.registry.get(_context.parentId);
 				//TODO: Handle parent not found
 				elements = parent.findAggregatedObjects(true);
 			}
@@ -56,7 +53,7 @@ sap.ui.define(
 			setScope: function () {
 				var set = {};
 				_context.components.forEach(function (componentId) {
-					var component = coreInstance.mObjects.component[componentId],
+					var component = Component.registry.get(componentId),
 						aggregations = component.findAggregatedObjects(true);
 
 					aggregations.forEach(function (agg) {
@@ -157,7 +154,6 @@ sap.ui.define(
 		}
 
 		function ExecutionScope(core, context) {
-			coreInstance = core;
 			elements = [];
 			_context = context;
 
@@ -250,14 +246,13 @@ sap.ui.define(
 				 */
 				getPublicElements: function () {
 					var aPublicElements = [];
-					var mComponents = core.mObjects.component;
 					var mUIAreas = core.mUIAreas;
 
-					for (var i in mComponents) {
+					Component.registry.forEach(function(oComponent) {
 						aPublicElements = aPublicElements.concat(
-							getPublicElementsInside(mComponents[i])
+							getPublicElementsInside(oComponent)
 						);
-					}
+					});
 
 					for (var key in mUIAreas) {
 						aPublicElements = aPublicElements.concat(
@@ -298,8 +293,8 @@ sap.ui.define(
 				 * @alias sap.ui.support.ExecutionScope.getLoggedObjects
 				 */
 				getLoggedObjects: function (type) {
-					var log = jQuery.sap.log.getLogEntries(),
-						loggedObjects = [];
+					var log = Log.getLogEntries(),
+						loggedObjects = [], elemIds;
 
 					// Add logEntries that have support info object,
 					// and that have the same type as the type provided
@@ -308,16 +303,18 @@ sap.ui.define(
 							return;
 						}
 
-						var elemIds = elements.map(function (element) {
-							return element.getId();
-						});
+						if (!elemIds){
+							elemIds = elements.map(function (element) {
+								return element.getId();
+							});
+						}
 
 						var hasElemId = !!logEntry.supportInfo.elementId,
 							typeMatch =
 								logEntry.supportInfo.type === type || type === undefined,
 							scopeMatch =
 								!hasElemId ||
-								jQuery.inArray(logEntry.supportInfo.elementId, elemIds) > -1;
+								elemIds.indexOf(logEntry.supportInfo.elementId) > -1;
 
 						/**
 						 * Give the developer the ability to pass filtering function
@@ -334,7 +331,14 @@ sap.ui.define(
 
 					return loggedObjects;
 				},
-				_getType: function () {
+				/**
+				 * Gets the type of the execution scope
+				 * @public
+				 * @function
+				 * @returns {string} The type of the execution scope. Possible values are <code>global</code>, <code>subtree</code> or <code>components</code>.
+				 * @alias sap.ui.support.ExecutionScope.getType
+				 */
+				getType: function () {
 					return _context.type;
 				},
 				_getContext: function () {

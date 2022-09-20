@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','./Element','./library'],function(q,E,l){"use strict";var V=l.ValueState;var a={};var t=null;var e=function(){if(!t){t={};var r=sap.ui.getCore().getLibraryResourceBundle("sap.ui.core");t[V.Error]=r.getText("VALUE_STATE_ERROR");t[V.Warning]=r.getText("VALUE_STATE_WARNING");t[V.Success]=r.getText("VALUE_STATE_SUCCESS");}};a.enrichTooltip=function(o,T){if(!T&&o.getTooltip()){return undefined;}var s=a.getAdditionalText(o);if(s){return(T?T+" - ":"")+s;}return T;};a.getAdditionalText=function(v){var s=null;if(v&&v.getValueState){s=v.getValueState();}else if(V[v]){s=v;}if(s&&(s!=V.None)){e();return t[s];}return null;};a.formatValueState=function(s){switch(s){case 1:return V.Warning;case 2:return V.Success;case 3:return V.Error;default:return V.None;}};return a;},true);
+sap.ui.define(["./Element","./library","sap/base/assert"],function(e,t,r){"use strict";var n=t.ValueState;var a={};var u=null;var i=function(){if(!u){u={};var e=sap.ui.getCore().getLibraryResourceBundle("sap.ui.core");u[n.Error]=e.getText("VALUE_STATE_ERROR");u[n.Warning]=e.getText("VALUE_STATE_WARNING");u[n.Success]=e.getText("VALUE_STATE_SUCCESS");u[n.Information]=e.getText("VALUE_STATE_INFORMATION")}};a.enrichTooltip=function(t,n){r(t instanceof e,"oElement must be an Element");if(!n&&t.getTooltip()){return undefined}var u=a.getAdditionalText(t);if(u){return(n?n+" - ":"")+u}return n};a.getAdditionalText=function(e){var t=null;if(e&&e.getValueState){t=e.getValueState()}else if(n[e]){t=e}if(t&&t!=n.None){i();return u[t]}return null};a.formatValueState=function(e){switch(e){case 1:return n.Warning;case 2:return n.Success;case 3:return n.Error;case 4:return n.Information;default:return n.None}};return a},true);
+//# sourceMappingURL=ValueStateSupport.js.map

@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['sap/ui/thirdparty/jquery'],function(q){"use strict";var A=Object.create(null);function a(s,v,p){var b=this.attr(s);if(!b){return this.attr(s,v);}var c=b.split(" ");if(c.indexOf(v)==-1){p?c.unshift(v):c.push(v);this.attr(s,c.join(" "));}return this;}function r(s,v){var b=this.attr(s)||"",c=b.split(" "),i=c.indexOf(v);if(i==-1){return this;}c.splice(i,1);if(c.length){this.attr(s,c.join(" "));}else{this.removeAttr(s);}return this;}A.addLabelledBy=function(i,p){return a.call(this,"aria-labelledby",i,p);};A.removeLabelledBy=function(i){return r.call(this,"aria-labelledby",i);};A.addDescribedBy=function(i,p){return a.call(this,"aria-describedby",i,p);};A.removeDescribedBy=function(i){return r.call(this,"aria-describedby",i);};q.fn.addAriaLabelledBy=A.addLabelledBy;q.fn.removeAriaLabelledBy=A.removeLabelledBy;q.fn.addAriaDescribedBy=A.addDescribedBy;q.fn.removeAriaDescribedBy=A.removeDescribedBy;return q;});
+sap.ui.define(["sap/ui/thirdparty/jquery"],function(jQuery){"use strict";function i(i,t,r){var e=this.attr(i);if(!e){return this.attr(i,t)}var n=e.split(" ");if(n.indexOf(t)==-1){r?n.unshift(t):n.push(t);this.attr(i,n.join(" "))}return this}function t(i,t){var r=this.attr(i)||"",e=r.split(" "),n=e.indexOf(t);if(n==-1){return this}e.splice(n,1);if(e.length){this.attr(i,e.join(" "))}else{this.removeAttr(i)}return this}jQuery.fn.addAriaLabelledBy=function(t,r){return i.call(this,"aria-labelledby",t,r)};jQuery.fn.removeAriaLabelledBy=function(i){return t.call(this,"aria-labelledby",i)};jQuery.fn.addAriaDescribedBy=function(t,r){return i.call(this,"aria-describedby",t,r)};jQuery.fn.removeAriaDescribedBy=function(i){return t.call(this,"aria-describedby",i)};return jQuery});
+//# sourceMappingURL=Aria.js.map

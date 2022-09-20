@@ -1,9 +1,9 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-
+/*eslint-disable max-len */
 /**
  * Analytical Adapter for ODataModels
  *
@@ -13,8 +13,8 @@
  */
 
 // Provides class ODataModelAdapter
-sap.ui.define(['jquery.sap.global', './AnalyticalBinding', "./AnalyticalTreeBindingAdapter", './odata4analytics', './AnalyticalVersionInfo'],
-	function(jQuery, AnalyticalBinding, AnalyticalTreeBindingAdapter, odata4analytics, AnalyticalVersionInfo) {
+sap.ui.define(['./AnalyticalBinding', "./AnalyticalTreeBindingAdapter", './odata4analytics', './AnalyticalVersionInfo', "sap/base/Log"],
+	function(AnalyticalBinding, AnalyticalTreeBindingAdapter, odata4analytics, AnalyticalVersionInfo, Log) {
 	"use strict";
 
 
@@ -56,20 +56,20 @@ sap.ui.define(['jquery.sap.global', './AnalyticalBinding', "./AnalyticalTreeBind
 		/*if (iModelVersion === AnalyticalVersionInfo.V2 && !(this.oMetadata && this.oMetadata.isLoaded())) {
 			var that = this;
 			this.attachMetadataLoaded(function () {
-				jQuery.sap.log.info("ODataModelAdapter: Running on ODataModel V2, Metadata was loaded; initialising analytics model.");
+				Log.info("ODataModelAdapter: Running on ODataModel V2, Metadata was loaded; initialising analytics model.");
 				that.getAnalyticalExtensions();
 			});
 		}*/
 
 		// disable the count support (inline count is required for AnalyticalBinding)
 		if (iModelVersion === AnalyticalVersionInfo.V1 && this.isCountSupported()) {
-			jQuery.sap.log.info("ODataModelAdapter: switched ODataModel to use inlinecount (mandatory for the AnalyticalBinding)");
+			Log.info("ODataModelAdapter: switched ODataModel to use inlinecount (mandatory for the AnalyticalBinding)");
 			this.setCountSupported(false);
 		}
 
 	};
 
-	/**
+	/*
 	 * @see sap.ui.model.odata.ODataModel#bindList
 	 * @see sap.ui.model.odata.v2.ODataModel#bindList
 	 */
@@ -85,7 +85,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalBinding', "./AnalyticalTreeBind
 		}
 	};
 
-	/**
+	/*
 	 * @see sap.ui.model.odata.ODataModel#bindTree
 	 * @see sap.ui.model.odata.v2.ODataModel#bindTree
 	 */
@@ -120,24 +120,13 @@ sap.ui.define(['jquery.sap.global', './AnalyticalBinding', "./AnalyticalTreeBind
 					"Register for the 'metadataLoaded' event of the ODataModel(v2) to know when the analytical extensions can be retrieved.";
 		}
 
-		var sAnnotationDoc = null;
-
-		if (arguments.length == 1) {
-			// hidden feature: load resource with additional analytical metadata
-			// defined in a JSON format
-			var sAnnotationDocURI = arguments[0];
-
-			var oResult = jQuery.sap.syncGetText(sAnnotationDocURI);
-			if (oResult.success) {
-				sAnnotationDoc = oResult.data;
-			}
-		}
-
 		// initialize API by loading the analytical OData model
 		try {
-			this.oOData4SAPAnalyticsModel = new odata4analytics.Model(new odata4analytics.Model.ReferenceByModel(this), {sAnnotationJSONDoc: sAnnotationDoc});
+			this.oOData4SAPAnalyticsModel = new odata4analytics.Model(
+				new odata4analytics.Model.ReferenceByModel(this));
 		} catch (exception) {
-			throw "Failed to instantiate analytical extensions for given OData model: " + exception.message;
+			throw "Failed to instantiate analytical extensions for given OData model: "
+				+ (exception.message || exception);
 		}
 		return this.oOData4SAPAnalyticsModel;
 	};

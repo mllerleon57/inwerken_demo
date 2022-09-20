@@ -1,11 +1,11 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["jquery.sap.global", "sap/ui/base/Object"],
-	function(jQuery, Object) {
+sap.ui.define(["sap/ui/base/Object", "sap/base/Log"],
+	function(Object, Log) {
 	"use strict";
 
 /**
@@ -24,7 +24,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/base/Object"],
  * @extends sap.ui.base.Object
  *
  * @author SAP SE
- * @version 1.56.5
+ * @version 1.106.0
  * @public
  * @abstract
  * @alias sap.ui.core.message.MessageParser
@@ -45,7 +45,7 @@ var MessageParser = Object.extend("sap.ui.core.message.MessageParser", {
  * This method is used by the model to register itself as MessageProcessor for this parser
  *
  * @param {sap.ui.core.message.MessageProcessor} oProcessor - The MessageProcessor that can be used to fire events
- * @return {sap.ui.core.message.MessageParser} Instance reference for method chaining
+ * @return {this} Instance reference for method chaining
  * @protected
  */
 MessageParser.prototype.setProcessor = function(oProcessor) {
@@ -56,27 +56,28 @@ MessageParser.prototype.setProcessor = function(oProcessor) {
 /**
  * Returns the registered processor on which the events for message handling can be fired
  *
- * @return {sap.ui.core.message.MessageProcessor} The currently set MessageProcessor or null if none is set
+ * @returns {sap.ui.core.message.MessageProcessor|null} The currently set MessageProcessor or <code>null</code> if none is set
  * @protected
  */
 MessageParser.prototype.getProcessor = function() {
 	return this._processor;
 };
 
-
 /**
  * Abstract parse method must be implemented in the inheriting class.
  *
+ * @param {object} oResponse
+ *   The response from the server containing body and headers
+ * @param {object} oRequest
+ *   The original request that lead to this response
  * @public
- * @abstract
  */
-MessageParser.prototype.parse = function(oResponse) {
-	jQuery.sap.log.error(
+MessageParser.prototype.parse = function(oResponse, oRequest) {
+	Log.error(
 		"MessageParser: parse-method must be implemented in the specific parser class. Messages " +
 		"have been ignored."
 	);
 };
-
 
 ////////////////////////////////////////// onEvent Methods /////////////////////////////////////////
 ////////////////////////////////////////// Private Methods /////////////////////////////////////////

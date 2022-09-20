@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','sap/ui/model/ChangeReason','sap/ui/model/ClientPropertyBinding'],function(q,C,a){"use strict";var M=a.extend("sap.ui.model.message.MessagePropertyBinding");M.prototype.setValue=function(v){if(!q.sap.equal(this.oValue,v)){this.oModel.setProperty(this.sPath,v,this.oContext);}};M.prototype.checkUpdate=function(f){var v=this._getValue();if(!q.sap.equal(v,this.oValue)||f){this.oValue=v;this._fireChange({reason:C.Change});}};return M;});
+sap.ui.define(["sap/ui/model/ChangeReason","sap/ui/model/ClientPropertyBinding","sap/base/util/deepEqual"],function(e,t,i){"use strict";var s=t.extend("sap.ui.model.message.MessagePropertyBinding");s.prototype.setValue=function(e){if(!i(this.oValue,e)){this.oModel.setProperty(this.sPath,e,this.oContext)}};s.prototype.checkUpdate=function(t){var s=this._getValue();if(!i(s,this.oValue)||t){this.oValue=s;this._fireChange({reason:e.Change})}};return s});
+//# sourceMappingURL=MessagePropertyBinding.js.map

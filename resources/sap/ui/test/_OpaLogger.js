@@ -1,6 +1,7 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(["jquery.sap.global"],function($){"use strict";var l=[];var L=$.sap.log.Level.DEBUG;return{setLevel:function(n){var s=n&&n.toUpperCase();var N=s&&$.sap.log.Level[s];L=N||L;l.forEach(function(c){$.sap.log.setLevel(L,c);});},getLogger:function(c){l.push(c);var a=$.sap.log.getLogger(c,L);a.timestamp=function(m){if(console.timeStamp&&this.getLevel()>=$.sap.log.Level.DEBUG){console.timeStamp(m);}};return a;},getLevel:function(){return L;}};},true);
+sap.ui.define(["sap/base/Log"],function(e){"use strict";e.setLogEntriesLimit(Infinity);var t=[];var n="DEBUG";var i=n;return{setLevel:function(n){n=n&&n.toUpperCase();if(n&&e.Level[n]){i=n}t.forEach(function(t){e.setLevel(e.Level[i],t)})},getLogger:function(r){t.push(r);var o=e.getLogger(r,e.Level[i]);o.timestamp=function(t){if(console.timeStamp&&e.Level[this.getLevel()]>=e.Level[n]){console.timeStamp(t)}};return o},getLevel:function(){return i}}},true);
+//# sourceMappingURL=_OpaLogger.js.map

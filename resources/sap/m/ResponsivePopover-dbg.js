@@ -1,31 +1,33 @@
 /*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
+ * OpenUI5
+ * (c) Copyright 2009-2022 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.ResponsivePopover.
 sap.ui.define([
-	'jquery.sap.global',
 	'./Dialog',
 	'./Popover',
 	'./library',
 	'sap/ui/core/Control',
 	'sap/ui/core/IconPool',
-	'sap/ui/base/ManagedObject',
 	'sap/ui/Device',
-	'./ResponsivePopoverRenderer'
+	'./ResponsivePopoverRenderer',
+	'./Toolbar',
+	'./ToolbarSpacer',
+	'./Button'
 ],
 	function(
-		jQuery,
 		Dialog,
 		Popover,
 		library,
 		Control,
 		IconPool,
-		ManagedObject,
 		Device,
-		ResponsivePopoverRenderer
+		ResponsivePopoverRenderer,
+		Toolbar,
+		ToolbarSpacer,
+		Button
 	) {
 	"use strict";
 
@@ -35,7 +37,8 @@ sap.ui.define([
 	// shortcut for sap.m.PlacementType
 	var PlacementType = library.PlacementType;
 
-
+	// shortcut for sap.m.TitleAlignment
+	var TitleAlignment = library.TitleAlignment;
 
 	/**
 	 * Constructor for a new ResponsivePopover.
@@ -58,7 +61,7 @@ sap.ui.define([
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.56.5
+	 * @version 1.106.0
 	 *
 	 * @constructor
 	 * @public
@@ -144,7 +147,16 @@ sap.ui.define([
 			 * @since 1.36.4
 			 * @private
 			 */
-			resizable: {type: "boolean", group: "Dimension", defaultValue: false}
+			resizable: {type: "boolean", group: "Dimension", defaultValue: false},
+
+			/**
+			 * Specifies the Title alignment (theme specific).
+			 * If set to <code>TitleAlignment.Auto</code>, the Title will be aligned as it is set in the theme (if not set, the default value is <code>center</code>);
+			 * Other possible values are <code>TitleAlignment.Start</code> (left or right depending on LTR/RTL), and <code>TitleAlignment.Center</code> (centered)
+			 * @since 1.72
+			 * @public
+			 */
+			titleAlignment : {type : "sap.m.TitleAlignment", group : "Misc", defaultValue : TitleAlignment.Auto}
 		},
 		defaultAggregation: "content",
 		aggregations : {
@@ -274,7 +286,7 @@ sap.ui.define([
 	 *
 	 * @name sap.m.ResponsivePopover#close
 	 * @function
-	 * @type sap.ui.core.Control
+	 * @return {this} Reference to <code>this</code> in order to allow method chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -285,7 +297,7 @@ sap.ui.define([
 	 *
 	 * @name sap.m.ResponsivePopover#isOpen
 	 * @function
-	 * @type sap.ui.core.Control
+	 * @return {boolean} whether the ResponsivePopover is currently opened
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -298,6 +310,7 @@ sap.ui.define([
 
 		var settings = {
 			resizable: that.getResizable(),
+			titleAlignment: that.getTitleAlignment(),
 			beforeOpen: function(oEvent){
 				that.fireBeforeOpen({openBy: oEvent.getParameter('openBy')});
 			},
@@ -315,6 +328,7 @@ sap.ui.define([
 			this._aNotSupportedProperties = ["placement", "modal", "offsetX", "offsetY", "showCloseButton"];
 			settings.stretch = true;
 			settings.type = DialogType.Standard;
+			settings.titleAlignment = this.getTitleAlignment();
 			this._oControl = new Dialog(this.getId() + "-dialog", settings);
 		} else {
 			this._aNotSupportedProperties = ["icon", "showCloseButton"];
@@ -359,6 +373,11 @@ sap.ui.define([
 					//register to the navigation inside navcontainer to insert the closebutton to the page which is being navigated to
 					oNavContent.attachEvent("navigate", this._fnOnNavigate , this);
 				}
+
+				// title alignment
+				if (this._oControl && this._oControl.setTitleAlignment) {
+					this._oControl.setTitleAlignment(this.getTitleAlignment());
+				}
 			}
 		};
 
@@ -384,7 +403,7 @@ sap.ui.define([
 		//overwrite the _removeChild to detach event listener and remove delegate when the navcontainer is removed from this responsive popover
 		this._oControl._removeChild = function(oChild, sAggregationName, bSuppressInvalidate){
 			var aPages, i;
-			if ((sAggregationName === "content") && (oChild instanceof sap.m.NavContainer)) {
+			if ((sAggregationName === "content") && (oChild && oChild.isA("sap.m.NavContainer"))) {
 				aPages = oChild.getPages();
 				for (i = 0 ; i < aPages.length ; i++) {
 					aPages[i].removeEventDelegate(that._oPageDelegate);
@@ -399,8 +418,8 @@ sap.ui.define([
 	/**
 	 * Opens the ResponsivePopover. The ResponsivePopover is positioned relatively to the control parameter on tablet or desktop and is full screen on phone. Therefore the control parameter is only used on tablet or desktop and is ignored on phone.
 	 *
-	 * @param {object} oParent When this control is displayed on tablet or desktop, the ResponsivePopover is positioned relative to this control.
-	 * @returns {object} Reference to the opening control
+	 * @param {sap.ui.core.Control|HTMLElement} oParent When this control is displayed on tablet or desktop, the ResponsivePopover is positioned relative to this UI5 control or DOM element.
+	 * @returns {sap.m.Popover|sap.m.Dialog} Reference to the opening control
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -440,7 +459,7 @@ sap.ui.define([
 	ResponsivePopover.prototype._getCloseButton = function(){
 		if (!this._oCloseButton) {
 			var that = this;
-			this._oCloseButton = new sap.m.Button(this.getId() + "-closeButton", {
+			this._oCloseButton = new Button(this.getId() + "-closeButton", {
 				icon: IconPool.getIconURI("decline"),
 				press: function() {
 					that._oControl._oCloseTrigger = this;
@@ -459,13 +478,9 @@ sap.ui.define([
 	ResponsivePopover.prototype.addContent = function(oControl){
 		this._bContentChanged = true;
 		this.addAggregation("content", oControl);
+		return this;
 	};
 
-	/**
-	 * Creates a new instance of ResponsivePopover with the same settings as the ResponsivePopover on which the method is called
-	 * @returns {sap.m.ResponsivePopover} New instance of ResponsivePopover
-	 * @public
-	 */
 	ResponsivePopover.prototype.clone = function(){
 		var oClone = Control.prototype.clone.apply(this, arguments),
 			aContent = this.getAggregation('_popup').getContent();
@@ -480,11 +495,11 @@ sap.ui.define([
 	ResponsivePopover.prototype._getSingleNavContent = function(){
 		var aContent = this.getContent();
 
-		while (aContent.length === 1 && aContent[0] instanceof sap.ui.core.mvc.View) {
+		while (aContent.length === 1 && aContent[0] && aContent[0].isA("sap.ui.core.mvc.View")) {
 			aContent = aContent[0].getContent();
 		}
 
-		if (aContent.length === 1 && aContent[0] instanceof sap.m.NavContainer) {
+		if (aContent.length === 1 && aContent[0] && aContent[0].isA("sap.m.NavContainer")) {
 			return aContent[0];
 		} else {
 			return null;
@@ -495,10 +510,10 @@ sap.ui.define([
 		var oReturn = oPage, aContent;
 
 		while (oReturn) {
-			if (oReturn instanceof sap.m.Page) {
+			if (oReturn.isA("sap.m.Page")) {
 				return oReturn;
 			}
-			if (oReturn instanceof sap.ui.core.mvc.View) {
+			if (oReturn.isA("sap.ui.core.mvc.View")) {
 				aContent = oReturn.getContent();
 				if (aContent.length === 1) {
 					oReturn = aContent[0];
@@ -564,21 +579,19 @@ sap.ui.define([
 		return -1;
 	};
 
-	ResponsivePopover.prototype._oldSetProperty = ResponsivePopover.prototype.setProperty;
 	ResponsivePopover.prototype.setProperty = function(sPropertyName, oValue, bSuppressInvalidate){
-		this._oldSetProperty(sPropertyName, oValue, true);
+		Control.prototype.setProperty.call(this, sPropertyName, oValue, true);
 		var sSetterName = "set" + this._firstLetterUpperCase(sPropertyName);
-		if (jQuery.inArray(sPropertyName, this._aNotSupportedProperties) === -1 &&
+		if (this._aNotSupportedProperties.indexOf(sPropertyName) === -1 &&
 			sSetterName in this._oControl) {
 			this._oControl[sSetterName](oValue);
 		}
 		return this;
 	};
 
-	ResponsivePopover.prototype._oldSetModel = ResponsivePopover.prototype.setModel;
 	ResponsivePopover.prototype.setModel = function(oModel, sName){
 		this._oControl.setModel(oModel, sName);
-		return this._oldSetModel(oModel, sName);
+		return Control.prototype.setModel.call(this, oModel, sName);
 	};
 
 	/**
@@ -591,11 +604,28 @@ sap.ui.define([
 			return this._oFooter;
 		}
 
-		this._oFooter = new sap.m.Toolbar(this.getId() + "-footer", {
-			content: [new sap.m.ToolbarSpacer()]
+		this._oFooter = new Toolbar(this.getId() + "-footer", {
+			content: [new ToolbarSpacer()]
 		});
 
 		return this._oFooter;
+	};
+
+	/**
+	 * @returns {sap.ui.core.Control}
+	 * @private
+	 */
+	ResponsivePopover.prototype._getButtonFooter = function() {
+		return Device.system.phone ? this._oControl._getToolbar() : this._oControl.getFooter();
+	};
+
+	/**
+	 *
+	 * @returns {sap.ui.core.Popup}
+	 * @private
+	 */
+	ResponsivePopover.prototype._getPopup = function() {
+		return  this._oControl.oPopup;
 	};
 
 	ResponsivePopover.prototype._setButton = function(sPos, oButton){
@@ -650,7 +680,7 @@ sap.ui.define([
 	/**
 	 * Setter for beginButton aggregation
 	 * @param {sap.m.Button} oButton The button that will be set as an aggregation
-	 * @returns {sap.m.ResponsivePopover} Pointer to the control instance for chaining
+	 * @returns {this} Pointer to the control instance for chaining
 	 * @public
 	 */
 	ResponsivePopover.prototype.setBeginButton = function(oButton){
@@ -661,7 +691,7 @@ sap.ui.define([
 	/**
 	 * Setter for endButton aggregation
 	 * @param {sap.m.Button} oButton The button that will be set as an aggregation
-	 * @returns {sap.m.ResponsivePopover} Pointer to the control instance for chaining
+	 * @returns {this} Pointer to the control instance for chaining
 	 * @public
 	 */
 	ResponsivePopover.prototype.setEndButton = function(oButton){
@@ -672,7 +702,7 @@ sap.ui.define([
 	/**
 	 * Determines if the close button to the ResponsivePopover is shown or not. Works only when ResponsivePopover is used as a dialog
 	 * @param {boolean} bShowCloseButton Defines whether the close button is shown
-	 * @returns {sap.m.ResponsivePopover} Pointer to the control instance for chaining
+	 * @returns {this} Pointer to the control instance for chaining
 	 * @public
 	 */
 	ResponsivePopover.prototype.setShowCloseButton = function(bShowCloseButton) {
@@ -713,7 +743,7 @@ sap.ui.define([
 			ResponsivePopover.prototype[sName] = function(){
 				var iLastUpperCase = this._lastIndexOfUpperCaseLetter(sName),
 					sMethodName, res;
-				if (jQuery.type(arguments[0]) === "string") {
+				if (typeof arguments[0] === "string") {
 					if (iLastUpperCase !== -1) {
 						sMethodName = sName.substring(0, iLastUpperCase) + this._firstLetterUpperCase(arguments[0]);
 						//_oControl can be already destroyed in exit method
@@ -732,10 +762,18 @@ sap.ui.define([
 
 	// forward the other necessary methods to the inner instance, but do not check the existence of generated methods like (addItem)
 	["invalidate", "close", "isOpen", "addStyleClass", "removeStyleClass", "toggleStyleClass", "hasStyleClass",
-		"getDomRef", "setBusy", "getBusy", "setBusyIndicatorDelay", "getBusyIndicatorDelay", "addEventDelegate"].forEach(function(sName){
+		"getDomRef", "setBusy", "getBusy", "setBusyIndicatorDelay", "getBusyIndicatorDelay", "addEventDelegate", "removeEventDelegate", "_setAriaModal", "_setAriaRoleApplication"].forEach(function(sName){
 			ResponsivePopover.prototype[sName] = function() {
 				if (this._oControl && this._oControl[sName]) {
-					var res = this._oControl[sName].apply(this._oControl ,arguments);
+
+					// standard invalidate logic bubbles invalidates up the parent chain when the whole control tree is not in a UI area
+					// which in this case - the parent of the popover is the ResponsivePopover which leads to infinite loop
+					// to prevent that, use standard invalidation logic when the origin is the child control
+					if (sName === "invalidate" && arguments[0] === this._oControl) {
+						return Control.prototype.invalidate.apply(this, arguments);
+					}
+
+					var res = this._oControl[sName].apply(this._oControl, arguments);
 					return res === this._oControl ? this : res;
 				}
 			};
@@ -746,7 +784,7 @@ sap.ui.define([
 	 * @private
 	 */
 	ResponsivePopover.prototype._applyContextualSettings = function () {
-		ManagedObject.prototype._applyContextualSettings.call(this, ManagedObject._defaultContextualSettings);
+		Control.prototype._applyContextualSettings.call(this);
 	};
 
 	return ResponsivePopover;
