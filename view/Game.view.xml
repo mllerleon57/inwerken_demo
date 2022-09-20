@@ -14,19 +14,19 @@ displayBlock="true" xmlns:layout="sap.ui.layout" xmlns:semantic="sap.f.semantic"
         <semantic:content>
             <FlexBox width="100%" height="100%" justifyContent="SpaceBetween" class="o-hidden p-medium">
                 <items>
-                    <List items="{data}" id="lb1-listUl" showNoData="false" headerText="" class="h-100 list1" updateStarted="onUpdateStarted" updateFinished="onUpdateFinished">
+                    <List items="{data}" id="lb1-listUl" showNoData="false" headerText="Einträge" class="h-100 list1" updateStarted="onUpdateStarted" updateFinished="onUpdateFinished">
                         <ObjectListItem title="{name}" class="list-item">
                             <customData>
                                 <core:CustomData key="intend" value="intend_{intend}" writeToDom="{=${intend}>0}" />
                             </customData>
                         </ObjectListItem>
                         <layoutData>
-                            <FlexItemData growFactor="1" maxWidth="48%" />
+                            <FlexItemData growFactor="1" maxWidth="49%" />
                         </layoutData>
                     </List>
                     <List id="lb2-listUl" showNoData="false" class="h-100 list2" headerText="Lösung 👇">
                         <layoutData>
-                            <FlexItemData growFactor="1" maxWidth="48%" />
+                            <FlexItemData growFactor="1" maxWidth="49%" />
                         </layoutData>
                     </List>
                 </items>
