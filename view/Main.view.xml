@@ -12,7 +12,7 @@
         </semantic:titleHeading>
         <semantic:content>
          <FlexBox justifyContent="Center" direction="Column" class="sapUiResponsivePadding" height="80%">
-            <Image src="../images/Header_Herbst_Inwerken_Zentrale_2022-4.webp"
+            <Image src="images/Header_Herbst_Inwerken_Zentrale_2022-4.webp"
             width="100%"/>
             <l:BlockLayout id="BlockLayout" background="Light">
                 <l:BlockLayoutRow>

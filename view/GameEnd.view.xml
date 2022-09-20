@@ -14,7 +14,7 @@
         <semantic:content>
              
                 <FlexBox justifyContent="Center" direction="Column" class="sapUiResponsivePadding" height="80%">
-                    <Image src="../images/Handschlag_Geschäftlich_Mann_und_Frau.png"
+                    <Image src="images/Handschlag_Geschäftlich_Mann_und_Frau.png"
                 width="100%"/>
                     <l:BlockLayout id="BlockLayout" background="Light">
                         <l:BlockLayoutRow>
