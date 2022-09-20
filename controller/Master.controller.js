@@ -47,6 +47,8 @@ sap.ui.define(
         oRouter.navTo("gameEnd");
       },
       reset: function () {
+        var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+        oRouter.navTo("overview");
         window.location.reload();
       },
       //home icon handler
