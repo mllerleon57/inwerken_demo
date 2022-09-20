@@ -89,7 +89,12 @@ sap.ui.define(
         //checking if solved
         if (this._handleGameMode()) {
           oView.getModel("viewModel").setProperty("/solved", 1);
-          oView.getModel().setProperty(`${this.getView().getBindingContext().getPath()}/solved`, true);
+          oView
+            .getModel()
+            .setProperty(
+              `${this.getView().getBindingContext().getPath()}/solved`,
+              true
+            );
           this._checkIfAllSolved();
         }
 
@@ -234,6 +239,8 @@ sap.ui.define(
         let aUnsolved = aLists.filter((el) => el.solved === false);
         if (aUnsolved.length < 1) {
           this.getView().getModel().setProperty("/allSolved", true);
+          var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+          oRouter.navTo("gameEnd");
         }
       },
       //kanaban mode switch handler
