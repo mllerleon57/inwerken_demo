@@ -312,7 +312,23 @@ sap.ui.define(
       },
 
       _handleSelectGameMode: function () {
-        return this._areCorrectBoxesSelected();
+        const data = this.getView().getBindingContext().getProperty("data")
+        const trueValues = data
+        .filter((el) => el.correct === true)
+        .map((el) => el.name)
+
+        const selectedItems = data
+        .filter((el) => el.selected === true)
+        .map((el) => el.name)
+
+        const resultArray = selectedItems.filter((el) => trueValues.includes(el));
+        
+        //first check if all true values are selected. second check - if there arent any falsly selected items
+        return (
+          resultArray.length === trueValues.length &&
+          trueValues.length === selectedItems.length
+        );
+        // return this._areCorrectBoxesSelected();
       },
 
       _handleSortGameMode: function () {

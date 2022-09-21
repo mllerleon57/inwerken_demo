@@ -9,10 +9,14 @@ displayBlock="true" xmlns:layout="sap.ui.layout" xmlns:semantic="sap.f.semantic"
         <!-- Header Content -->
         <semantic:headerContent>
             <ObjectAttribute title="Schwierigkeit" text="{difficulty}" />
-            <ObjectAttribute title="Beschreibung" text="{instruction}" />
         </semantic:headerContent>
         <semantic:content>
-            <FlexBox width="100%" height="100%" justifyContent="SpaceBetween" class="o-hidden p-medium">
+            <FlexBox direction="Column">
+            <ObjectAttribute class="sapUiMediumMarginBottom" title="Beschreibung" text="{instruction}" />
+            <FlexBox items="{data}" direction="Column" visible="{= ${gameMode} === 'select' ? true : false}" width="100%" height="100%" justifyContent="SpaceBetween" class="o-hidden p-medium">
+                    <CheckBox text="{name}" selected="{selected}"/>
+            </FlexBox>
+            <FlexBox visible="{= ${gameMode} === 'sortandorder' ? true : false}" width="100%" height="100%" justifyContent="SpaceBetween" class="o-hidden p-medium">
                 <items>
                     <List items="{data}" id="lb1-listUl" showNoData="false" headerText="Einträge" class="h-100 list1" updateStarted="onUpdateStarted" updateFinished="onUpdateFinished">
                         <ObjectListItem title="{name}" class="list-item">
@@ -31,6 +35,7 @@ displayBlock="true" xmlns:layout="sap.ui.layout" xmlns:semantic="sap.f.semantic"
                     </List>
                 </items>
             </FlexBox>
+        </FlexBox>
         </semantic:content>
         <!-- Custom Footer Content-->
         <semantic:positiveAction>

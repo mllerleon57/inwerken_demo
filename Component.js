@@ -40,7 +40,7 @@ sap.ui.define([
 							{name:"Taste()",order:7,correct:true},
 							{name:"Eat()",order:8,correct:true}	
 						],
-						difficulty:"⭐⭐⭐",
+						difficulty:"⭐⭐⭐⭐",
 						solved:false,
 						gameMode:"sortandorder",
 						instruction:"Verschiebe die richtigen Einträge von links nach rechts. Achtung: Die Reihenfolge ist entscheidend!"
@@ -82,7 +82,7 @@ sap.ui.define([
 						difficulty:"⭐⭐",
 						solved:false,
 						gameMode:"select",
-						instruction:"Verschiebe die richtigen Einträge von links nach rechts.",
+						instruction:"Kreuze die Einträge an, die eine Programmiersprache sind. (Tipp: Wenn Du nicht weiter kommst, benutze das Ausschlussverfahren)",
 						
 					},
 					{
@@ -96,7 +96,7 @@ sap.ui.define([
 							{name:"endif.",order:4,correct:true},
 							{name:"end program kanban.",order:5,correct:true}
 						],
-						difficulty:"⭐⭐",
+						difficulty:"⭐⭐⭐",
 						solved:false,
 						gameMode:"sortandorder",
 						instruction:"Kanban ist eine Methode um Prozesse zu steuern, in diesem Fall das Nachfüllen von Behältern mit Materialien in einer Fabrik. Ein Fabrikarbeiter entnimmt ständig Material aus einem Behälter und du bist dafür zuständig, rechtzeitig für Nachschub zu sorgen. Bringe dafür die Codeschnippsel in die Richtige Reihenfolge.",
@@ -114,10 +114,10 @@ sap.ui.define([
 							{name:"C++",order:5,correct:false},
 							{name:"Hummus",order:6,correct:false},
 						],
-						difficulty:"⭐⭐⭐",
+						difficulty:"⭐⭐",
 						solved:false,
 						gameMode:"select",
-						instruction:"Verschiebe die richtigen Einträge von links nach rechts.",
+						instruction:"Kreuze die Einträge an, die eine Programmiersprache sind. (Tipp: Wenn Du nicht weiter kommst, benutze das Ausschlussverfahren).",
 					
 					},
 					// {
