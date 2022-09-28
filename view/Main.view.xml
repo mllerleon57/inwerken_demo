@@ -41,11 +41,10 @@
                             wrappingType="Hyphenated"
                             text="Du kannst uns einfach ansprechen und wir werden Dir alles erzählen, was du dafür benötigst. Keine Sorge, es ist ganz einfach!" />
                             <FlexBox class="sapUiContentPadding" direction="Column">
-                            <Link text="🔗 Auszubildende*r Kaufleute für Büromanagement" href="../assets/azubi_bueromanagement.pdf" target="_blank" />
-                            <Link text="🔗 Auszubildende*r Fachrichtung Fachinformatik" href="assets/Auszubildende%20Fachinformatik%20mit%20Fachrichtung%20Systemintegration%20(m_w_d)%202022.html" target="_blank" />
-                            <Link text="🔗 Auszubildende*r Fachrichtung Systemintegration" href="assets/Auszubildende%20Fachinformatik%20mit%20Fachrichtung%20Systemintegration%20(m_w_d)%202022.html" target="_blank" />
-                            <Link text="🔗 Dual Studierende*r" href="assets/Duales%20Studium_%20Wirtschaftsinformatik%20B.Sc.%20–%20Isernhagen%20bei%20Hannover.html" target="_blank" />
-                            <Link text="🔗 Werkstudierende*r" href="assets/Werkstudent%20(m_w_d)%20im%20Personal%20-%20Isernhagen,%20Hannover%20–%20Inwerken.html" target="_blank" />
+                            <Link text="🔗 Auszubildende Kaufleute für Büromanagement (m|w|d)" href="assets/Azubi_Büromanagement_Messe_Stellenausschreibung_2022.pdf" target="_blank" />
+                            <Link text="🔗 Auszubildende Fachinformatik Fachrichtung Systemintegration (m|w|d)" href="assets/Ausbildung_Fachinformatik_SI_Messe_Stellenausschreibung_BST_2022.pdf" target="_blank" />
+                            <Link text="🔗 Auszubildende Fachinformatik für Anwendungsentwicklung (m|w|d)" href="assets/Azubi_Fachinformatik_Messe_Stellenausschreibung_2022.pdf" target="_blank" />
+                            <Link text="🔗 Dual Studierende B. Sc. Wirtschaftsinformatik (m|w|d)" href="assets/Duales_Studium_Messe_Stellenausschreibung_2022.pdf" target="_blank" />
                         </FlexBox>
                     </l:BlockLayoutCell>
                 </l:BlockLayoutRow>
